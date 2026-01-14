@@ -1,0 +1,21 @@
+/Debug/
+
+# In Memoria
+in-memoria.db
+.in-memoria/cache/
+
+# STM32 static tree (keep out of ESP32 port repo)
+/Core/
+/Drivers/
+/application/
+/include/
+/src/
+/.settings/
+/.cproject
+/.project
+/.mxproject
+/pickplazfeederstm.ioc
+/pickplazfeederstm Debug.launch
+/STM32F030C8TX_FLASH.ld
+/LED_ANALYSIS.md
+/MOTOR_PWM_ANALYSIS.md
