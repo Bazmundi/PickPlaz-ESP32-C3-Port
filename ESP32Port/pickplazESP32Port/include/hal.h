@@ -61,6 +61,8 @@ int hal_i2c_read(int bus_id, uint8_t addr, uint8_t *data, size_t length);
 hal_status_t hal_adc_init(void);
 int hal_adc_read(int channel);
 
+void hal_selftest_run(void);
+
 #ifdef __cplusplus
 }
 #endif

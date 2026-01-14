@@ -118,3 +118,12 @@ small self-tests after each step.
 ## Test notes
 - For QEMU, use `scripts/run_qemu_with_monitor.sh` to avoid socket ordering.
 - For hardware, keep monitor at 115200 and avoid DTR/RTS toggles.
+
+## Implementation notes
+- HAL is now backed by ESP-IDF drivers: GPIO, esp_timer, LEDC, UART, I2C, SPI, and ADC oneshot.
+- Peripheral pins default to disabled in the HAL config; enable by setting values in `hal_config.h`.
+- UART0 init is optional and will return unsupported unless TX/RX pins are configured; console routing is unchanged.
+- I2C and SPI init return unsupported until valid pins are assigned.
+- ADC uses `adc_oneshot` on ADC1; `hal_adc_read` expects an ADC channel number (not a GPIO).
+- PWM uses LEDC low-speed mode; LEDs use timer 0 and motor pins use timer 1.
+- `HAL_SELFTEST` enables a basic self-test path; add a compile-time flag to run it.

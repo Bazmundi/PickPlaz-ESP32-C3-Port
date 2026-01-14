@@ -58,6 +58,11 @@ Or use the composite target:
 make qemu-all
 ```
 
+To run without the self-test:
+```bash
+make qemu-all-noselftest
+```
+
 ## Workflow E: QEMU run (two terminals)
 Start QEMU in one terminal, then attach a monitor in another.
 Order matters: start QEMU first.
@@ -100,11 +105,56 @@ Skip the build step when binaries are unchanged.
 make qemu-run-fast
 ```
 
+For the no-selftest environment:
+```bash
+make qemu-run-fast-noselftest
+```
+
 ## Workflow J: Flash + monitor (hardware)
 Convenience wrapper to flash then attach the USB monitor.
 ```bash
 make devkit-flash-monitor
 ```
+
+## Workflow K: PICSimLab integration
+Use PICSimLab as a GUI to observe the QEMU run.
+
+External QEMU (recommended if you want our custom QEMU build):
+```bash
+make picsimlab-external
+```
+
+No-selftest variant:
+```bash
+make picsimlab-external-noselftest
+```
+
+Or run the steps manually:
+```bash
+make build-qemu
+make merge-qemu
+make qemu-picsimlab
+make picsimlab
+```
+
+Standalone PICSimLab (uses its built-in QEMU):
+```bash
+make picsimlab-standalone
+```
+
+No-selftest variant:
+```bash
+make picsimlab-standalone-noselftest
+```
+
+Or run the steps manually:
+```bash
+make build-qemu
+make merge-qemu
+make picsimlab
+```
+
+See `docs/PICSIMLAB_INTEGRATION.md` for details.
 
 ## Variable overrides
 Defaults:
