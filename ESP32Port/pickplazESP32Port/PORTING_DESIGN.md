@@ -61,6 +61,11 @@ Behavior details are in `LED_ANALYSIS.md`.
 - LED4: PB11 (GPIO output, feed indicator)
 - OPTO_LED: PA5 (GPIO output, always on)
 
+STM32 opto driver behavior:
+- The opto LED is driven as a plain GPIO and is turned on once in `app_init()`
+  via `gpio_SetPin(OPTO_LED_GPIO_Port, OPTO_LED_Pin)`.
+- There is no PWM or runtime modulation; it stays high for normal operation.
+
 ### Motor (H-bridge PWM)
 Behavior details are in `MOTOR_PWM_ANALYSIS.md`.
 Notes: Motor analysis and .ioc labels disagree on polarity naming.
