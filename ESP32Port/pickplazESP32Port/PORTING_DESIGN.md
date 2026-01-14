@@ -10,7 +10,7 @@ stages grounded.
 - Documented expected peripheral requirements for the ESP32-C3 target.
 - Flagged ambiguities between sources that must be resolved before wiring.
 - Noted board configuration checks for PlatformIO.
-- Adopted a 4-LED layout for the ESP32-C3 port (LED0-LED3 only).
+- Confirmed a 5-LED layout for the ESP32-C3 port (LED0-LED4 supported).
 
 ## Existing analysis references
 These documents remain the source of truth for behavior and timing details:
@@ -66,6 +66,24 @@ STM32 opto driver behavior:
   via `gpio_SetPin(OPTO_LED_GPIO_Port, OPTO_LED_Pin)`.
 - There is no PWM or runtime modulation; it stays high for normal operation.
 
+LED behavior summary (STM32):
+Individual behaviors:
+- LED4 is independent: a 500 ms pulse whenever `feed_signal_state` is not
+  `FEED_none`.
+- OPTO_LED is static on (not part of LED animations).
+
+Grouped behaviors (LED0-LED3):
+- Idle + indexed: LED3 full brightness; LED0/LED1/LED2 off.
+- Idle + not indexed: LED1 and LED2 sine wave animation (phase offset);
+  LED0 and LED3 off.
+- Forward motion: LED0->LED3 sequential sine wave pattern.
+- Backward motion: LED3->LED0 sequential sine wave pattern (reverse order).
+- Other states: all four LEDs follow sine wave animation (phase 128 steps).
+
+Notes for the ESP32 LED layout:
+- LED0-LED3 retain the STM32 animation patterns.
+- LED4 is available (GPIO10) for the dedicated feed pulse indicator.
+
 ### Motor (H-bridge PWM)
 Behavior details are in `MOTOR_PWM_ANALYSIS.md`.
 Notes: Motor analysis and .ioc labels disagree on polarity naming.
@@ -106,15 +124,21 @@ This mapping is based on the provided ESP32-C3 Super Mini pinout list.
 | LED1 | PA10 | GPIO1 | Output |
 | LED2 | PA9 | GPIO3 | Output |
 | LED3 | PA8 | GPIO5 | Output |
+| LED4 | PB11 | GPIO10 | Output (feed indicator) |
 
 Notes:
 - Avoid GPIO2, GPIO8, GPIO9 (strapping pins) and GPIO18/19 (USB).
 - Motor polarity (forward/backward) should be verified in software during bring-up.
-- LED4 is omitted on ESP32-C3; feed indication should reuse LED3 per
-  `LED_ANALYSIS.md`.
+- LED4 is kept on ESP32-C3 (GPIO10) to preserve the STM32 feed indicator.
 - OPTO_LED is hardware-powered from 3V3 (no GPIO).
 - FEED is not assigned in this mapping; confirm if it is handled in hardware
   or needs a GPIO.
+
+Update (Stage 4 hardware/QEMU split):
+- Hardware mapping uses GPIO10 for LED4 (feed indicator).
+- QEMU/PICSim mapping reassigns GPIO0/GPIO1 as FWD/REV buttons and disables
+  LED0/LED1, keeping LED2/LED3 animations while leaving UART0 (GPIO20/21)
+  available for logging.
 
 ## PlatformIO board configuration
 Current `platformio.ini` uses:

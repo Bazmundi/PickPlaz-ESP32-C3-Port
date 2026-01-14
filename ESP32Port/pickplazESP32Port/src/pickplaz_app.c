@@ -432,10 +432,18 @@ static void eval_led_pwm(void) {
         led3 = sintab[t4 % APP_SINE_LEN] * APP_SINE_SCALE;
     }
 
-    app_set_led_duty(APP_PWM_LED0_CH, led0);
-    app_set_led_duty(APP_PWM_LED1_CH, led1);
-    app_set_led_duty(APP_PWM_LED2_CH, led2);
-    app_set_led_duty(APP_PWM_LED3_CH, led3);
+    if (app_pin_valid(BOARD_GPIO_LED0)) {
+        app_set_led_duty(APP_PWM_LED0_CH, led0);
+    }
+    if (app_pin_valid(BOARD_GPIO_LED1)) {
+        app_set_led_duty(APP_PWM_LED1_CH, led1);
+    }
+    if (app_pin_valid(BOARD_GPIO_LED2)) {
+        app_set_led_duty(APP_PWM_LED2_CH, led2);
+    }
+    if (app_pin_valid(BOARD_GPIO_LED3)) {
+        app_set_led_duty(APP_PWM_LED3_CH, led3);
+    }
 }
 
 static void eval_led_feed(void) {
@@ -444,6 +452,13 @@ static void eval_led_feed(void) {
     }
     if (feed_led_counter) {
         feed_led_counter--;
+    }
+    if (app_pin_valid(BOARD_GPIO_LED4)) {
+        hal_gpio_write(BOARD_GPIO_LED4,
+                       feed_led_counter ? HAL_GPIO_HIGH : HAL_GPIO_LOW);
+        return;
+    }
+    if (feed_led_counter) {
         app_set_led_duty(APP_PWM_LED3_CH, APP_PWM_STM32_MAX);
     }
 }
@@ -547,6 +562,7 @@ static void app_configure_inputs(void) {
                               app_pull_for_active_low(button_forward.active_low));
     }
     if (app_pin_valid(button_backward.pin)) {
+
         hal_gpio_config_input(button_backward.pin,
                               app_pull_for_active_low(button_backward.active_low));
     }
@@ -564,6 +580,9 @@ hal_status_t pickplaz_app_init(void) {
 
     app_configure_pwm_outputs();
     app_configure_inputs();
+    if (app_pin_valid(BOARD_GPIO_LED4)) {
+        hal_gpio_config_output(BOARD_GPIO_LED4, HAL_GPIO_LOW);
+    }
 
     if (app_pin_valid(HAL_OPTO_ADC_CHANNEL)) {
         hal_adc_init();
