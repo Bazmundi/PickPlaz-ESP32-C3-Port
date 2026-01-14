@@ -19,3 +19,7 @@ in-memoria.db
 /STM32F030C8TX_FLASH.ld
 /LED_ANALYSIS.md
 /MOTOR_PWM_ANALYSIS.md
+
+# QEMU sources/builds (keep out of ESP32 port repo)
+/qemu/
+/qemu-install/
