@@ -1,3 +1,16 @@
+/**
+ * @file hal.c
+ * @brief Implements the ESP32-C3 hardware abstraction layer.
+ *
+ * @details
+ * Provides GPIO, timers, PWM, UART, SPI, I2C, ADC, and optional self-test
+ * services using ESP-IDF drivers. The HAL hides platform specifics from the
+ * application layer.
+ *
+ * Thread-safety:
+ * - Not thread-safe; callers should serialize access when sharing resources.
+ */
+
 #include "hal.h"
 
 #include "hal_config.h"
@@ -26,11 +39,39 @@ static bool hal_gpio_output_valid(int pin) {
     return (pin >= 0) && GPIO_IS_VALID_OUTPUT_GPIO((gpio_num_t)pin);
 }
 
+/**
+ * @brief Initializes HAL services.
+ *
+ * @details
+ * Performs lightweight HAL startup and logs the initialization banner.
+ *
+ * Postconditions:
+ * - HAL services are available to callers.
+ *
+ * Side effects:
+ * - Writes a log message.
+ *
+ * @return HAL_OK on success.
+ */
 hal_status_t hal_init(void) {
     ESP_LOGI(TAG, "HAL init (Stage 3)");
     return HAL_OK;
 }
 
+/**
+ * @brief Delays execution for the requested number of milliseconds.
+ *
+ * @details
+ * Uses the FreeRTOS tick delay to suspend the calling task.
+ *
+ * Preconditions:
+ * - Must be called from a task context (not an ISR).
+ *
+ * Side effects:
+ * - Suspends the current task.
+ *
+ * @param ms Delay duration in milliseconds. Zero performs no delay.
+ */
 void hal_delay_ms(uint32_t ms) {
     if (ms == 0) {
         return;
@@ -38,6 +79,26 @@ void hal_delay_ms(uint32_t ms) {
     vTaskDelay(pdMS_TO_TICKS(ms));
 }
 
+/**
+ * @brief Configures a GPIO pin as a push-pull output.
+ *
+ * @details
+ * Sets the pin to output mode with no pull resistors and applies the initial
+ * logic level.
+ *
+ * Preconditions:
+ * - pin must be a valid output-capable GPIO.
+ *
+ * Postconditions:
+ * - GPIO is configured for output and driven to initial_level.
+ *
+ * Side effects:
+ * - Updates GPIO hardware configuration.
+ *
+ * @param pin GPIO number to configure.
+ * @param initial_level Initial logic level to drive.
+ * @return HAL_OK on success, HAL_ERR_INVALID on invalid pin/config failure.
+ */
 hal_status_t hal_gpio_config_output(int pin, hal_gpio_level_t initial_level) {
     if (!hal_gpio_output_valid(pin)) {
         return HAL_ERR_INVALID;
@@ -57,6 +118,25 @@ hal_status_t hal_gpio_config_output(int pin, hal_gpio_level_t initial_level) {
     return HAL_OK;
 }
 
+/**
+ * @brief Configures a GPIO pin as an input with pull settings.
+ *
+ * @details
+ * Sets the pin to input mode and enables the requested pull-up or pull-down.
+ *
+ * Preconditions:
+ * - pin must be a valid GPIO.
+ *
+ * Postconditions:
+ * - GPIO is configured for input with the requested pull configuration.
+ *
+ * Side effects:
+ * - Updates GPIO hardware configuration.
+ *
+ * @param pin GPIO number to configure.
+ * @param pull Pull mode (none/up/down).
+ * @return HAL_OK on success, HAL_ERR_INVALID on invalid pin/config failure.
+ */
 hal_status_t hal_gpio_config_input(int pin, hal_gpio_pull_t pull) {
     if (!hal_gpio_valid(pin)) {
         return HAL_ERR_INVALID;
@@ -75,6 +155,19 @@ hal_status_t hal_gpio_config_input(int pin, hal_gpio_pull_t pull) {
     return HAL_OK;
 }
 
+/**
+ * @brief Writes a logic level to a GPIO output.
+ *
+ * Preconditions:
+ * - pin must be configured as an output-capable GPIO.
+ *
+ * Side effects:
+ * - Updates the GPIO output level.
+ *
+ * @param pin GPIO number to write.
+ * @param level Logic level to drive.
+ * @return HAL_OK on success, HAL_ERR_INVALID on invalid pin.
+ */
 hal_status_t hal_gpio_write(int pin, hal_gpio_level_t level) {
     if (!hal_gpio_output_valid(pin)) {
         return HAL_ERR_INVALID;
@@ -83,6 +176,15 @@ hal_status_t hal_gpio_write(int pin, hal_gpio_level_t level) {
     return HAL_OK;
 }
 
+/**
+ * @brief Reads the current logic level of a GPIO.
+ *
+ * @details
+ * Returns HAL_GPIO_LOW if the pin is invalid.
+ *
+ * @param pin GPIO number to read.
+ * @return HAL_GPIO_HIGH or HAL_GPIO_LOW based on the sampled level.
+ */
 hal_gpio_level_t hal_gpio_read(int pin) {
     if (!hal_gpio_valid(pin)) {
         return HAL_GPIO_LOW;
@@ -90,6 +192,13 @@ hal_gpio_level_t hal_gpio_read(int pin) {
     return (hal_gpio_level_t)gpio_get_level((gpio_num_t)pin);
 }
 
+/**
+ * @brief Defines the maximum number of HAL timer slots.
+ *
+ * @details
+ * Limits the number of concurrent periodic timers that can be registered via
+ * hal_timer_start().
+ */
 #define HAL_TIMER_MAX 4
 
 typedef struct {
@@ -107,6 +216,30 @@ static void hal_timer_dispatch(void *arg) {
     }
 }
 
+/**
+ * @brief Starts a periodic HAL timer.
+ *
+ * @details
+ * Allocates or reuses a timer slot and calls the provided callback at the
+ * specified period.
+ *
+ * Preconditions:
+ * - timer_id must be in range [0, HAL_TIMER_MAX).
+ * - callback must be non-null.
+ * - period_ms must be > 0.
+ *
+ * Postconditions:
+ * - The timer slot is active and invokes callback periodically.
+ *
+ * Side effects:
+ * - Allocates an ESP timer and schedules periodic callbacks.
+ *
+ * @param timer_id Timer slot identifier.
+ * @param period_ms Period in milliseconds.
+ * @param callback Function to invoke each period. Must not be NULL.
+ * @param user_data Opaque pointer passed to callback.
+ * @return HAL_OK on success, HAL_ERR_INVALID on invalid parameters or failure.
+ */
 hal_status_t hal_timer_start(int timer_id, uint32_t period_ms,
                              hal_timer_callback_t callback, void *user_data) {
     if (timer_id < 0 || timer_id >= HAL_TIMER_MAX || callback == NULL || period_ms == 0) {
@@ -143,6 +276,24 @@ hal_status_t hal_timer_start(int timer_id, uint32_t period_ms,
     return HAL_OK;
 }
 
+/**
+ * @brief Stops a periodic HAL timer.
+ *
+ * @details
+ * Cancels and deletes the timer slot if it is active.
+ *
+ * Preconditions:
+ * - timer_id must be in range [0, HAL_TIMER_MAX).
+ *
+ * Postconditions:
+ * - The timer slot is inactive.
+ *
+ * Side effects:
+ * - Deletes the underlying ESP timer if present.
+ *
+ * @param timer_id Timer slot identifier.
+ * @return HAL_OK on success, HAL_ERR_INVALID on invalid timer_id.
+ */
 hal_status_t hal_timer_stop(int timer_id) {
     if (timer_id < 0 || timer_id >= HAL_TIMER_MAX) {
         return HAL_ERR_INVALID;
@@ -172,6 +323,28 @@ static void hal_tick_dispatch(void *arg) {
     }
 }
 
+/**
+ * @brief Starts the global HAL tick timer.
+ *
+ * @details
+ * Configures a periodic ESP timer that calls the provided callback at the
+ * requested frequency.
+ *
+ * Preconditions:
+ * - hz must be > 0.
+ * - callback must be non-null.
+ *
+ * Postconditions:
+ * - The tick callback is invoked at approximately hz.
+ *
+ * Side effects:
+ * - Allocates and starts an ESP timer.
+ *
+ * @param hz Tick frequency in Hertz.
+ * @param callback Function to invoke on each tick. Must not be NULL.
+ * @param user_data Opaque pointer passed to callback.
+ * @return HAL_OK on success, HAL_ERR_INVALID on invalid params or failure.
+ */
 hal_status_t hal_tick_start(uint32_t hz, hal_timer_callback_t callback, void *user_data) {
     if (hz == 0 || callback == NULL) {
         return HAL_ERR_INVALID;
@@ -210,6 +383,20 @@ hal_status_t hal_tick_start(uint32_t hz, hal_timer_callback_t callback, void *us
     return HAL_OK;
 }
 
+/**
+ * @brief Stops the global HAL tick timer.
+ *
+ * @details
+ * Cancels and deletes the tick timer if it is active.
+ *
+ * Postconditions:
+ * - The global tick timer is inactive.
+ *
+ * Side effects:
+ * - Deletes the underlying ESP timer.
+ *
+ * @return HAL_OK on success.
+ */
 hal_status_t hal_tick_stop(void) {
     if (!hal_tick_timer) {
         return HAL_OK;
@@ -251,6 +438,30 @@ static bool hal_pwm_timer_configured[LEDC_TIMER_MAX];
 static uint32_t hal_pwm_timer_freq[LEDC_TIMER_MAX];
 static uint32_t hal_pwm_timer_bits[LEDC_TIMER_MAX];
 
+/**
+ * @brief Initializes a PWM channel for a GPIO pin.
+ *
+ * @details
+ * Configures the LEDC timer and channel for the requested frequency and
+ * resolution. Motor pins are placed on a separate LEDC timer to preserve
+ * frequency settings.
+ *
+ * Preconditions:
+ * - channel must be in [0, LEDC_CHANNEL_MAX).
+ * - pin must be a valid output-capable GPIO.
+ *
+ * Postconditions:
+ * - The PWM channel is configured and ready for duty updates.
+ *
+ * Side effects:
+ * - Allocates/updates LEDC timer and channel configuration.
+ *
+ * @param channel LEDC channel index.
+ * @param pin GPIO number to drive with PWM.
+ * @param freq_hz PWM frequency in Hertz.
+ * @param duty_resolution_bits Duty resolution in bits.
+ * @return HAL_OK on success, HAL_ERR_INVALID on invalid params or failure.
+ */
 hal_status_t hal_pwm_init(int channel, int pin, uint32_t freq_hz,
                           uint32_t duty_resolution_bits) {
     if (channel < 0 || channel >= LEDC_CHANNEL_MAX) {
@@ -305,6 +516,23 @@ hal_status_t hal_pwm_init(int channel, int pin, uint32_t freq_hz,
     return HAL_OK;
 }
 
+/**
+ * @brief Updates the PWM duty for a configured channel.
+ *
+ * @details
+ * Clamps duty to the configured maximum for the channel before updating.
+ *
+ * Preconditions:
+ * - channel must be configured via hal_pwm_init().
+ *
+ * Side effects:
+ * - Updates LEDC duty and commits it to hardware.
+ *
+ * @param channel LEDC channel index.
+ * @param duty Duty value in channel resolution units.
+ * @return HAL_OK on success, HAL_ERR_INVALID on invalid params or failure,
+ *         HAL_ERR_UNSUPPORTED if the channel is not configured.
+ */
 hal_status_t hal_pwm_set_duty(int channel, uint32_t duty) {
     if (channel < 0 || channel >= LEDC_CHANNEL_MAX) {
         return HAL_ERR_INVALID;
@@ -327,6 +555,28 @@ hal_status_t hal_pwm_set_duty(int channel, uint32_t duty) {
     return HAL_OK;
 }
 
+/**
+ * @brief Initializes UART0 with the configured pins.
+ *
+ * @details
+ * Only UART0 is supported. Pins are defined in hal_config.h and must be set
+ * to non-BOARD_GPIO_UNUSED to enable UART usage.
+ *
+ * Preconditions:
+ * - uart_id must be UART_NUM_0.
+ * - UART pins must be configured in hal_config.h.
+ *
+ * Postconditions:
+ * - UART driver is installed and ready for IO.
+ *
+ * Side effects:
+ * - Allocates UART driver resources.
+ *
+ * @param uart_id UART identifier (must be UART_NUM_0).
+ * @param baud_rate Baud rate in bits per second.
+ * @return HAL_OK on success, HAL_ERR_UNSUPPORTED on unsupported config,
+ *         HAL_ERR_INVALID on invalid parameters or driver failure.
+ */
 hal_status_t hal_uart_init(int uart_id, uint32_t baud_rate) {
     if (uart_id != UART_NUM_0) {
         return HAL_ERR_UNSUPPORTED;
@@ -366,6 +616,20 @@ hal_status_t hal_uart_init(int uart_id, uint32_t baud_rate) {
     return HAL_OK;
 }
 
+/**
+ * @brief Writes data to UART0.
+ *
+ * Preconditions:
+ * - UART0 has been initialized.
+ *
+ * Side effects:
+ * - Sends bytes over the UART driver.
+ *
+ * @param uart_id UART identifier (must be UART_NUM_0).
+ * @param data Buffer to write. Must not be NULL.
+ * @param length Number of bytes to write. Must be > 0.
+ * @return Number of bytes written, or HAL_ERR_INVALID on invalid params.
+ */
 int hal_uart_write(int uart_id, const uint8_t *data, size_t length) {
     if (uart_id != UART_NUM_0 || data == NULL || length == 0) {
         return HAL_ERR_INVALID;
@@ -373,6 +637,20 @@ int hal_uart_write(int uart_id, const uint8_t *data, size_t length) {
     return uart_write_bytes(uart_id, data, length);
 }
 
+/**
+ * @brief Reads data from UART0.
+ *
+ * @details
+ * Performs a non-blocking read with zero timeout.
+ *
+ * Preconditions:
+ * - UART0 has been initialized.
+ *
+ * @param uart_id UART identifier (must be UART_NUM_0).
+ * @param data Output buffer. Must not be NULL.
+ * @param length Maximum number of bytes to read. Must be > 0.
+ * @return Number of bytes read, or HAL_ERR_INVALID on invalid params.
+ */
 int hal_uart_read(int uart_id, uint8_t *data, size_t length) {
     if (uart_id != UART_NUM_0 || data == NULL || length == 0) {
         return HAL_ERR_INVALID;
@@ -382,6 +660,27 @@ int hal_uart_read(int uart_id, uint8_t *data, size_t length) {
 
 static bool hal_i2c_initialized;
 
+/**
+ * @brief Initializes the I2C master bus.
+ *
+ * @details
+ * Only I2C_NUM_0 is supported. Pins are defined in hal_config.h.
+ *
+ * Preconditions:
+ * - bus_id must be I2C_NUM_0.
+ * - SDA/SCL pins must be configured and valid.
+ *
+ * Postconditions:
+ * - I2C driver is installed and ready for transfers.
+ *
+ * Side effects:
+ * - Allocates I2C driver resources.
+ *
+ * @param bus_id I2C bus identifier (must be I2C_NUM_0).
+ * @param clock_hz Bus clock in Hertz. Zero uses HAL_I2C0_CLOCK_HZ.
+ * @return HAL_OK on success, HAL_ERR_UNSUPPORTED on unsupported config,
+ *         HAL_ERR_INVALID on invalid parameters or driver failure.
+ */
 hal_status_t hal_i2c_init(int bus_id, uint32_t clock_hz) {
     if (bus_id != I2C_NUM_0) {
         return HAL_ERR_UNSUPPORTED;
@@ -416,6 +715,22 @@ hal_status_t hal_i2c_init(int bus_id, uint32_t clock_hz) {
     return HAL_OK;
 }
 
+/**
+ * @brief Writes data to an I2C device.
+ *
+ * @details
+ * Uses a blocking transfer with a 100 ms timeout.
+ *
+ * Preconditions:
+ * - I2C bus has been initialized.
+ *
+ * @param bus_id I2C bus identifier (must be I2C_NUM_0).
+ * @param addr 7-bit I2C device address.
+ * @param data Buffer to write. Must not be NULL.
+ * @param length Number of bytes to write. Must be > 0.
+ * @return Number of bytes written, or HAL_ERR_INVALID on failure,
+ *         HAL_ERR_UNSUPPORTED if the bus is not available.
+ */
 int hal_i2c_write(int bus_id, uint8_t addr, const uint8_t *data, size_t length) {
     if (data == NULL || length == 0) {
         return HAL_ERR_INVALID;
@@ -428,6 +743,22 @@ int hal_i2c_write(int bus_id, uint8_t addr, const uint8_t *data, size_t length) 
     return (err == ESP_OK) ? (int)length : HAL_ERR_INVALID;
 }
 
+/**
+ * @brief Reads data from an I2C device.
+ *
+ * @details
+ * Uses a blocking transfer with a 100 ms timeout.
+ *
+ * Preconditions:
+ * - I2C bus has been initialized.
+ *
+ * @param bus_id I2C bus identifier (must be I2C_NUM_0).
+ * @param addr 7-bit I2C device address.
+ * @param data Output buffer. Must not be NULL.
+ * @param length Number of bytes to read. Must be > 0.
+ * @return Number of bytes read, or HAL_ERR_INVALID on failure,
+ *         HAL_ERR_UNSUPPORTED if the bus is not available.
+ */
 int hal_i2c_read(int bus_id, uint8_t addr, uint8_t *data, size_t length) {
     if (data == NULL || length == 0) {
         return HAL_ERR_INVALID;
@@ -450,6 +781,28 @@ static void hal_selftest_tick_cb(void *ctx) {
 }
 #endif
 
+/**
+ * @brief Initializes the SPI bus and device handle.
+ *
+ * @details
+ * Only bus_id 0 is supported and mapped to SPI2_HOST. Pins are defined in
+ * hal_config.h.
+ *
+ * Preconditions:
+ * - SPI pins must be configured and valid.
+ *
+ * Postconditions:
+ * - SPI bus is initialized and device handle is ready.
+ *
+ * Side effects:
+ * - Allocates SPI bus resources.
+ *
+ * @param bus_id SPI bus identifier (must be 0).
+ * @param clock_hz Clock rate in Hertz. Zero uses HAL_SPI0_CLOCK_HZ.
+ * @param mode SPI mode (0-3).
+ * @return HAL_OK on success, HAL_ERR_UNSUPPORTED on unsupported config,
+ *         HAL_ERR_INVALID on invalid parameters or driver failure.
+ */
 hal_status_t hal_spi_init(int bus_id, uint32_t clock_hz, uint8_t mode) {
     if (bus_id != 0) {
         return HAL_ERR_UNSUPPORTED;
@@ -494,6 +847,22 @@ hal_status_t hal_spi_init(int bus_id, uint32_t clock_hz, uint8_t mode) {
     return HAL_OK;
 }
 
+/**
+ * @brief Performs a blocking SPI transfer.
+ *
+ * @details
+ * Sends tx bytes (if provided) and optionally captures rx bytes.
+ *
+ * Preconditions:
+ * - SPI bus has been initialized.
+ *
+ * @param bus_id SPI bus identifier (must be 0).
+ * @param tx Optional transmit buffer (may be NULL).
+ * @param rx Optional receive buffer (may be NULL).
+ * @param length Number of bytes to transfer. Must be > 0.
+ * @return Number of bytes transferred, or HAL_ERR_INVALID on failure,
+ *         HAL_ERR_UNSUPPORTED if the bus is not available.
+ */
 int hal_spi_transfer(int bus_id, const uint8_t *tx, uint8_t *rx, size_t length) {
     if (length == 0) {
         return HAL_ERR_INVALID;
@@ -515,6 +884,20 @@ int hal_spi_transfer(int bus_id, const uint8_t *tx, uint8_t *rx, size_t length) 
 static adc_oneshot_unit_handle_t hal_adc_handle;
 static bool hal_adc_initialized;
 
+/**
+ * @brief Initializes the ADC oneshot unit.
+ *
+ * @details
+ * Uses ADC_UNIT_1 and prepares it for per-channel configuration.
+ *
+ * Postconditions:
+ * - ADC oneshot handle is available.
+ *
+ * Side effects:
+ * - Allocates ADC unit resources.
+ *
+ * @return HAL_OK on success, HAL_ERR_INVALID on initialization failure.
+ */
 hal_status_t hal_adc_init(void) {
     if (hal_adc_initialized) {
         return HAL_OK;
@@ -531,6 +914,20 @@ hal_status_t hal_adc_init(void) {
     return HAL_OK;
 }
 
+/**
+ * @brief Reads a raw ADC sample from the specified channel.
+ *
+ * @details
+ * Configures channel attenuation and bit width on each read to match the
+ * default ESP-IDF oneshot configuration.
+ *
+ * Preconditions:
+ * - channel must be a valid ADC channel for ADC_UNIT_1.
+ *
+ * @param channel ADC channel number.
+ * @return Raw ADC reading on success, HAL_ERR_INVALID on failure,
+ *         HAL_ERR_UNSUPPORTED if channel is disabled.
+ */
 int hal_adc_read(int channel) {
     if (channel == BOARD_GPIO_UNUSED) {
         return HAL_ERR_UNSUPPORTED;
@@ -544,7 +941,7 @@ int hal_adc_read(int channel) {
     }
 
     adc_oneshot_chan_cfg_t cfg = {
-        .atten = ADC_ATTEN_DB_11,
+        .atten = ADC_ATTEN_DB_12,
         .bitwidth = ADC_BITWIDTH_DEFAULT,
     };
     if (adc_oneshot_config_channel(hal_adc_handle, (adc_channel_t)channel, &cfg) != ESP_OK) {
@@ -558,6 +955,19 @@ int hal_adc_read(int channel) {
     return raw;
 }
 
+/**
+ * @brief Runs a basic HAL self-test sequence.
+ *
+ * @details
+ * Validates GPIO, tick timer, PWM, and optional peripheral bring-up. Only
+ * compiled when HAL_SELFTEST is defined.
+ *
+ * Side effects:
+ * - Reconfigures GPIO/PWM peripherals for test patterns.
+ * - Writes test output to the UART when available.
+ *
+ * @note Intended for development builds only.
+ */
 void hal_selftest_run(void) {
 #ifndef HAL_SELFTEST
     return;

@@ -1,3 +1,17 @@
+/**
+ * @file pickplaz_app.c
+ * @brief Implements the PickPlaz application state machine and IO orchestration.
+ *
+ * @details
+ * Owns the 1 kHz application tick, translates button/opto/feed inputs into
+ * state transitions, and drives LED/motor outputs through the HAL. This
+ * module is platform-agnostic and relies on board pin mappings defined in
+ * `board_pins.h` plus optional overrides in `hal_config.h`.
+ *
+ * Thread-safety:
+ * - Not thread-safe; intended to run from a single periodic tick.
+ */
+
 #include "pickplaz_app.h"
 
 #include <inttypes.h>
@@ -9,9 +23,21 @@
 
 static const char *TAG = "pickplaz_app";
 
-extern const uint8_t sintab[256];
+/**
+ * @brief Provides a 256-entry sine lookup table for LED animation.
+ *
+ * @details
+ * Values range from 0..256 and are scaled by APP_SINE_SCALE to reach the
+ * STM32-style 0..APP_PWM_STM32_MAX duty range.
+ *
+ * @note Indexed modulo APP_SINE_LEN.
+ */
+extern const uint16_t sintab[256];
 
-enum {
+/**
+ * @brief Application timing and scaling constants.
+ */
+enum app_constants {
     APP_PWM_STM32_MAX = 2048,
     APP_TICK_HZ = 1000,
     APP_SINE_LEN = 256,
@@ -21,43 +47,98 @@ enum {
     APP_BUTTON_LONGPRESS = 400,
 };
 
+/**
+ * @brief Represents a decoded feed input event.
+ *
+ * @details
+ * The feed input is sampled at 1 kHz and converted into a short or long event
+ * consumed by the application FSM.
+ */
 typedef enum {
+    /** No feed event has been detected. */
     FEED_none,
+    /** A short feed pulse was latched. */
     FEED_short,
+    /** A long feed pulse was latched. */
     FEED_long
 } feed_signal_t;
 
+/**
+ * @brief Tracks the raw feed input level for pulse detection.
+ */
 typedef enum {
+    /** Feed input is low; waiting for a rising edge. */
     FEED_fsm_low,
+    /** Feed input is high; timing the pulse width. */
     FEED_fsm_high
 } feed_fsm_t;
 
+/**
+ * @brief Describes the motor control state machine.
+ *
+ * @details
+ * Tracks whether the motor is idle, running, or in active braking.
+ */
 typedef enum {
+    /** Initial state after reset; forces outputs to a stopped condition. */
     MOTOR_init,
+    /** Motor is stopped and waiting for a target. */
     MOTOR_idle,
+    /** Motor is driving forward with PWM. */
     MOTOR_running_forward,
+    /** Motor is driving backward with PWM. */
     MOTOR_running_backward,
+    /** Motor is actively braking after a stop request. */
     MOTOR_brake
 } motor_state_t;
 
+/**
+ * @brief Represents the main application state machine.
+ *
+ * @details
+ * States mirror the STM32 firmware behavior for indexed moves and continuous
+ * motion while a button is held.
+ */
 typedef enum {
+    /** Initial state after reset. */
     APP_init,
+    /** Idle state waiting for button or feed events. */
     APP_idle,
+    /** Forward step: move until the opto leaves index or timeout. */
     APP_increment_forward1,
+    /** Reverse step: move until the opto leaves index or timeout. */
     APP_increment_backward1,
+    /** Forward step: continue until opto returns to index or timeout. */
     APP_increment_forward2,
+    /** Reverse step: continue until opto returns to index or timeout. */
     APP_increment_backward2,
+    /** Continuous forward motion while the forward request is held. */
     APP_free_forward,
+    /** Continuous reverse motion while the reverse request is held. */
     APP_free_backward
 } app_state_t;
 
+/**
+ * @brief Represents the debounced button event for a single tick.
+ */
 typedef enum {
+    /** No event this tick. */
     BUTTON_none,
+    /** Short press released after debounce timing. */
     BUTTON_short,
+    /** Long press released after exceeding the long-press threshold. */
     BUTTON_long,
+    /** Button remains held; emitted while pressed. */
     BUTTON_hold
 } button_event_t;
 
+/**
+ * @brief Holds debounce and press timing state for a button input.
+ *
+ * @details
+ * The debounce counter saturates at APP_BUTTON_CNT_MAX and press counts are
+ * measured in 1 kHz ticks.
+ */
 typedef struct {
     int pin;
     bool active_low;
@@ -65,7 +146,10 @@ typedef struct {
     uint32_t press;
 } app_button_t;
 
-enum {
+/**
+ * @brief PWM values for motor control modes.
+ */
+enum motor_pwm_constants {
     MOTOR_FORWARD_NORMAL = 2048,
     MOTOR_BACKWARD_NORMAL = -2048,
     MOTOR_FORWARD_FAST = 2048,
@@ -73,7 +157,10 @@ enum {
     MOTOR_STOP = 0
 };
 
-enum {
+/**
+ * @brief PWM channel assignments for LEDs and motor outputs.
+ */
+enum app_pwm_channels {
     APP_PWM_LED0_CH = 0,
     APP_PWM_LED1_CH = 1,
     APP_PWM_LED2_CH = 2,
@@ -159,6 +246,26 @@ static bool app_gpio_is_active(int pin, bool active_low) {
     return active_low ? (level == HAL_GPIO_LOW) : (level == HAL_GPIO_HIGH);
 }
 
+/**
+ * @brief Samples and debounces a button, returning edge events.
+ *
+ * @details
+ * Implements the STM32 timing model: a debounce counter followed by press
+ * timing. Returns BUTTON_short/BUTTON_long on release and BUTTON_hold while
+ * the button remains held.
+ *
+ * Preconditions:
+ * - button must be non-null and initialized with pin and polarity.
+ *
+ * Postconditions:
+ * - Debounce and press counters are updated.
+ *
+ * Side effects:
+ * - Reads GPIO through the HAL.
+ *
+ * @param button Button state storage. Must not be NULL.
+ * @return Button event for this tick.
+ */
 static button_event_t app_button_update(app_button_t *button) {
     bool pressed = app_gpio_is_active(button->pin, button->active_low);
 
@@ -192,6 +299,22 @@ static button_event_t app_button_update(app_button_t *button) {
     return BUTTON_none;
 }
 
+/**
+ * @brief Drives the motor H-bridge outputs with scaled PWM.
+ *
+ * @details
+ * Applies the STM32-style duty value (0..2048) to the ESP32 LEDC channels.
+ * Forward drives IN2, backward drives IN1, matching the STM32 polarity model.
+ *
+ * Preconditions:
+ * - Motor PWM channels are initialized via hal_pwm_init().
+ *
+ * Side effects:
+ * - Updates LEDC duty on the motor output channels.
+ *
+ * @param pwm Duty value in STM32 units (0..2048).
+ * @param forward True for forward direction, false for reverse.
+ */
 static void app_set_motor(uint32_t pwm, bool forward) {
     uint32_t duty = app_pwm_scale(pwm);
     if (forward) {
@@ -203,6 +326,23 @@ static void app_set_motor(uint32_t pwm, bool forward) {
     }
 }
 
+/**
+ * @brief Updates the feed pulse FSM.
+ *
+ * @details
+ * Detects short/long feed pulses on HAL_FEED_PIN using the 1 kHz tick and
+ * updates feed_signal_state accordingly. If the feed pin is not configured,
+ * the FSM remains idle.
+ *
+ * Preconditions:
+ * - HAL_FEED_PIN is configured as input when enabled.
+ *
+ * Postconditions:
+ * - feed_signal_state reflects the most recent pulse classification.
+ *
+ * Side effects:
+ * - Reads GPIO through the HAL.
+ */
 static void run_feed_fsm(void) {
     if (!app_pin_valid(HAL_FEED_PIN)) {
         return;
@@ -231,6 +371,19 @@ static void run_feed_fsm(void) {
     }
 }
 
+/**
+ * @brief Advances the main application FSM.
+ *
+ * @details
+ * Updates application state transitions, timers, and motor_target based on
+ * button requests, feed signals, and opto indexing status.
+ *
+ * Preconditions:
+ * - app_state and request flags are initialized.
+ *
+ * Postconditions:
+ * - app_state, app_timer, and motor_target are updated.
+ */
 static void run_app_fsm(void) {
     switch (app_state) {
     case APP_init:
@@ -328,6 +481,19 @@ static void run_app_fsm(void) {
     }
 }
 
+/**
+ * @brief Advances the motor control FSM.
+ *
+ * @details
+ * Translates motor_target into PWM outputs, applies active braking when
+ * stopping, and tracks the last commanded direction for brake polarity.
+ *
+ * Preconditions:
+ * - motor_target is updated by run_app_fsm().
+ *
+ * Postconditions:
+ * - PWM outputs reflect the desired motor behavior.
+ */
 static void run_motor_fsm(void) {
     switch (motor_state) {
     case MOTOR_init:
@@ -384,6 +550,16 @@ static void run_motor_fsm(void) {
     }
 }
 
+/**
+ * @brief Computes LED animation PWM values for the current state.
+ *
+ * @details
+ * Reproduces STM32 LED patterns: idle/indexed, idle/unindexed, forward and
+ * backward motion waves, and the default sine animation.
+ *
+ * Side effects:
+ * - Updates LED PWM channels via the HAL when LEDs are enabled.
+ */
 static void eval_led_pwm(void) {
     uint32_t led0 = 0;
     uint32_t led1 = 0;
@@ -446,6 +622,16 @@ static void eval_led_pwm(void) {
     }
 }
 
+/**
+ * @brief Drives the feed indicator LED.
+ *
+ * @details
+ * Emits a 500 ms pulse when a feed event is detected. Uses LED4 when
+ * available; otherwise falls back to LED3 to preserve visibility.
+ *
+ * Side effects:
+ * - Updates LED4 GPIO or LED3 PWM output.
+ */
 static void eval_led_feed(void) {
     if (feed_signal_state != FEED_none) {
         feed_led_counter = APP_FEED_PULSE_MS;
@@ -463,6 +649,19 @@ static void eval_led_feed(void) {
     }
 }
 
+/**
+ * @brief Updates opto indexing status from ADC or GPIO.
+ *
+ * @details
+ * If HAL_OPTO_ADC_CHANNEL is configured, uses hysteresis thresholds to avoid
+ * flapping. Otherwise reads BOARD_GPIO_OPTO_INT with configurable polarity.
+ *
+ * Postconditions:
+ * - opto_is_indexed reflects the latest sampled input.
+ *
+ * Side effects:
+ * - Reads ADC or GPIO through the HAL.
+ */
 static void app_update_opto(void) {
     if (app_pin_valid(HAL_OPTO_ADC_CHANNEL)) {
         int adc_value = hal_adc_read(HAL_OPTO_ADC_CHANNEL);
@@ -482,6 +681,21 @@ static void app_update_opto(void) {
     }
 }
 
+/**
+ * @brief Executes one 1 kHz application tick.
+ *
+ * @details
+ * Samples buttons, updates opto/feed state, advances the application and motor
+ * FSMs, and refreshes LED outputs.
+ *
+ * Preconditions:
+ * - pickplaz_app_init() has configured IO and initialized state.
+ *
+ * Side effects:
+ * - Reads GPIO/ADC inputs and updates PWM/GPIO outputs.
+ *
+ * @param user_data Unused; reserved for future tick context.
+ */
 static void app_tick(void *user_data) {
     (void)user_data;
     app_tick_ms++;
@@ -528,6 +742,16 @@ static void app_tick(void *user_data) {
     eval_led_feed();
 }
 
+/**
+ * @brief Configures PWM outputs for LEDs and motor channels.
+ *
+ * @details
+ * Initializes LEDC channels only for pins that are enabled in the current
+ * board pinmap.
+ *
+ * Side effects:
+ * - Allocates LEDC timers/channels via the HAL.
+ */
 static void app_configure_pwm_outputs(void) {
     if (app_pin_valid(BOARD_GPIO_LED0)) {
         hal_pwm_init(APP_PWM_LED0_CH, BOARD_GPIO_LED0, HAL_PWM_LED_FREQ_HZ,
@@ -556,6 +780,15 @@ static void app_configure_pwm_outputs(void) {
     }
 }
 
+/**
+ * @brief Configures GPIO inputs for buttons, feed, and opto.
+ *
+ * @details
+ * Applies active-low or active-high pull configuration based on pin settings.
+ *
+ * Side effects:
+ * - Configures GPIO input mode via the HAL.
+ */
 static void app_configure_inputs(void) {
     if (app_pin_valid(button_forward.pin)) {
         hal_gpio_config_input(button_forward.pin,
@@ -575,6 +808,29 @@ static void app_configure_inputs(void) {
     }
 }
 
+/**
+ * @brief Initializes PickPlaz application state and IO.
+ *
+ * @details
+ * Configures PWM outputs, input GPIOs, and optional ADC usage, then resets all
+ * application state machines and counters.
+ *
+ * Preconditions:
+ * - hal_init() has been called.
+ *
+ * Postconditions:
+ * - Application state machines are reset to APP_init/MOTOR_init.
+ * - GPIO/PWM resources are configured for enabled pins.
+ *
+ * Side effects:
+ * - Configures PWM, GPIO, and ADC resources through the HAL.
+ * - Logs initialization status.
+ *
+ * Error handling:
+ * - Returns HAL_OK; initialization failures are reported via HAL logs.
+ *
+ * @return HAL_OK on completion.
+ */
 hal_status_t pickplaz_app_init(void) {
     ESP_LOGI(TAG, "PickPlaz app init (Stage 4)");
 
@@ -603,10 +859,39 @@ hal_status_t pickplaz_app_init(void) {
     return HAL_OK;
 }
 
+/**
+ * @brief Starts the PickPlaz application tick.
+ *
+ * @details
+ * Registers the 1 kHz tick callback with the HAL timer service.
+ *
+ * Preconditions:
+ * - pickplaz_app_init() has been called.
+ *
+ * Postconditions:
+ * - The application tick is running.
+ *
+ * Side effects:
+ * - Allocates and starts a periodic timer via the HAL.
+ *
+ * Error handling:
+ * - Returns HAL_ERR_* codes from hal_tick_start().
+ *
+ * @return HAL_OK on success, or a HAL_ERR_* code on failure.
+ */
 hal_status_t pickplaz_app_start(void) {
     return hal_tick_start(APP_TICK_HZ, app_tick, NULL);
 }
 
+/**
+ * @brief Stops the PickPlaz application tick.
+ *
+ * @details
+ * Cancels the periodic tick timer created by pickplaz_app_start().
+ *
+ * Side effects:
+ * - Stops the periodic timer via the HAL.
+ */
 void pickplaz_app_stop(void) {
     hal_tick_stop();
 }
