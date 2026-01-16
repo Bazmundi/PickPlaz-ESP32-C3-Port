@@ -1,0 +1,25 @@
+# Makefile fragment: Doxygen + (optional) Sphinx integration
+#
+# Add this to your project's Makefile.
+
+DOXYGEN ?= doxygen
+DOXYFILE ?= Doxyfile
+
+.PHONY: docs docs-doxygen docs-clean docs-check
+
+docs: docs-doxygen
+	@echo "Docs built."
+
+docs-doxygen:
+	@echo "Running Doxygen..."
+	$(DOXYGEN) $(DOXYFILE)
+	@echo "Doxygen HTML: docs/doxygen/html/index.html"
+	@echo "Doxygen XML:  docs/doxygen/xml/"
+
+docs-check:
+	@echo "Running Doxygen in warning-as-error mode (FAIL_ON_WARNINGS)..."
+	$(DOXYGEN) $(DOXYFILE)
+
+docs-clean:
+	@echo "Cleaning generated docs..."
+	rm -rf docs/doxygen

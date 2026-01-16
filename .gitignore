@@ -23,3 +23,10 @@ in-memoria.db
 # QEMU sources/builds (keep out of ESP32 port repo)
 /qemu/
 /qemu-install/
+
+# ESP32 port docs build outputs
+/ESP32Port/pickplazESP32Port/docs/build/
+/ESP32Port/pickplazESP32Port/docs/build-internal/
+/ESP32Port/pickplazESP32Port/docs/doxygen/
+/ESP32Port/pickplazESP32Port/docs/doxygen-internal/
+/ESP32Port/pickplazESP32Port/docs/source/api/exhale/

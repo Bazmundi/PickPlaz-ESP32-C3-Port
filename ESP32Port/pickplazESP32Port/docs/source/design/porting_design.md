@@ -17,6 +17,10 @@ These documents remain the source of truth for behavior and timing details:
 - `LED_ANALYSIS.md` (LED patterns, PWM use, idle/motion indications)
 - `MOTOR_PWM_ANALYSIS.md` (motor PWM behavior, braking, timing)
 
+## External references
+- [ESP32-C3 hardware reference (ESP-IDF)](https://docs.espressif.com/projects/esp-idf/en/v5.5.2/esp32c3/hw-reference/index.html)
+- [ESP32-C3 Super Mini overview (ESPBoards)](https://www.espboards.dev/esp32/esp32-c3-super-mini/)
+
 ## From/To rationale (high-level)
 - From: STM32F030C8T6 uses STM32 HAL + direct timer PWM; single SysTick loop
   at 1 kHz drives application state, PWM updates, and sensor sampling.
