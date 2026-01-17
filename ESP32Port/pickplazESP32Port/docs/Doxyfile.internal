@@ -4,7 +4,7 @@
 @INCLUDE = Doxyfile
 
 # Include implementation sources for the internal reference.
-INPUT                  = include src docs/doxygen_main.md
+INPUT                  = ../include ../src doxygen_main.md
 
 # Write to a separate output directory to keep public docs intact.
-OUTPUT_DIRECTORY       = docs/doxygen-internal
+OUTPUT_DIRECTORY       = doxygen-internal
