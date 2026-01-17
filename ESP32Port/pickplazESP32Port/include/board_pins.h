@@ -1,3 +1,13 @@
+/*
+ * PickPlaz ESP32-C3 Port
+ * Copyright (c) 2026 Asterion Daedalus https://github.com/Bazmundi
+ * SPDX-License-Identifier: MIT
+ *
+ * This file is part of PickPlaz ESP32-C3 Port and is licensed under the MIT License.
+ * See the LICENSE file in the project root for full license text.
+ * This code is based upon https://github.com/ftobler/pick-plaz
+ */
+
 #ifndef PICKPLAZ_BOARD_PINS_H_
 #define PICKPLAZ_BOARD_PINS_H_
 
