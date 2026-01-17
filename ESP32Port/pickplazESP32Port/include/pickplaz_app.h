@@ -5,7 +5,6 @@
  *
  * This file is part of PickPlaz ESP32-C3 Port and is licensed under the MIT License.
  * See the LICENSE file in the project root for full license text.
- * This code is based upon https://github.com/ftobler/pick-plaz
  */
 
 #ifndef PICKPLAZ_APP_H_
