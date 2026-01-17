@@ -12,6 +12,9 @@ stages grounded.
 - Noted board configuration checks for PlatformIO.
 - Confirmed a 5-LED layout for the ESP32-C3 port (LED0-LED4 supported).
 
+For a concise overview of all stages (and links to stage plans), see the
+[Port stages overview](../stages/overview.md).
+
 ## Existing analysis references
 These documents remain the source of truth for behavior and timing details:
 - `LED_ANALYSIS.md` (LED patterns, PWM use, idle/motion indications)
@@ -20,6 +23,42 @@ These documents remain the source of truth for behavior and timing details:
 ## External references
 - [ESP32-C3 hardware reference (ESP-IDF)](https://docs.espressif.com/projects/esp-idf/en/v5.5.2/esp32c3/hw-reference/index.html)
 - [ESP32-C3 Super Mini overview (ESPBoards)](https://www.espboards.dev/esp32/esp32-c3-super-mini/)
+
+## Documentation build layout
+This project keeps documentation sources with the dev stream while the doc
+build scaffolding lives under `docs/`. The Doxygen config files stay inside
+`docs/` so the doc system is self-contained and portable to other ESP32
+porting projects.
+
+Sphinx reads content from `docs/source/` and writes HTML into `docs/build/`.
+Doxygen writes its output into `docs/doxygen/` for the public API and into
+`docs/doxygen-internal/` for the internal/developer reference.
+
+### Build commands (public API)
+From `ESP32Port/pickplazESP32Port/docs`:
+
+```
+doxygen Doxyfile
+make html
+```
+
+- `doxygen Doxyfile` generates the public XML/HTML API from `../include` and
+  the Doxygen main page in `docs/doxygen_main.md`.
+- `make html` runs Sphinx against `docs/source/` and writes to `docs/build/`.
+
+### Build commands (internal developer reference)
+From `ESP32Port/pickplazESP32Port/docs`:
+
+```
+doxygen Doxyfile.internal
+BREATHE_XML_DIR="$PWD/doxygen-internal/xml" make html BUILDDIR=build-internal
+```
+
+- `doxygen Doxyfile.internal` includes `../src` in addition to headers and
+  writes output to `docs/doxygen-internal/`.
+- `BREATHE_XML_DIR=... make html BUILDDIR=build-internal` points Sphinx at the
+  internal XML and writes HTML into `docs/build-internal/`, keeping it separate
+  from the public build.
 
 ## From/To rationale (high-level)
 - From: STM32F030C8T6 uses STM32 HAL + direct timer PWM; single SysTick loop
@@ -115,6 +154,48 @@ Action: Confirm actual wiring or PCB schematic before assigning ESP32 pins.
 - TP5: PB7 (GPIO output)
 
 ## ESP32-C3 Super Mini pinout alignment (confirmed)
+
+(images sourced from www.espboards.dev/esp32/esp32-c3-super-mini)
+```{figure} ../images/pose.webp
+---
+align: center
+figclass: doc-figure
+---
+ESP32-C3 Super Mini overview.
+```
+
+```{figure} ../images/dimensions.webp
+---
+align: center
+figclass: doc-figure
+---
+ESP32-C3 Super Mini dimensions.
+```
+
+```{figure} ../images/top_pinouts.webp
+---
+align: center
+figclass: doc-figure
+---
+ESP32-C3 Super Mini top pinout.
+```
+
+```{figure} ../images/bottom_pinouts.webp
+---
+align: center
+figclass: doc-figure
+---
+ESP32-C3 Super Mini bottom pinout.
+```
+
+```{figure} ../images/leds.webp
+---
+align: center
+figclass: doc-figure
+---
+ESP32-C3 Super Mini LED locations.
+```
+
 This mapping is based on the provided ESP32-C3 Super Mini pinout list.
 
 | Signal | STM32 Pin | ESP32-C3 Pin | Notes |
@@ -150,17 +231,4 @@ Current `platformio.ini` uses:
 - `board = esp32-c3-devkitm-1`
 - `framework = espidf`
 
-Action: Confirm whether the Super Mini is best represented by
-`esp32-c3-devkitm-1`, or if a dedicated board definition is required.
-If a custom board is needed, create a `boards/` JSON entry before Stage 1.
-
-## Stage 0 done / pending
-Done:
-- Captured STM32 signal roles and peripherals.
-- Identified timing and ADC differences to account for in the port.
-- Locked the initial ESP32-C3 GPIO assignments.
-
-Pending (blockers for Stage 1):
-- Resolve MOT_POS/MOT_NEG polarity mismatch.
-- Choose the final PlatformIO board target or add a custom definition.
-- Confirm how FEED is handled on the ESP32-C3 build.
+There is more detail in the platform.ini to cover devkit and qemu builds (with and without self-test injection)
