@@ -7,12 +7,6 @@ goal is a faithful port that is easier to build, test, and evolve.
 If you are new here, start with the docs index and stage overview. They give
 context, decisions, and the rationale behind each step.
 
-## Where the ESP32 port lives
-
-At the repo root, the ESP32-C3 port lives under
-`ESP32Port/pickplazESP32Port/` (this directory). The STM32 baseline and other
-historical assets remain at the repo root.
-
 ## Start here
 
 - Docs entry point: [docs/source/index.md](docs/source/index.md)

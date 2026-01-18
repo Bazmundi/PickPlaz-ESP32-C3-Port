@@ -17,8 +17,8 @@ For a concise overview of all stages (and links to stage plans), see the
 
 ## Existing analysis references
 These documents remain the source of truth for behavior and timing details:
-- `LED_ANALYSIS.md` (LED patterns, PWM use, idle/motion indications)
-- `MOTOR_PWM_ANALYSIS.md` (motor PWM behavior, braking, timing)
+- [LED_ANALYSIS.md](LED_ANALYSIS.md) (LED patterns, PWM use, idle/motion indications)
+- [MOTOR_PWM_ANALYSIS.md](MOTOR_PWM_ANALYSIS.md) (motor PWM behavior, braking, timing)
 
 ## External references
 - [ESP32-C3 hardware reference (ESP-IDF)](https://docs.espressif.com/projects/esp-idf/en/v5.5.2/esp32c3/hw-reference/index.html)
@@ -93,10 +93,11 @@ Reasoning:
   Any 5 V signals from the feeder board must be level-shifted.
 
 ## Baseline signal inventory (STM32)
-Source: `pickplazfeederstm.ioc`, `LED_ANALYSIS.md`, `MOTOR_PWM_ANALYSIS.md`.
+Source: `pickplazfeederstm.ioc`, [LED_ANALYSIS.md](LED_ANALYSIS.md),
+[MOTOR_PWM_ANALYSIS.md](MOTOR_PWM_ANALYSIS.md).
 
 ### LEDs
-Behavior details are in `LED_ANALYSIS.md`.
+Behavior details are in [LED_ANALYSIS.md](LED_ANALYSIS.md).
 - LED0: PA11 (TIM1_CH4, PWM)
 - LED1: PA10 (TIM1_CH3, PWM)
 - LED2: PA9 (TIM1_CH2, PWM)
@@ -128,7 +129,7 @@ Notes for the ESP32 LED layout:
 - LED4 is available (GPIO10) for the dedicated feed pulse indicator.
 
 ### Motor (H-bridge PWM)
-Behavior details are in `MOTOR_PWM_ANALYSIS.md`.
+Behavior details are in [MOTOR_PWM_ANALYSIS.md](MOTOR_PWM_ANALYSIS.md).
 Notes: Motor analysis and .ioc labels disagree on polarity naming.
 
 - .ioc labels:
@@ -214,16 +215,25 @@ This mapping is based on the provided ESP32-C3 Super Mini pinout list.
 Notes:
 - Avoid GPIO2, GPIO8, GPIO9 (strapping pins) and GPIO18/19 (USB).
 - Motor polarity (forward/backward) should be verified in software during bring-up.
-- LED4 is kept on ESP32-C3 (GPIO10) to preserve the STM32 feed indicator.
+- LED4 maps to GPIO10 for the feed indicator (same behavior as STM32).
 - OPTO_LED is hardware-powered from 3V3 (no GPIO).
-- FEED is not assigned in this mapping; confirm if it is handled in hardware
-  or needs a GPIO.
+- FEED is not assigned in this mapping as we will add an mqtt client to the app to subscribe to feed message.
+
+Pins not carried over (STM32-only debug):
+
+| Signal | STM32 Pin | Usage (STM32) | Port status |
+| --- | --- | --- | --- |
+| TP1 | PB3 | Toggled around SysTick for timing/profiling | Not mapped on ESP32 |
+| TP2 | PB4 | Configured as output only | Not mapped on ESP32 |
+| TP3 | PB5 | Configured as output only | Not mapped on ESP32 |
+| TP4 | PB6 | Configured as output only | Not mapped on ESP32 |
+| TP5 | PB7 | Configured as output only | Not mapped on ESP32 |
 
 Update (Stage 4 hardware/QEMU split):
-- Hardware mapping uses GPIO10 for LED4 (feed indicator).
+- Devkit hardware mapping uses LED0..LED4 (feed indicator) as per original STM32.
 - QEMU/PICSim mapping reassigns GPIO0/GPIO1 as FWD/REV buttons and disables
   LED0/LED1, keeping LED2/LED3 animations while leaving UART0 (GPIO20/21)
-  available for logging.
+  available for logging.  This is a hangover from the way we need talk to the emulated device, it's good enough since any flickering of leds is related to known functions.
 
 ## PlatformIO board configuration
 Current `platformio.ini` uses:

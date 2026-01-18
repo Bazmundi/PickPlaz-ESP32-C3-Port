@@ -19,6 +19,8 @@ via `docs/doxygen/html/index.html`.
 :caption: Contents
 
 design/porting_design
+design/LED_ANALYSIS
+design/MOTOR_PWM_ANALYSIS
 stages/overview
 stages/stage1_lessons
 stages/stage1_qemu_lessons

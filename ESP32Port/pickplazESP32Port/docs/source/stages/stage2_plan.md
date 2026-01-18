@@ -12,7 +12,8 @@ This stage does not port full behavior yet; it sets up the plumbing.
 
 ## Inputs and constraints
 - **Pin map (confirmed)**: see `PORTING_DESIGN.md`.
-- **LED4 omitted**: feed indication must reuse LED3 per `LED_ANALYSIS.md`.
+- **LED4 retained**: feed indication uses LED4 (GPIO10) per
+  [LED_ANALYSIS.md](../design/LED_ANALYSIS.md).
 - **OPTO_LED**: hardware-powered from 3V3 (no GPIO).
 - **FEED**: still unresolved; must confirm if it's a GPIO input or handled in hardware.
 - **No STM32 edits**: do not modify STM32 files.
