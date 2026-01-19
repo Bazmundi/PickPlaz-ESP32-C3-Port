@@ -1,0 +1,14 @@
+.. _exhale_function_pickplaz__app_8c_1ae8a27307d299092f67077a8822a02a35:
+
+Function app_configure_pwm_outputs
+==================================
+
+- Defined in :ref:`file_src_pickplaz_app.c`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: app_configure_pwm_outputs(void)
+   :project: pickplaz

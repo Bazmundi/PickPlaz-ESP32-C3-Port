@@ -1,0 +1,14 @@
+.. _exhale_define_hal__config_8h_1ab75455812944a504ef3f78d169887fdd:
+
+Define HAL_SPI0_CS_PIN
+======================
+
+- Defined in :ref:`file_include_hal_config.h`
+
+
+Define Documentation
+--------------------
+
+
+.. doxygendefine:: HAL_SPI0_CS_PIN
+   :project: pickplaz

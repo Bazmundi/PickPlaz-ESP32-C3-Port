@@ -1,0 +1,14 @@
+.. _exhale_function_hal_8h_1aa1fa817a67ff2caab80e12a8a6f7fa27:
+
+Function hal_spi_transfer(int, const uint8_t \*, uint8_t \*, size_t)
+====================================================================
+
+- Defined in :ref:`file_include_hal.h`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: hal_spi_transfer(int, const uint8_t *, uint8_t *, size_t)
+   :project: pickplaz

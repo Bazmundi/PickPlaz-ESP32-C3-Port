@@ -1,0 +1,14 @@
+.. _exhale_function_hal_8c_1a0393c84325eca1b4409f0e16e333d032:
+
+Function hal_gpio_output_valid
+==============================
+
+- Defined in :ref:`file_src_hal.c`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: hal_gpio_output_valid(int)
+   :project: pickplaz

@@ -1,0 +1,14 @@
+.. _exhale_function_hal_8c_1a32c6e93ceec92767cd9ddd91d7bbd9d0:
+
+Function hal_tick_dispatch
+==========================
+
+- Defined in :ref:`file_src_hal.c`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: hal_tick_dispatch(void *)
+   :project: pickplaz

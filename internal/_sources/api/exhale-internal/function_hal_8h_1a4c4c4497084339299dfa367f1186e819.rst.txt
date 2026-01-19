@@ -1,0 +1,14 @@
+.. _exhale_function_hal_8h_1a4c4c4497084339299dfa367f1186e819:
+
+Function hal_timer_start(int, uint32_t, hal_timer_callback_t, void \*)
+======================================================================
+
+- Defined in :ref:`file_include_hal.h`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: hal_timer_start(int, uint32_t, hal_timer_callback_t, void *)
+   :project: pickplaz

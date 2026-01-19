@@ -1,0 +1,14 @@
+.. _exhale_define_hal__config_8h_1a1c329bff2d2b1e2fbfb68d516ccd62de:
+
+Define HAL_UART0_BAUD_DEFAULT
+=============================
+
+- Defined in :ref:`file_include_hal_config.h`
+
+
+Define Documentation
+--------------------
+
+
+.. doxygendefine:: HAL_UART0_BAUD_DEFAULT
+   :project: pickplaz

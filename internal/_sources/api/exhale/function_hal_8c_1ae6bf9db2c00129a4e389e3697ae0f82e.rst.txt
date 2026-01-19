@@ -1,0 +1,14 @@
+.. _exhale_function_hal_8c_1ae6bf9db2c00129a4e389e3697ae0f82e:
+
+Function hal_init(void)
+=======================
+
+- Defined in :ref:`file_src_hal.c`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: hal_init(void)
+   :project: pickplaz

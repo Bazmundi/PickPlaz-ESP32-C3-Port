@@ -1,0 +1,14 @@
+.. _exhale_function_hal_8c_1aa47580b596362a723c64253b6f96da7f:
+
+Function hal_gpio_config_output(int, hal_gpio_level_t)
+======================================================
+
+- Defined in :ref:`file_src_hal.c`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: hal_gpio_config_output(int, hal_gpio_level_t)
+   :project: pickplaz

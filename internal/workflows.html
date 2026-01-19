@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Workflows (Make Targets) &#8212; PickPlaz ESP32-C3 Port 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=2bf1fcf8" />
+    <link rel="stylesheet" type="text/css" href="_static/collapsible-lists/css/tree_view.css?v=a885cde7" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=047d7ffa" />
+    
+    <script src="_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/collapsible-lists/js/CollapsibleLists.compressed.js?v=73120307"></script>
+    <script src="_static/collapsible-lists/js/apply-collapsible-lists.js?v=660e4f45"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="PICSimLab Integration (ESP32-C3)" href="tooling/picsimlab.html" />
+    <link rel="prev" title="Stage 4 Plan - Feature Porting by Subsystem (ESP32-C3)" href="stages/stage4_plan.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="tooling/picsimlab.html" title="PICSimLab Integration (ESP32-C3)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="stages/stage4_plan.html" title="Stage 4 Plan - Feature Porting by Subsystem (ESP32-C3)"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Workflows (Make Targets)</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="workflows-make-targets">
+<h1>Workflows (Make Targets)<a class="headerlink" href="#workflows-make-targets" title="Link to this heading">¶</a></h1>
+<p>This doc groups the Make targets into common, independent workflows so we
+don’t have to remember long command lines.</p>
+<section id="conventions">
+<h2>Conventions<a class="headerlink" href="#conventions" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Run all commands from <code class="docutils literal notranslate"><span class="pre">ESP32Port/pickplazESP32Port/</span></code>.</p></li>
+<li><p>Override variables at invocation time, e.g. <code class="docutils literal notranslate"><span class="pre">PORT=/dev/ttyACM0</span> <span class="pre">make</span> <span class="pre">monitor-usb</span></code>.</p></li>
+<li><p>QEMU workflows assume the Espressif QEMU fork is installed at repo root.</p></li>
+</ul>
+</section>
+<section id="coupling-and-terminals">
+<h2>Coupling and terminals<a class="headerlink" href="#coupling-and-terminals" title="Link to this heading">¶</a></h2>
+<p>Some workflows are coupled (build → merge → run) and/or require two terminals.</p>
+<p>Key rules:</p>
+<ul class="simple">
+<li><p>QEMU serial monitor <strong>must</strong> attach after QEMU starts, otherwise the socket
+is not yet listening and the monitor exits.</p></li>
+<li><p>If you want a single terminal, use <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">qemu-run-monitor</span></code> (it waits for
+the socket before attaching).</p></li>
+<li><p>For QEMU, you always need a <strong>build</strong> and <strong>merge</strong> before running QEMU
+unless you already have a fresh <code class="docutils literal notranslate"><span class="pre">flash_image.bin</span></code>.</p></li>
+</ul>
+</section>
+<section id="workflow-a-hardware-build-devkit">
+<h2>Workflow A: Hardware build (devkit)<a class="headerlink" href="#workflow-a-hardware-build-devkit" title="Link to this heading">¶</a></h2>
+<p>Build firmware for the ESP32‑C3 devkit without flashing.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>build-devkit
+</pre></div>
+</div>
+</section>
+<section id="workflow-b-hardware-flash-monitor">
+<h2>Workflow B: Hardware flash + monitor<a class="headerlink" href="#workflow-b-hardware-flash-monitor" title="Link to this heading">¶</a></h2>
+<p>Flash the board and attach the monitor.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>flash
+make<span class="w"> </span>monitor-usb
+</pre></div>
+</div>
+<p>If you need a specific port:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">PORT</span><span class="o">=</span>/dev/ttyACM0<span class="w"> </span>make<span class="w"> </span>flash-port
+<span class="nv">PORT</span><span class="o">=</span>/dev/ttyACM0<span class="w"> </span>make<span class="w"> </span>monitor-usb
+</pre></div>
+</div>
+</section>
+<section id="workflow-c-qemu-smoke-test-qemu-install-only">
+<h2>Workflow C: QEMU smoke test (QEMU install only)<a class="headerlink" href="#workflow-c-qemu-smoke-test-qemu-install-only" title="Link to this heading">¶</a></h2>
+<p>Verify the QEMU binaries exist and can list machines.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>qemu-smoke
+</pre></div>
+</div>
+</section>
+<section id="workflow-d-qemu-run-with-monitor-recommended">
+<h2>Workflow D: QEMU run with monitor (recommended)<a class="headerlink" href="#workflow-d-qemu-run-with-monitor-recommended" title="Link to this heading">¶</a></h2>
+<p>Build, merge, then run QEMU with the monitor attached in one command.
+This avoids the socket timing race.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>build-qemu
+make<span class="w"> </span>merge-qemu
+make<span class="w"> </span>qemu-run-monitor
+</pre></div>
+</div>
+<p>Or use the composite target:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>qemu-all
+</pre></div>
+</div>
+<p>To run without the self-test:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>qemu-all-noselftest
+</pre></div>
+</div>
+</section>
+<section id="workflow-e-qemu-run-two-terminals">
+<h2>Workflow E: QEMU run (two terminals)<a class="headerlink" href="#workflow-e-qemu-run-two-terminals" title="Link to this heading">¶</a></h2>
+<p>Start QEMU in one terminal, then attach a monitor in another.
+Order matters: start QEMU first.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># terminal 1</span>
+make<span class="w"> </span>qemu-run
+
+<span class="c1"># terminal 2</span>
+make<span class="w"> </span>monitor-qemu
+</pre></div>
+</div>
+</section>
+<section id="workflow-f-qemu-run-stdio-only">
+<h2>Workflow F: QEMU run (stdio only)<a class="headerlink" href="#workflow-f-qemu-run-stdio-only" title="Link to this heading">¶</a></h2>
+<p>Print the serial output directly in the QEMU terminal.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>build-qemu
+make<span class="w"> </span>merge-qemu
+make<span class="w"> </span>qemu-run-stdio
+</pre></div>
+</div>
+</section>
+<section id="workflow-g-qemu-reset">
+<h2>Workflow G: QEMU reset<a class="headerlink" href="#workflow-g-qemu-reset" title="Link to this heading">¶</a></h2>
+<p>Print the reset sequence and execute it manually in a telnet session.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>qemu-reset
+</pre></div>
+</div>
+<p>Then run:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>system_reset
+</pre></div>
+</div>
+</section>
+<section id="workflow-h-clean-builds">
+<h2>Workflow H: Clean builds<a class="headerlink" href="#workflow-h-clean-builds" title="Link to this heading">¶</a></h2>
+<p>Clean build artifacts for a specific environment.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>clean-devkit
+make<span class="w"> </span>clean-qemu
+</pre></div>
+</div>
+</section>
+<section id="workflow-i-fast-qemu-rerun">
+<h2>Workflow I: Fast QEMU rerun<a class="headerlink" href="#workflow-i-fast-qemu-rerun" title="Link to this heading">¶</a></h2>
+<p>Skip the build step when binaries are unchanged.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>qemu-run-fast
+</pre></div>
+</div>
+<p>For the no-selftest environment:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>qemu-run-fast-noselftest
+</pre></div>
+</div>
+</section>
+<section id="workflow-j-flash-monitor-hardware">
+<h2>Workflow J: Flash + monitor (hardware)<a class="headerlink" href="#workflow-j-flash-monitor-hardware" title="Link to this heading">¶</a></h2>
+<p>Convenience wrapper to flash then attach the USB monitor.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>devkit-flash-monitor
+</pre></div>
+</div>
+</section>
+<section id="workflow-k-picsimlab-integration">
+<h2>Workflow K: PICSimLab integration<a class="headerlink" href="#workflow-k-picsimlab-integration" title="Link to this heading">¶</a></h2>
+<p>Use PICSimLab as a GUI to observe the QEMU run.</p>
+<p>External QEMU (recommended if you want our custom QEMU build):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>picsimlab-external
+</pre></div>
+</div>
+<p>No-selftest variant:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>picsimlab-external-noselftest
+</pre></div>
+</div>
+<p>Or run the steps manually:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>build-qemu
+make<span class="w"> </span>merge-qemu
+make<span class="w"> </span>qemu-picsimlab
+make<span class="w"> </span>picsimlab
+</pre></div>
+</div>
+<p>Standalone PICSimLab (uses its built-in QEMU):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>picsimlab-standalone
+</pre></div>
+</div>
+<p>No-selftest variant:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>picsimlab-standalone-noselftest
+</pre></div>
+</div>
+<p>Or run the steps manually:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>build-qemu
+make<span class="w"> </span>merge-qemu
+make<span class="w"> </span>picsimlab
+</pre></div>
+</div>
+<p>See <code class="docutils literal notranslate"><span class="pre">docs/PICSIMLAB_INTEGRATION.md</span></code> for details.</p>
+</section>
+<section id="variable-overrides">
+<h2>Variable overrides<a class="headerlink" href="#variable-overrides" title="Link to this heading">¶</a></h2>
+<p>Defaults:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">PORT=/dev/ttyACM0</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BAUD=115200</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">QEMU_SERIAL_PORT=4444</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">QEMU_MONITOR_PORT=5555</span></code></p></li>
+</ul>
+<p>Examples:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">PORT</span><span class="o">=</span>/dev/ttyACM1<span class="w"> </span>make<span class="w"> </span>monitor-usb
+<span class="nv">QEMU_SERIAL_PORT</span><span class="o">=</span><span class="m">4445</span><span class="w"> </span><span class="nv">QEMU_MONITOR_PORT</span><span class="o">=</span><span class="m">5556</span><span class="w"> </span>make<span class="w"> </span>qemu-run-monitor
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Workflows (Make Targets)</a><ul>
+<li><a class="reference internal" href="#conventions">Conventions</a></li>
+<li><a class="reference internal" href="#coupling-and-terminals">Coupling and terminals</a></li>
+<li><a class="reference internal" href="#workflow-a-hardware-build-devkit">Workflow A: Hardware build (devkit)</a></li>
+<li><a class="reference internal" href="#workflow-b-hardware-flash-monitor">Workflow B: Hardware flash + monitor</a></li>
+<li><a class="reference internal" href="#workflow-c-qemu-smoke-test-qemu-install-only">Workflow C: QEMU smoke test (QEMU install only)</a></li>
+<li><a class="reference internal" href="#workflow-d-qemu-run-with-monitor-recommended">Workflow D: QEMU run with monitor (recommended)</a></li>
+<li><a class="reference internal" href="#workflow-e-qemu-run-two-terminals">Workflow E: QEMU run (two terminals)</a></li>
+<li><a class="reference internal" href="#workflow-f-qemu-run-stdio-only">Workflow F: QEMU run (stdio only)</a></li>
+<li><a class="reference internal" href="#workflow-g-qemu-reset">Workflow G: QEMU reset</a></li>
+<li><a class="reference internal" href="#workflow-h-clean-builds">Workflow H: Clean builds</a></li>
+<li><a class="reference internal" href="#workflow-i-fast-qemu-rerun">Workflow I: Fast QEMU rerun</a></li>
+<li><a class="reference internal" href="#workflow-j-flash-monitor-hardware">Workflow J: Flash + monitor (hardware)</a></li>
+<li><a class="reference internal" href="#workflow-k-picsimlab-integration">Workflow K: PICSimLab integration</a></li>
+<li><a class="reference internal" href="#variable-overrides">Variable overrides</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="stages/stage4_plan.html"
+                          title="previous chapter">Stage 4 Plan - Feature Porting by Subsystem (ESP32-C3)</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="tooling/picsimlab.html"
+                          title="next chapter">PICSimLab Integration (ESP32-C3)</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/workflows.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="tooling/picsimlab.html" title="PICSimLab Integration (ESP32-C3)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="stages/stage4_plan.html" title="Stage 4 Plan - Feature Porting by Subsystem (ESP32-C3)"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Workflows (Make Targets)</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2026, Asterion Daedalus.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    </div>
+  </body>
+</html>

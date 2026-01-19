@@ -1,0 +1,14 @@
+.. _exhale_enum_hal_8h_1a0aceb1241ece7cef15f6300e47b1aeeb:
+
+Enum hal_gpio_pull_t
+====================
+
+- Defined in :ref:`file_include_hal.h`
+
+
+Enum Documentation
+------------------
+
+
+.. doxygenenum:: hal_gpio_pull_t
+   :project: pickplaz

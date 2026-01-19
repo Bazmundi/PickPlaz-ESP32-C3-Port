@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Struct app_button_t &#8212; PickPlaz ESP32-C3 Port 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/classic.css?v=2bf1fcf8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/collapsible-lists/css/tree_view.css?v=a885cde7" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=047d7ffa" />
+    
+    <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/collapsible-lists/js/CollapsibleLists.compressed.js?v=73120307"></script>
+    <script src="../../_static/collapsible-lists/js/apply-collapsible-lists.js?v=660e4f45"></script>
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Struct app_button_t</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="struct-app-button-t">
+<span id="exhale-struct-structapp-button-t"></span><h1>Struct app_button_t<a class="headerlink" href="#struct-app-button-t" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Defined in <a class="reference internal" href="file_src_pickplaz_app.c.html#file-src-pickplaz-app-c"><span class="std std-ref">File pickplaz_app.c</span></a></p></li>
+</ul>
+<section id="struct-documentation">
+<h2>Struct Documentation<a class="headerlink" href="#struct-documentation" title="Link to this heading">¶</a></h2>
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv412app_button_t">
+<span id="_CPPv312app_button_t"></span><span id="_CPPv212app_button_t"></span><span id="app_button_t"></span><span class="target" id="structapp__button__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">app_button_t</span></span></span><br /></dt>
+<dd><p>Holds debounce and press timing state for a button input. </p>
+<p>The debounce counter saturates at APP_BUTTON_CNT_MAX and press counts are measured in 1 kHz ticks. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12app_button_t10active_lowE">
+<span id="_CPPv3N12app_button_t10active_lowE"></span><span id="_CPPv2N12app_button_t10active_lowE"></span><span id="app_button_t::active_low__b"></span><span class="target" id="structapp__button__t_1a908b9a247ce5ef8d57b5c1cee625d74d"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">active_low</span></span></span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12app_button_t3cntE">
+<span id="_CPPv3N12app_button_t3cntE"></span><span id="_CPPv2N12app_button_t3cntE"></span><span id="app_button_t::cnt__uint32_t"></span><span class="target" id="structapp__button__t_1a83c15924d9cbfb877e8713d9d9f2d08c"></span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">cnt</span></span></span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12app_button_t3pinE">
+<span id="_CPPv3N12app_button_t3pinE"></span><span id="_CPPv2N12app_button_t3pinE"></span><span id="app_button_t::pin__i"></span><span class="target" id="structapp__button__t_1abfc485cdb1bb596d6a77d46cfe0e6da7"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">pin</span></span></span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12app_button_t5pressE">
+<span id="_CPPv3N12app_button_t5pressE"></span><span id="_CPPv2N12app_button_t5pressE"></span><span id="app_button_t::press__uint32_t"></span><span class="target" id="structapp__button__t_1a7dff55953c828614a47a2d1c749770c6"></span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">press</span></span></span><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Struct app_button_t</a><ul>
+<li><a class="reference internal" href="#struct-documentation">Struct Documentation</a><ul>
+<li><a class="reference internal" href="#_CPPv412app_button_t"><code class="docutils literal notranslate"><span class="pre">app_button_t</span></code></a><ul>
+<li><a class="reference internal" href="#_CPPv4N12app_button_t10active_lowE"><code class="docutils literal notranslate"><span class="pre">active_low</span></code></a></li>
+<li><a class="reference internal" href="#_CPPv4N12app_button_t3cntE"><code class="docutils literal notranslate"><span class="pre">cnt</span></code></a></li>
+<li><a class="reference internal" href="#_CPPv4N12app_button_t3pinE"><code class="docutils literal notranslate"><span class="pre">pin</span></code></a></li>
+<li><a class="reference internal" href="#_CPPv4N12app_button_t5pressE"><code class="docutils literal notranslate"><span class="pre">press</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/api/exhale/structapp__button__t.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Struct app_button_t</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2026, Asterion Daedalus.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    </div>
+  </body>
+</html>

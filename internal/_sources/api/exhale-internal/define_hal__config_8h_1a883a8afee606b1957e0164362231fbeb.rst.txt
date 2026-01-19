@@ -1,0 +1,14 @@
+.. _exhale_define_hal__config_8h_1a883a8afee606b1957e0164362231fbeb:
+
+Define HAL_UART0_RX_PIN
+=======================
+
+- Defined in :ref:`file_include_hal_config.h`
+
+
+Define Documentation
+--------------------
+
+
+.. doxygendefine:: HAL_UART0_RX_PIN
+   :project: pickplaz

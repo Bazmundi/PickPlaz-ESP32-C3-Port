@@ -1,0 +1,14 @@
+.. _exhale_define_hal__config_8h_1a541081843acf650329c2190692f1ddbf:
+
+Define HAL_SPI0_MODE
+====================
+
+- Defined in :ref:`file_include_hal_config.h`
+
+
+Define Documentation
+--------------------
+
+
+.. doxygendefine:: HAL_SPI0_MODE
+   :project: pickplaz

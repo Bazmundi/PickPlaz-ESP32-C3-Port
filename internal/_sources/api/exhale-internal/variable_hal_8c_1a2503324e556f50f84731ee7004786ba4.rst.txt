@@ -1,0 +1,14 @@
+.. _exhale_variable_hal_8c_1a2503324e556f50f84731ee7004786ba4:
+
+Variable hal_i2c_initialized
+============================
+
+- Defined in :ref:`file_src_hal.c`
+
+
+Variable Documentation
+----------------------
+
+
+.. doxygenvariable:: hal_i2c_initialized
+   :project: pickplaz

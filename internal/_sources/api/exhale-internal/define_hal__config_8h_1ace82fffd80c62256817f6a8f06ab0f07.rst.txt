@@ -1,0 +1,14 @@
+.. _exhale_define_hal__config_8h_1ace82fffd80c62256817f6a8f06ab0f07:
+
+Define HAL_PWM_MOTOR_FREQ_HZ
+============================
+
+- Defined in :ref:`file_include_hal_config.h`
+
+
+Define Documentation
+--------------------
+
+
+.. doxygendefine:: HAL_PWM_MOTOR_FREQ_HZ
+   :project: pickplaz

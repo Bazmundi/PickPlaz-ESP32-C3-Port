@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Motor PWM Analysis Report &#8212; PickPlaz ESP32-C3 Port 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=2bf1fcf8" />
+    <link rel="stylesheet" type="text/css" href="../_static/collapsible-lists/css/tree_view.css?v=a885cde7" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=047d7ffa" />
+    
+    <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js?v=73120307"></script>
+    <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js?v=660e4f45"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Port stages" href="../stages/overview.html" />
+    <link rel="prev" title="LED Analysis Report" href="LED_ANALYSIS.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../stages/overview.html" title="Port stages"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="LED_ANALYSIS.html" title="LED Analysis Report"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Motor PWM Analysis Report</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="motor-pwm-analysis-report">
+<h1>Motor PWM Analysis Report<a class="headerlink" href="#motor-pwm-analysis-report" title="Link to this heading">¶</a></h1>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
+<p>This report analyzes the PWM implementation for motor control in the pickplazfeederstm project. The system uses Timer 3 (TIM3) to generate PWM signals for controlling a DC motor with bidirectional movement capability.</p>
+</section>
+<section id="motor-pwm-components">
+<h2>Motor PWM Components<a class="headerlink" href="#motor-pwm-components" title="Link to this heading">¶</a></h2>
+<section id="timer-configuration">
+<h3>Timer Configuration<a class="headerlink" href="#timer-configuration" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong>Timer</strong>: TIM3</p></li>
+<li><p><strong>PWM Channels</strong>: 2 channels (CH1 and CH2)</p></li>
+<li><p><strong>Pins</strong>:</p>
+<ul>
+<li><p>MOT_POS: PA6 (TIM3_CH1) - Positive pole</p></li>
+<li><p>MOT_NEG: PA7 (TIM3_CH2) - Negative pole</p></li>
+</ul>
+</li>
+<li><p><strong>PWM Configuration</strong>:</p>
+<ul>
+<li><p>Period: 2048</p></li>
+<li><p>Prescaler: 0</p></li>
+<li><p>Mode: PWM1</p></li>
+<li><p>Polarity: High</p></li>
+<li><p>Auto-reload preload: Enabled</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="motor-control-mechanism">
+<h3>Motor Control Mechanism<a class="headerlink" href="#motor-control-mechanism" title="Link to this heading">¶</a></h3>
+<p>The system implements an H-bridge motor control scheme:</p>
+<ul class="simple">
+<li><p><strong>Forward Movement</strong>: CH1 = 0, CH2 = PWM value</p></li>
+<li><p><strong>Backward Movement</strong>: CH1 = PWM value, CH2 = 0</p></li>
+<li><p><strong>Stop</strong>: CH1 = 0, CH2 = 0</p></li>
+<li><p><strong>Brake</strong>: CH1 = CH2 (both set to same value temporarily)</p></li>
+</ul>
+</section>
+</section>
+<section id="pwm-implementation-details">
+<h2>PWM Implementation Details<a class="headerlink" href="#pwm-implementation-details" title="Link to this heading">¶</a></h2>
+<section id="hardware-setup">
+<h3>Hardware Setup<a class="headerlink" href="#hardware-setup" title="Link to this heading">¶</a></h3>
+<ol class="arabic simple">
+<li><p><strong>Timer Initialization</strong>: TIM3 configured with 2048 period and 0 prescaler</p></li>
+<li><p><strong>Channel Configuration</strong>: Both channels configured in PWM1 mode</p></li>
+<li><p><strong>Pin Mapping</strong>: PA6 and PA7 configured as alternate function for TIM3</p></li>
+<li><p><strong>Startup</strong>: PWM channels started in <code class="docutils literal notranslate"><span class="pre">app_init()</span></code> function</p></li>
+</ol>
+</section>
+<section id="software-control">
+<h3>Software Control<a class="headerlink" href="#software-control" title="Link to this heading">¶</a></h3>
+<p>The motor control is implemented through multiple layers:</p>
+<ol class="arabic simple">
+<li><p><strong>Application State Machine</strong>: Sets <code class="docutils literal notranslate"><span class="pre">motor_target</span></code> values based on system state</p></li>
+<li><p><strong>Motor State Machine</strong>: Translates <code class="docutils literal notranslate"><span class="pre">motor_target</span></code> into actual PWM signals</p></li>
+<li><p><strong>Direct PWM Control</strong>: <code class="docutils literal notranslate"><span class="pre">set_motor()</span></code> function directly controls CCR registers</p></li>
+</ol>
+</section>
+<section id="motor-control-functions">
+<h3>Motor Control Functions<a class="headerlink" href="#motor-control-functions" title="Link to this heading">¶</a></h3>
+<section id="set-motor-function">
+<h4>set_motor() Function<a class="headerlink" href="#set-motor-function" title="Link to this heading">¶</a></h4>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">set_motor</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">pwm</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">direction</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">//timer 3</span>
+<span class="w">    </span><span class="c1">//ch1 is positive pole</span>
+<span class="w">    </span><span class="c1">//ch2 is negative pole</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">direction</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">htim3</span><span class="p">.</span><span class="n">Instance</span><span class="o">-&gt;</span><span class="n">CCR1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">htim3</span><span class="p">.</span><span class="n">Instance</span><span class="o">-&gt;</span><span class="n">CCR2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pwm</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">htim3</span><span class="p">.</span><span class="n">Instance</span><span class="o">-&gt;</span><span class="n">CCR1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pwm</span><span class="p">;</span>
+<span class="w">        </span><span class="n">htim3</span><span class="p">.</span><span class="n">Instance</span><span class="o">-&gt;</span><span class="n">CCR2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Parameters</strong>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pwm</span></code>: Value from 0 to 2048 representing motor speed</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">direction</span></code>: 1 for forward, 0 for backward</p></li>
+</ul>
+</section>
+</section>
+<section id="motor-state-machine">
+<h3>Motor State Machine<a class="headerlink" href="#motor-state-machine" title="Link to this heading">¶</a></h3>
+<p>The motor uses a 5-state FSM to control operation and implement braking:</p>
+<ol class="arabic simple">
+<li><p><strong>MOTOR_init</strong>: Initial state, sets motor to stop</p></li>
+<li><p><strong>MOTOR_idle</strong>: Motor stopped, waiting for command</p></li>
+<li><p><strong>Motor_running_forward</strong>: Motor running forward at requested speed</p></li>
+<li><p><strong>Motor_running_backward</strong>: Motor running backward at requested speed</p></li>
+<li><p><strong>Motor_break</strong>: Active braking by shorting motor terminals</p></li>
+</ol>
+</section>
+</section>
+<section id="motor-behavior-analysis">
+<h2>Motor Behavior Analysis<a class="headerlink" href="#motor-behavior-analysis" title="Link to this heading">¶</a></h2>
+<section id="speed-control">
+<h3>Speed Control<a class="headerlink" href="#speed-control" title="Link to this heading">¶</a></h3>
+<p>The PWM duty cycle directly controls motor speed:</p>
+<ul class="simple">
+<li><p><strong>0 (0%)</strong>: Motor stopped</p></li>
+<li><p><strong>1024 (50%)</strong>: Half speed</p></li>
+<li><p><strong>2048 (100%)</strong>: Full speed</p></li>
+</ul>
+<p>The system uses two speed levels:</p>
+<ul class="simple">
+<li><p><strong>Normal Speed</strong>: 2048 (MOTOR_FORWARD_NORMAL/MOTOR_BACKWARD_NORMAL)</p></li>
+<li><p><strong>Fast Speed</strong>: 2048 (MOTOR_FORWARD_FAST/MOTOR_BACKWARD_FAST)</p></li>
+</ul>
+</section>
+<section id="direction-control">
+<h3>Direction Control<a class="headerlink" href="#direction-control" title="Link to this heading">¶</a></h3>
+<p>Direction is controlled by activating one PWM channel while keeping the other at 0:</p>
+<ul class="simple">
+<li><p><strong>Forward</strong>: CH2 active (PA7), CH1 inactive (PA6)</p></li>
+<li><p><strong>Backward</strong>: CH1 active (PA6), CH2 inactive (PA7)</p></li>
+</ul>
+</section>
+<section id="braking-mechanism">
+<h3>Braking Mechanism<a class="headerlink" href="#braking-mechanism" title="Link to this heading">¶</a></h3>
+<p>When stopping, the system implements active braking:</p>
+<ol class="arabic simple">
+<li><p>Swaps CCR values temporarily (CH1=CH2, CH2=CH1)</p></li>
+<li><p>Maintains this state for 8 timer cycles</p></li>
+<li><p>This shorts the motor terminals, creating braking torque</p></li>
+</ol>
+</section>
+</section>
+<section id="application-integration">
+<h2>Application Integration<a class="headerlink" href="#application-integration" title="Link to this heading">¶</a></h2>
+<section id="motor-target-values">
+<h3>Motor Target Values<a class="headerlink" href="#motor-target-values" title="Link to this heading">¶</a></h3>
+<p>The application uses specific constants for motor control:</p>
+<ul class="simple">
+<li><p>MOTOR_FORWARD_NORMAL = 2048</p></li>
+<li><p>MOTOR_BACKWARD_NORMAL = -2048</p></li>
+<li><p>MOTOR_FORWARD_FAST = 2048</p></li>
+<li><p>MOTOR_BACKWARD_FAST = -2048</p></li>
+<li><p>MOTOR_STOP = 0</p></li>
+</ul>
+</section>
+<section id="state-transitions">
+<h3>State Transitions<a class="headerlink" href="#state-transitions" title="Link to this heading">¶</a></h3>
+<p>The motor responds to application state changes:</p>
+<ol class="arabic simple">
+<li><p><strong>Incremental movements</strong>: Precise positioning control using opto sensor feedback</p></li>
+<li><p><strong>Continuous movements</strong>: Manual control with holding buttons</p></li>
+<li><p><strong>Feed operations</strong>: Automatic responses to feed signals</p></li>
+</ol>
+</section>
+<section id="control-timing">
+<h3>Control Timing<a class="headerlink" href="#control-timing" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Motor updates occur in <code class="docutils literal notranslate"><span class="pre">app_systick()</span></code> which runs at 1kHz frequency</p></li>
+<li><p>Braking duration is fixed at 8 timer cycles</p></li>
+<li><p>State transitions are immediate for start/stop commands</p></li>
+</ul>
+</section>
+</section>
+<section id="timing-characteristics">
+<h2>Timing Characteristics<a class="headerlink" href="#timing-characteristics" title="Link to this heading">¶</a></h2>
+<section id="pwm-frequency">
+<h3>PWM Frequency<a class="headerlink" href="#pwm-frequency" title="Link to this heading">¶</a></h3>
+<p>With TIM3 running at system clock speed and:</p>
+<ul class="simple">
+<li><p>Prescaler: 0</p></li>
+<li><p>Period: 2048</p></li>
+<li><p>Assuming 48MHz system clock: ~23.4kHz PWM frequency</p></li>
+</ul>
+</section>
+<section id="response-time">
+<h3>Response Time<a class="headerlink" href="#response-time" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Motor commands processed every 1ms (SysTick interval)</p></li>
+<li><p>Braking duration: ~0.34ms (8 cycles at 23.4kHz)</p></li>
+<li><p>State transitions: Immediate</p></li>
+</ul>
+</section>
+</section>
+<section id="summary-of-motor-functions">
+<h2>Summary of Motor Functions<a class="headerlink" href="#summary-of-motor-functions" title="Link to this heading">¶</a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Component</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Control</p></th>
+<th class="head"><p>Primary Function</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>TIM3_CH1</p></td>
+<td><p>PWM</p></td>
+<td><p>PA6</p></td>
+<td><p>Positive motor pole</p></td>
+</tr>
+<tr class="row-odd"><td><p>TIM3_CH2</p></td>
+<td><p>PWM</p></td>
+<td><p>PA7</p></td>
+<td><p>Negative motor pole</p></td>
+</tr>
+<tr class="row-even"><td><p>Motor FSM</p></td>
+<td><p>State Machine</p></td>
+<td><p>Software</p></td>
+<td><p>Motor state management</p></td>
+</tr>
+<tr class="row-odd"><td><p>set_motor()</p></td>
+<td><p>Function</p></td>
+<td><p>Direct CCR</p></td>
+<td><p>Low-level PWM control</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="behavior-mapping">
+<h2>Behavior Mapping<a class="headerlink" href="#behavior-mapping" title="Link to this heading">¶</a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Application State</p></th>
+<th class="head"><p>Motor Target</p></th>
+<th class="head"><p>Direction</p></th>
+<th class="head"><p>Speed</p></th>
+<th class="head"><p>Behavior</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>APP_idle</p></td>
+<td><p>MOTOR_STOP (0)</p></td>
+<td><p>None</p></td>
+<td><p>0%</p></td>
+<td><p>Motor stopped</p></td>
+</tr>
+<tr class="row-odd"><td><p>APP_increment_forward1/2</p></td>
+<td><p>MOTOR_FORWARD_NORMAL (2048)</p></td>
+<td><p>Forward</p></td>
+<td><p>100%</p></td>
+<td><p>Precise forward movement</p></td>
+</tr>
+<tr class="row-even"><td><p>APP_increment_backward1/2</p></td>
+<td><p>MOTOR_BACKWARD_NORMAL (-2048)</p></td>
+<td><p>Backward</p></td>
+<td><p>100%</p></td>
+<td><p>Precise backward movement</p></td>
+</tr>
+<tr class="row-odd"><td><p>APP_free_forward</p></td>
+<td><p>MOTOR_FORWARD_FAST (2048)</p></td>
+<td><p>Forward</p></td>
+<td><p>100%</p></td>
+<td><p>Continuous forward movement</p></td>
+</tr>
+<tr class="row-even"><td><p>APP_free_backward</p></td>
+<td><p>MOTOR_BACKWARD_FAST (-2048)</p></td>
+<td><p>Backward</p></td>
+<td><p>100%</p></td>
+<td><p>Continuous backward movement</p></td>
+</tr>
+<tr class="row-odd"><td><p>Stopping</p></td>
+<td><p>MOTOR_STOP (0)</p></td>
+<td><p>Brake</p></td>
+<td><p>N/A</p></td>
+<td><p>Active braking for 8 cycles</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="key-features">
+<h2>Key Features<a class="headerlink" href="#key-features" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p><strong>Bidirectional Control</strong>: Full forward and backward movement control</p></li>
+<li><p><strong>Active Braking</strong>: Reduces stopping time and prevents coasting</p></li>
+<li><p><strong>Precise Speed Control</strong>: 11-bit resolution (0-2048) for fine speed adjustment</p></li>
+<li><p><strong>H-Bridge Implementation</strong>: Efficient motor driver using complementary PWM</p></li>
+<li><p><strong>State Management</strong>: Robust FSM for reliable motor operation</p></li>
+<li><p><strong>Real-time Response</strong>: 1kHz update rate for responsive control</p></li>
+</ol>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Motor PWM Analysis Report</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#motor-pwm-components">Motor PWM Components</a><ul>
+<li><a class="reference internal" href="#timer-configuration">Timer Configuration</a></li>
+<li><a class="reference internal" href="#motor-control-mechanism">Motor Control Mechanism</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#pwm-implementation-details">PWM Implementation Details</a><ul>
+<li><a class="reference internal" href="#hardware-setup">Hardware Setup</a></li>
+<li><a class="reference internal" href="#software-control">Software Control</a></li>
+<li><a class="reference internal" href="#motor-control-functions">Motor Control Functions</a><ul>
+<li><a class="reference internal" href="#set-motor-function">set_motor() Function</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#motor-state-machine">Motor State Machine</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#motor-behavior-analysis">Motor Behavior Analysis</a><ul>
+<li><a class="reference internal" href="#speed-control">Speed Control</a></li>
+<li><a class="reference internal" href="#direction-control">Direction Control</a></li>
+<li><a class="reference internal" href="#braking-mechanism">Braking Mechanism</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#application-integration">Application Integration</a><ul>
+<li><a class="reference internal" href="#motor-target-values">Motor Target Values</a></li>
+<li><a class="reference internal" href="#state-transitions">State Transitions</a></li>
+<li><a class="reference internal" href="#control-timing">Control Timing</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#timing-characteristics">Timing Characteristics</a><ul>
+<li><a class="reference internal" href="#pwm-frequency">PWM Frequency</a></li>
+<li><a class="reference internal" href="#response-time">Response Time</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#summary-of-motor-functions">Summary of Motor Functions</a></li>
+<li><a class="reference internal" href="#behavior-mapping">Behavior Mapping</a></li>
+<li><a class="reference internal" href="#key-features">Key Features</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="LED_ANALYSIS.html"
+                          title="previous chapter">LED Analysis Report</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="../stages/overview.html"
+                          title="next chapter">Port stages</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/design/MOTOR_PWM_ANALYSIS.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../stages/overview.html" title="Port stages"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="LED_ANALYSIS.html" title="LED Analysis Report"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Motor PWM Analysis Report</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2026, Asterion Daedalus.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    </div>
+  </body>
+</html>

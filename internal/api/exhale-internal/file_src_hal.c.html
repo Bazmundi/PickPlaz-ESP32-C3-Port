@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>File hal.c &#8212; PickPlaz ESP32-C3 Port 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/classic.css?v=2bf1fcf8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/collapsible-lists/css/tree_view.css?v=a885cde7" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=047d7ffa" />
+    
+    <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/collapsible-lists/js/CollapsibleLists.compressed.js?v=73120307"></script>
+    <script src="../../_static/collapsible-lists/js/apply-collapsible-lists.js?v=660e4f45"></script>
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">File hal.c</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="file-hal-c">
+<span id="file-src-hal-c"></span><h1>File hal.c<a class="headerlink" href="#file-hal-c" title="Link to this heading">¶</a></h1>
+<p>↰ <a class="reference internal" href="../exhale/dir_src.html#dir-src"><span class="std std-ref">Parent directory</span></a> (<code class="docutils literal notranslate"><span class="pre">src</span></code>)</p>
+<p>Implements the ESP32-C3 hardware abstraction layer.</p>
+<nav class="contents local" id="contents">
+<p class="topic-title">Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#definition-src-hal-c" id="id1">Definition (<code class="docutils literal notranslate"><span class="pre">src/hal.c</span></code>)</a></p></li>
+<li><p><a class="reference internal" href="#detailed-description" id="id2">Detailed Description</a></p></li>
+<li><p><a class="reference internal" href="#includes" id="id3">Includes</a></p></li>
+<li><p><a class="reference internal" href="#classes" id="id4">Classes</a></p></li>
+<li><p><a class="reference internal" href="#functions" id="id5">Functions</a></p></li>
+<li><p><a class="reference internal" href="#defines" id="id6">Defines</a></p></li>
+<li><p><a class="reference internal" href="#variables" id="id7">Variables</a></p></li>
+</ul>
+</nav>
+<section id="definition-src-hal-c">
+<h2>Definition (<code class="docutils literal notranslate"><span class="pre">src/hal.c</span></code>)<a class="headerlink" href="#definition-src-hal-c" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="program_listing_file_src_hal.c.html">Program Listing for File hal.c</a></li>
+</ul>
+</div>
+</section>
+<section id="detailed-description">
+<h2>Detailed Description<a class="headerlink" href="#detailed-description" title="Link to this heading">¶</a></h2>
+<p>Provides GPIO, timers, PWM, UART, SPI, I2C, ADC, and optional self-test services using ESP-IDF drivers. The HAL hides platform specifics from the application layer.</p>
+<p>Thread-safety:</p>
+<ul class="simple">
+<li><p>Not thread-safe; callers should serialize access when sharing resources.</p></li>
+</ul>
+</section>
+<section id="includes">
+<h2>Includes<a class="headerlink" href="#includes" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">driver/gpio.h</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">driver/i2c.h</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">driver/ledc.h</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">driver/spi_master.h</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">driver/uart.h</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">esp_adc/adc_oneshot.h</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">esp_err.h</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">esp_log.h</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">esp_timer.h</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">freertos/FreeRTOS.h</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">freertos/task.h</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hal.h</span></code> (<a class="reference internal" href="../exhale/file_include_hal.h.html#file-include-hal-h"><span class="std std-ref">File hal.h</span></a>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hal_config.h</span></code> (<a class="reference internal" href="../exhale/file_include_hal_config.h.html#file-include-hal-config-h"><span class="std std-ref">File hal_config.h</span></a>)</p></li>
+</ul>
+</section>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../exhale/structhal__pwm__channel__t.html#exhale-struct-structhal-pwm-channel-t"><span class="std std-ref">Struct hal_pwm_channel_t</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/structhal__timer__entry__t.html#exhale-struct-structhal-timer-entry-t"><span class="std std-ref">Struct hal_timer_entry_t</span></a></p></li>
+</ul>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../exhale/function_hal_8c_1ad2b0628033ffbd261bcf9b76766084de.html#exhale-function-hal-8c-1ad2b0628033ffbd261bcf9b76766084de"><span class="std std-ref">Function hal_adc_init(void)</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_hal_8c_1abbc15cb3d62f5f6a361e2439ca284ae1.html#exhale-function-hal-8c-1abbc15cb3d62f5f6a361e2439ca284ae1"><span class="std std-ref">Function hal_adc_read(int)</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_hal_8c_1a57165466685c07db56639eefa2c7762c.html#exhale-function-hal-8c-1a57165466685c07db56639eefa2c7762c"><span class="std std-ref">Function hal_delay_ms(uint32_t)</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_hal_8c_1a8e015bdd62711d772d0234e867552c9b.html#exhale-function-hal-8c-1a8e015bdd62711d772d0234e867552c9b"><span class="std std-ref">Function hal_gpio_config_input(int, hal_gpio_pull_t)</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_hal_8c_1aa47580b596362a723c64253b6f96da7f.html#exhale-function-hal-8c-1aa47580b596362a723c64253b6f96da7f"><span class="std std-ref">Function hal_gpio_config_output(int, hal_gpio_level_t)</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_hal_8c_1a0393c84325eca1b4409f0e16e333d032.html#exhale-function-hal-8c-1a0393c84325eca1b4409f0e16e333d032"><span class="std std-ref">Function hal_gpio_output_valid</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_hal_8c_1a3a47f0a0c54580c3321fcc786a10760e.html#exhale-function-hal-8c-1a3a47f0a0c54580c3321fcc786a10760e"><span class="std std-ref">Function hal_gpio_read(int)</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_hal_8c_1aade48bdd2daa3d361e064c7550adccd9.html#exhale-function-hal-8c-1aade48bdd2daa3d361e064c7550adccd9"><span class="std std-ref">Function hal_gpio_valid</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_hal_8c_1a0db3b7f6e6c7a39cf8d844458e2d6a12.html#exhale-function-hal-8c-1a0db3b7f6e6c7a39cf8d844458e2d6a12"><span class="std std-ref">Function hal_gpio_write(int, hal_gpio_level_t)</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_hal_8c_1a81481505356e62563e80581dd9cf6c82.html#exhale-function-hal-8c-1a81481505356e62563e80581dd9cf6c82"><span class="std std-ref">Function hal_i2c_init(int, uint32_t)</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_hal_8c_1a5ef9c5c01e84697df3a37b43ad75095c.html#exhale-function-hal-8c-1a5ef9c5c01e84697df3a37b43ad75095c"><span class="std std-ref">Function hal_i2c_read(int, uint8_t, uint8_t *, size_t)</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_hal_8c_1aeb14317f896030f3633262f975ecaca5.html#exhale-function-hal-8c-1aeb14317f896030f3633262f975ecaca5"><span class="std std-ref">Function hal_i2c_write(int, uint8_t, const uint8_t *, size_t)</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_hal_8c_1ae6bf9db2c00129a4e389e3697ae0f82e.html#exhale-function-hal-8c-1ae6bf9db2c00129a4e389e3697ae0f82e"><span class="std std-ref">Function hal_init(void)</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_hal_8c_1a7f3bf9248d72bdb2a3de774a672f732d.html#exhale-function-hal-8c-1a7f3bf9248d72bdb2a3de774a672f732d"><span class="std std-ref">Function hal_pwm_bits_to_ledc</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_hal_8c_1a4c49acebd21873268743c97e3819e251.html#exhale-function-hal-8c-1a4c49acebd21873268743c97e3819e251"><span class="std std-ref">Function hal_pwm_init(int, int, uint32_t, uint32_t)</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_hal_8c_1a563449b223b376f87e4fbead08e6a228.html#exhale-function-hal-8c-1a563449b223b376f87e4fbead08e6a228"><span class="std std-ref">Function hal_pwm_select_timer</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_hal_8c_1a92f001aca66be66a6d4fe1d269ea54a7.html#exhale-function-hal-8c-1a92f001aca66be66a6d4fe1d269ea54a7"><span class="std std-ref">Function hal_pwm_set_duty(int, uint32_t)</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_hal_8c_1a0fd5066915239ef7bf934a789344d484.html#exhale-function-hal-8c-1a0fd5066915239ef7bf934a789344d484"><span class="std std-ref">Function hal_selftest_run(void)</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_hal_8c_1a1c39abcb705f3d2dcab10dfd003a47ab.html#exhale-function-hal-8c-1a1c39abcb705f3d2dcab10dfd003a47ab"><span class="std std-ref">Function hal_spi_init(int, uint32_t, uint8_t)</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_hal_8c_1aa1fa817a67ff2caab80e12a8a6f7fa27.html#exhale-function-hal-8c-1aa1fa817a67ff2caab80e12a8a6f7fa27"><span class="std std-ref">Function hal_spi_transfer(int, const uint8_t *, uint8_t *, size_t)</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_hal_8c_1a32c6e93ceec92767cd9ddd91d7bbd9d0.html#exhale-function-hal-8c-1a32c6e93ceec92767cd9ddd91d7bbd9d0"><span class="std std-ref">Function hal_tick_dispatch</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_hal_8c_1ae089162c529176b1b41ed31b0c443106.html#exhale-function-hal-8c-1ae089162c529176b1b41ed31b0c443106"><span class="std std-ref">Function hal_tick_start(uint32_t, hal_timer_callback_t, void *)</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_hal_8c_1a23978cfc488ed31c3ce490e8964bff2d.html#exhale-function-hal-8c-1a23978cfc488ed31c3ce490e8964bff2d"><span class="std std-ref">Function hal_tick_stop(void)</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_hal_8c_1a891d05cc4410d477471204a4952b14ac.html#exhale-function-hal-8c-1a891d05cc4410d477471204a4952b14ac"><span class="std std-ref">Function hal_timer_dispatch</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_hal_8c_1a4c4c4497084339299dfa367f1186e819.html#exhale-function-hal-8c-1a4c4c4497084339299dfa367f1186e819"><span class="std std-ref">Function hal_timer_start(int, uint32_t, hal_timer_callback_t, void *)</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_hal_8c_1a24be8ca1c0912025c86497e9521e7682.html#exhale-function-hal-8c-1a24be8ca1c0912025c86497e9521e7682"><span class="std std-ref">Function hal_timer_stop(int)</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_hal_8c_1a04de98a22522468aaaacd4140626d6e3.html#exhale-function-hal-8c-1a04de98a22522468aaaacd4140626d6e3"><span class="std std-ref">Function hal_uart_init(int, uint32_t)</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_hal_8c_1a4a993f68f9c9bdf8baef6d370c452b95.html#exhale-function-hal-8c-1a4a993f68f9c9bdf8baef6d370c452b95"><span class="std std-ref">Function hal_uart_read(int, uint8_t *, size_t)</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_hal_8c_1a1bbe3dd10657732bf282f8cddb3bd941.html#exhale-function-hal-8c-1a1bbe3dd10657732bf282f8cddb3bd941"><span class="std std-ref">Function hal_uart_write(int, const uint8_t *, size_t)</span></a></p></li>
+</ul>
+</section>
+<section id="defines">
+<h2>Defines<a class="headerlink" href="#defines" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../exhale/define_hal_8c_1a3e9fd53c6c2d9b964e06e2f36329a576.html#exhale-define-hal-8c-1a3e9fd53c6c2d9b964e06e2f36329a576"><span class="std std-ref">Define HAL_TIMER_MAX</span></a></p></li>
+</ul>
+</section>
+<section id="variables">
+<h2>Variables<a class="headerlink" href="#variables" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../exhale/variable_hal_8c_1a8ecb4277a213ccb3f9e60c9faa0db12a.html#exhale-variable-hal-8c-1a8ecb4277a213ccb3f9e60c9faa0db12a"><span class="std std-ref">Variable hal_adc_handle</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_hal_8c_1af8e6de8ecceaf046d1758052c7a6a8b6.html#exhale-variable-hal-8c-1af8e6de8ecceaf046d1758052c7a6a8b6"><span class="std std-ref">Variable hal_adc_initialized</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_hal_8c_1a2503324e556f50f84731ee7004786ba4.html#exhale-variable-hal-8c-1a2503324e556f50f84731ee7004786ba4"><span class="std std-ref">Variable hal_i2c_initialized</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_hal_8c_1a1cd5df15df4e267a3e694d2e39d07b7b.html#exhale-variable-hal-8c-1a1cd5df15df4e267a3e694d2e39d07b7b"><span class="std std-ref">Variable hal_pwm_channels</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_hal_8c_1acb0148585a3b8d9d8570f50865521e29.html#exhale-variable-hal-8c-1acb0148585a3b8d9d8570f50865521e29"><span class="std std-ref">Variable hal_pwm_timer_bits</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_hal_8c_1a15cfca1f569460aa1e47e92c65c14cb8.html#exhale-variable-hal-8c-1a15cfca1f569460aa1e47e92c65c14cb8"><span class="std std-ref">Variable hal_pwm_timer_configured</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_hal_8c_1a5f8f5dc62b177995447d5525948b1219.html#exhale-variable-hal-8c-1a5f8f5dc62b177995447d5525948b1219"><span class="std std-ref">Variable hal_pwm_timer_freq</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_hal_8c_1adb9e2e243f5f0cab814e13fb9087bd53.html#exhale-variable-hal-8c-1adb9e2e243f5f0cab814e13fb9087bd53"><span class="std std-ref">Variable hal_spi_device</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_hal_8c_1a78f99cd17fd3513e2cd0ff942cac3091.html#exhale-variable-hal-8c-1a78f99cd17fd3513e2cd0ff942cac3091"><span class="std std-ref">Variable hal_spi_initialized</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_hal_8c_1a5223d62afcc3cacaf9b08abc09c631e7.html#exhale-variable-hal-8c-1a5223d62afcc3cacaf9b08abc09c631e7"><span class="std std-ref">Variable hal_tick_callback</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_hal_8c_1ab6dfe53f9a47179293b8de175c89fdf3.html#exhale-variable-hal-8c-1ab6dfe53f9a47179293b8de175c89fdf3"><span class="std std-ref">Variable hal_tick_timer</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_hal_8c_1a50e428074639c8531dce6bf48797db18.html#exhale-variable-hal-8c-1a50e428074639c8531dce6bf48797db18"><span class="std std-ref">Variable hal_tick_user_data</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_hal_8c_1a8fc71bf7d0e535093155b224351cad15.html#exhale-variable-hal-8c-1a8fc71bf7d0e535093155b224351cad15"><span class="std std-ref">Variable hal_timers</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_hal_8c_1a5a85b9c772bbeb480b209a3e6ea92b4c.html#exhale-variable-hal-8c-1a5a85b9c772bbeb480b209a3e6ea92b4c"><span class="std std-ref">Variable TAG</span></a></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">File hal.c</a><ul>
+<li><a class="reference internal" href="#definition-src-hal-c">Definition (<code class="docutils literal notranslate"><span class="pre">src/hal.c</span></code>)</a></li>
+<li><a class="reference internal" href="#detailed-description">Detailed Description</a></li>
+<li><a class="reference internal" href="#includes">Includes</a></li>
+<li><a class="reference internal" href="#classes">Classes</a></li>
+<li><a class="reference internal" href="#functions">Functions</a></li>
+<li><a class="reference internal" href="#defines">Defines</a></li>
+<li><a class="reference internal" href="#variables">Variables</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/api/exhale-internal/file_src_hal.c.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">File hal.c</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2026, Asterion Daedalus.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    </div>
+  </body>
+</html>

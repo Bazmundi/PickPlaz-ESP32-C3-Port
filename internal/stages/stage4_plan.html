@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Stage 4 Plan - Feature Porting by Subsystem (ESP32-C3) &#8212; PickPlaz ESP32-C3 Port 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=2bf1fcf8" />
+    <link rel="stylesheet" type="text/css" href="../_static/collapsible-lists/css/tree_view.css?v=a885cde7" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=047d7ffa" />
+    
+    <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js?v=73120307"></script>
+    <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js?v=660e4f45"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Workflows (Make Targets)" href="../workflows.html" />
+    <link rel="prev" title="Stage 3 Plan - Core Peripheral Bring-up (ESP32-C3)" href="stage3_plan.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../workflows.html" title="Workflows (Make Targets)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="stage3_plan.html" title="Stage 3 Plan - Core Peripheral Bring-up (ESP32-C3)"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Stage 4 Plan - Feature Porting by Subsystem (ESP32-C3)</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="stage-4-plan-feature-porting-by-subsystem-esp32-c3">
+<h1>Stage 4 Plan - Feature Porting by Subsystem (ESP32-C3)<a class="headerlink" href="#stage-4-plan-feature-porting-by-subsystem-esp32-c3" title="Link to this heading">¶</a></h1>
+<p>Stage 4 ports actual application behavior from the STM32 firmware to the ESP32
+by migrating subsystems one at a time. Each subsystem is validated against the
+known STM32 behavior or documentation before moving on.</p>
+<section id="goals">
+<h2>Goals<a class="headerlink" href="#goals" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Port motor control, sensor inputs, and safety/limit logic in isolation.</p></li>
+<li><p>Avoid regressions by validating each subsystem independently.</p></li>
+<li><p>Keep HAL API stable while moving application logic across.</p></li>
+</ul>
+</section>
+<section id="constraints">
+<h2>Constraints<a class="headerlink" href="#constraints" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Do not modify STM32 source files.</p></li>
+<li><p>Use the Stage 3 HAL for all hardware access.</p></li>
+<li><p>Maintain the ESP32 pin map in <code class="docutils literal notranslate"><span class="pre">PORTING_DESIGN.md</span></code>.</p></li>
+</ul>
+</section>
+<section id="deliverables">
+<h2>Deliverables<a class="headerlink" href="#deliverables" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p><strong>Motor control subsystem</strong></p>
+<ul class="simple">
+<li><p>PWM drive for DRV8833 IN1/IN2.</p></li>
+<li><p>Direction control and duty mapping aligned to STM32 behavior.</p></li>
+</ul>
+</li>
+<li><p><strong>Sensor input subsystem</strong></p>
+<ul class="simple">
+<li><p>Buttons (FWD/REV) with active‑low logic.</p></li>
+<li><p>Opto interrupt handling (polarity configurable).</p></li>
+</ul>
+</li>
+<li><p><strong>Safety/limit logic</strong></p>
+<ul class="simple">
+<li><p>Any debounce, timeout, or edge‑case handling from STM32.</p></li>
+<li><p>Enforce safe stop on invalid states.</p></li>
+</ul>
+</li>
+<li><p><strong>Validation harness</strong></p>
+<ul class="simple">
+<li><p>Small test hooks to compare behavior across platforms.</p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="work-breakdown">
+<h2>Work breakdown<a class="headerlink" href="#work-breakdown" title="Link to this heading">¶</a></h2>
+<section id="motor-control-port">
+<h3>4.1 Motor control port<a class="headerlink" href="#motor-control-port" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Identify motor drive logic and duty mapping in STM32 code.</p></li>
+<li><p>Map to HAL PWM calls:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">hal_pwm_init</span></code> for IN1/IN2.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hal_pwm_set_duty</span></code> for speed updates.</p></li>
+</ul>
+</li>
+<li><p>Validate:</p>
+<ul>
+<li><p>Stop, forward, reverse transitions.</p></li>
+<li><p>Duty ramp behavior (if present).</p></li>
+</ul>
+</li>
+<li><p>Self‑test:</p>
+<ul>
+<li><p>Low‑duty pulses with motor disconnected.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="button-input-debounce">
+<h3>4.2 Button input + debounce<a class="headerlink" href="#button-input-debounce" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Port button handling logic from STM32:</p>
+<ul>
+<li><p>Press, release, long‑press, hold.</p></li>
+</ul>
+</li>
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">hal_gpio_read</span></code> with active‑low interpretation.</p></li>
+<li><p>Validate:</p>
+<ul>
+<li><p>Timing and event generation match STM32 behavior.</p></li>
+<li><p>Debounce counters align with STM32 tick assumptions.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="opto-interrupt-handling">
+<h3>4.3 Opto interrupt handling<a class="headerlink" href="#opto-interrupt-handling" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Confirm whether opto is digital interrupt or analog sampling.</p></li>
+<li><p>If digital:</p>
+<ul>
+<li><p>Configure GPIO input and optional edge interrupt handler.</p></li>
+<li><p>Provide a HAL wrapper to expose polarity configuration.</p></li>
+</ul>
+</li>
+<li><p>If analog:</p>
+<ul>
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">hal_adc_read</span></code> with documented scaling.</p></li>
+</ul>
+</li>
+<li><p>Validate:</p>
+<ul>
+<li><p>Edge detection and polarity control match STM32 logic.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="safety-limit-logic-port">
+<h3>4.4 Safety/limit logic port<a class="headerlink" href="#safety-limit-logic-port" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Port limit/safety handling (timeouts, conflicting inputs, etc.).</p></li>
+<li><p>Ensure:</p>
+<ul>
+<li><p>Motor stops on invalid inputs.</p></li>
+<li><p>Buttons/inputs do not fight each other.</p></li>
+</ul>
+</li>
+<li><p>Validate:</p>
+<ul>
+<li><p>Known STM32 scenarios reproduced in logs.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="stm32-behavior-comparison">
+<h3>4.5 STM32 behavior comparison<a class="headerlink" href="#stm32-behavior-comparison" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Capture expected behaviors from existing STM32 logs or docs.</p></li>
+<li><p>Use ESP32 logs to compare:</p>
+<ul>
+<li><p>Motor duty changes.</p></li>
+<li><p>Button event transitions.</p></li>
+<li><p>Opto event timing.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+</section>
+<section id="integration-steps">
+<h2>Integration steps<a class="headerlink" href="#integration-steps" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p>Add subsystem wrappers on top of HAL in ESP32 app code.</p></li>
+<li><p>Port subsystem logic incrementally (motor → buttons → opto → safety).</p></li>
+<li><p>Add temporary logging to validate each subsystem.</p></li>
+<li><p>Remove temporary logging once validated.</p></li>
+</ol>
+</section>
+<section id="acceptance-criteria">
+<h2>Acceptance criteria<a class="headerlink" href="#acceptance-criteria" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Motor control works with correct direction and duty mapping.</p></li>
+<li><p>Button events match STM32 behavior (short/long/hold).</p></li>
+<li><p>Opto input handled correctly with configurable polarity.</p></li>
+<li><p>Safety logic halts motor on invalid or unsafe conditions.</p></li>
+</ul>
+</section>
+<section id="risks-and-mitigations">
+<h2>Risks and mitigations<a class="headerlink" href="#risks-and-mitigations" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>Timing mismatch</strong>: align tick rate and debounce timings with STM32.</p></li>
+<li><p><strong>PWM frequency mismatch</strong>: document and adjust if motor behavior differs.</p></li>
+<li><p><strong>Sensor polarity</strong>: confirm opto polarity to avoid inverted behavior.</p></li>
+<li><p><strong>Concurrency</strong>: avoid long work in ISR; use task notifications if needed.</p></li>
+</ul>
+</section>
+<section id="open-questions">
+<h2>Open questions<a class="headerlink" href="#open-questions" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Exact motor duty scaling from STM32 (0..2048 vs 0..1023).</p></li>
+<li><p>Opto input type (digital vs analog).</p></li>
+<li><p>Any additional limits or edge cases in STM32 logic not yet mapped.</p></li>
+</ul>
+</section>
+<section id="test-notes">
+<h2>Test notes<a class="headerlink" href="#test-notes" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Prefer QEMU for logic verification; use hardware for timing validation.</p></li>
+<li><p>Use the Stage 3 self‑test to confirm base HAL before subsystem testing.</p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Stage 4 Plan - Feature Porting by Subsystem (ESP32-C3)</a><ul>
+<li><a class="reference internal" href="#goals">Goals</a></li>
+<li><a class="reference internal" href="#constraints">Constraints</a></li>
+<li><a class="reference internal" href="#deliverables">Deliverables</a></li>
+<li><a class="reference internal" href="#work-breakdown">Work breakdown</a><ul>
+<li><a class="reference internal" href="#motor-control-port">4.1 Motor control port</a></li>
+<li><a class="reference internal" href="#button-input-debounce">4.2 Button input + debounce</a></li>
+<li><a class="reference internal" href="#opto-interrupt-handling">4.3 Opto interrupt handling</a></li>
+<li><a class="reference internal" href="#safety-limit-logic-port">4.4 Safety/limit logic port</a></li>
+<li><a class="reference internal" href="#stm32-behavior-comparison">4.5 STM32 behavior comparison</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#integration-steps">Integration steps</a></li>
+<li><a class="reference internal" href="#acceptance-criteria">Acceptance criteria</a></li>
+<li><a class="reference internal" href="#risks-and-mitigations">Risks and mitigations</a></li>
+<li><a class="reference internal" href="#open-questions">Open questions</a></li>
+<li><a class="reference internal" href="#test-notes">Test notes</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="stage3_plan.html"
+                          title="previous chapter">Stage 3 Plan - Core Peripheral Bring-up (ESP32-C3)</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="../workflows.html"
+                          title="next chapter">Workflows (Make Targets)</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/stages/stage4_plan.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../workflows.html" title="Workflows (Make Targets)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="stage3_plan.html" title="Stage 3 Plan - Core Peripheral Bring-up (ESP32-C3)"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Stage 4 Plan - Feature Porting by Subsystem (ESP32-C3)</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2026, Asterion Daedalus.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,14 @@
+.. _exhale_function_hal_8h_1a8e015bdd62711d772d0234e867552c9b:
+
+Function hal_gpio_config_input
+==============================
+
+- Defined in :ref:`file_include_hal.h`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: hal_gpio_config_input(int, hal_gpio_pull_t)
+   :project: pickplaz

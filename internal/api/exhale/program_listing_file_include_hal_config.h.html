@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Program Listing for File hal_config.h &#8212; PickPlaz ESP32-C3 Port 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/classic.css?v=2bf1fcf8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/collapsible-lists/css/tree_view.css?v=a885cde7" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=047d7ffa" />
+    
+    <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/collapsible-lists/js/CollapsibleLists.compressed.js?v=73120307"></script>
+    <script src="../../_static/collapsible-lists/js/apply-collapsible-lists.js?v=660e4f45"></script>
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Program Listing for File hal_config.h</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="program-listing-for-file-hal-config-h">
+<span id="program-listing-file-include-hal-config-h"></span><h1>Program Listing for File hal_config.h<a class="headerlink" href="#program-listing-for-file-hal-config-h" title="Link to this heading">¶</a></h1>
+<p>↰ <a class="reference internal" href="file_include_hal_config.h.html#file-include-hal-config-h"><span class="std std-ref">Return to documentation for file</span></a> (<code class="docutils literal notranslate"><span class="pre">include/hal_config.h</span></code>)</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cm">/*</span>
+<span class="cm"> * PickPlaz ESP32-C3 Port</span>
+<span class="cm"> * Copyright (c) 2026 Asterion Daedalus https://github.com/Bazmundi</span>
+<span class="cm"> * SPDX-License-Identifier: MIT</span>
+<span class="cm"> *</span>
+<span class="cm"> * This file is part of PickPlaz ESP32-C3 Port and is licensed under the MIT License.</span>
+<span class="cm"> * See the LICENSE file in the project root for full license text.</span>
+<span class="cm"> */</span>
+
+<span class="cp">#ifndef PICKPLAZ_HAL_CONFIG_H_</span>
+<span class="cp">#define PICKPLAZ_HAL_CONFIG_H_</span>
+
+<span class="cp">#ifdef __cplusplus</span>
+<span class="k">extern</span><span class="w"> </span><span class="s">&quot;C&quot;</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#endif</span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;board_pins.h&quot;</span>
+
+<span class="cp">#define HAL_UART0_TX_PIN BOARD_GPIO_UNUSED</span>
+<span class="cp">#define HAL_UART0_RX_PIN BOARD_GPIO_UNUSED</span>
+<span class="cp">#define HAL_UART0_RTS_PIN BOARD_GPIO_UNUSED</span>
+<span class="cp">#define HAL_UART0_CTS_PIN BOARD_GPIO_UNUSED</span>
+<span class="cp">#define HAL_UART0_BAUD_DEFAULT 115200</span>
+
+<span class="cp">#define HAL_I2C0_SDA_PIN BOARD_GPIO_UNUSED</span>
+<span class="cp">#define HAL_I2C0_SCL_PIN BOARD_GPIO_UNUSED</span>
+<span class="cp">#define HAL_I2C0_CLOCK_HZ 100000</span>
+
+<span class="cp">#define HAL_SPI0_MOSI_PIN BOARD_GPIO_UNUSED</span>
+<span class="cp">#define HAL_SPI0_MISO_PIN BOARD_GPIO_UNUSED</span>
+<span class="cp">#define HAL_SPI0_SCLK_PIN BOARD_GPIO_UNUSED</span>
+<span class="cp">#define HAL_SPI0_CS_PIN BOARD_GPIO_UNUSED</span>
+<span class="cp">#define HAL_SPI0_CLOCK_HZ 1000000</span>
+<span class="cp">#define HAL_SPI0_MODE 0</span>
+
+<span class="cp">#define HAL_ADC_DEFAULT_CHANNEL BOARD_GPIO_UNUSED</span>
+<span class="cp">#define HAL_OPTO_ADC_CHANNEL BOARD_GPIO_UNUSED</span>
+<span class="cp">#define HAL_OPTO_ADC_LOW_THRESHOLD 2800</span>
+<span class="cp">#define HAL_OPTO_ADC_HIGH_THRESHOLD 3200</span>
+<span class="cp">#define HAL_OPTO_ACTIVE_HIGH 1</span>
+
+<span class="cp">#define HAL_FEED_PIN BOARD_GPIO_UNUSED</span>
+<span class="cp">#define HAL_FEED_ACTIVE_LOW 1</span>
+
+<span class="cp">#define HAL_PWM_LED_FREQ_HZ 1000</span>
+<span class="cp">#define HAL_PWM_MOTOR_FREQ_HZ 20000</span>
+<span class="cp">#define HAL_PWM_DUTY_RES_BITS 10</span>
+
+<span class="cp">#ifdef __cplusplus</span>
+<span class="p">}</span>
+<span class="cp">#endif</span>
+
+<span class="cp">#endif</span>
+</pre></div>
+</div>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/api/exhale/program_listing_file_include_hal_config.h.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Program Listing for File hal_config.h</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2026, Asterion Daedalus.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    </div>
+  </body>
+</html>

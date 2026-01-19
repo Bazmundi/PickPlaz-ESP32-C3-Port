@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>PickPlaz ESP32-C3 Port &#8212; PickPlaz ESP32-C3 Port 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=2bf1fcf8" />
+    <link rel="stylesheet" type="text/css" href="_static/collapsible-lists/css/tree_view.css?v=a885cde7" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=047d7ffa" />
+    
+    <script src="_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/collapsible-lists/js/CollapsibleLists.compressed.js?v=73120307"></script>
+    <script src="_static/collapsible-lists/js/apply-collapsible-lists.js?v=660e4f45"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="PickPlaz ESP32-C3 Port - Stage 0 (Scope + Pinout Alignment)" href="design/porting_design.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="design/porting_design.html" title="PickPlaz ESP32-C3 Port - Stage 0 (Scope + Pinout Alignment)"
+             accesskey="N">next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">PickPlaz ESP32-C3 Port</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="pickplaz-esp32-c3-port">
+<h1>PickPlaz ESP32-C3 Port<a class="headerlink" href="#pickplaz-esp32-c3-port" title="Link to this heading">¶</a></h1>
+<p>This Sphinx documentation site now hosts the human-authored project docs. The
+source files were moved under <code class="docutils literal notranslate"><span class="pre">docs/source/</span></code> to keep authored content separate
+from generated output.</p>
+<section id="structure">
+<h2>Structure<a class="headerlink" href="#structure" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">design/</span></code> for architecture and porting design notes</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">stages/</span></code> for stage plans and lessons learned</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tooling/</span></code> for QEMU/PICSimLab integration notes</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">workflows.md</span></code> for developer workflows</p></li>
+</ul>
+<p>Doxygen-generated API docs remain in <code class="docutils literal notranslate"><span class="pre">docs/doxygen/html/</span></code> and can be browsed
+via <code class="docutils literal notranslate"><span class="pre">docs/doxygen/html/index.html</span></code>.</p>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="design/porting_design.html">PickPlaz ESP32-C3 Port - Stage 0 (Scope + Pinout Alignment)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="design/porting_design.html#stage-0-outcomes">Stage 0 outcomes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design/porting_design.html#existing-analysis-references">Existing analysis references</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design/porting_design.html#external-references">External references</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design/porting_design.html#documentation-build-layout">Documentation build layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design/porting_design.html#from-to-rationale-high-level">From/To rationale (high-level)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design/porting_design.html#architecture-issues-between-from-to-approaches">Architecture issues between from/to approaches</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design/porting_design.html#baseline-signal-inventory-stm32">Baseline signal inventory (STM32)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design/porting_design.html#esp32-c3-super-mini-pinout-alignment-confirmed">ESP32-C3 Super Mini pinout alignment (confirmed)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design/porting_design.html#platformio-board-configuration">PlatformIO board configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="design/LED_ANALYSIS.html">LED Analysis Report</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="design/LED_ANALYSIS.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design/LED_ANALYSIS.html#led-components">LED Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design/LED_ANALYSIS.html#led-behavior-analysis">LED Behavior Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design/LED_ANALYSIS.html#current-led-configuration-summary">Current LED Configuration Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design/LED_ANALYSIS.html#timing-and-animation-details">Timing and Animation Details</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design/LED_ANALYSIS.html#current-behavior-mapping">Current Behavior Mapping</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="design/MOTOR_PWM_ANALYSIS.html">Motor PWM Analysis Report</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="design/MOTOR_PWM_ANALYSIS.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design/MOTOR_PWM_ANALYSIS.html#motor-pwm-components">Motor PWM Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design/MOTOR_PWM_ANALYSIS.html#pwm-implementation-details">PWM Implementation Details</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design/MOTOR_PWM_ANALYSIS.html#motor-behavior-analysis">Motor Behavior Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design/MOTOR_PWM_ANALYSIS.html#application-integration">Application Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design/MOTOR_PWM_ANALYSIS.html#timing-characteristics">Timing Characteristics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design/MOTOR_PWM_ANALYSIS.html#summary-of-motor-functions">Summary of Motor Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design/MOTOR_PWM_ANALYSIS.html#behavior-mapping">Behavior Mapping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design/MOTOR_PWM_ANALYSIS.html#key-features">Key Features</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="stages/overview.html">Port stages</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="stages/overview.html#stage-0">Stage 0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/overview.html#stage-1">Stage 1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/overview.html#stage-2">Stage 2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/overview.html#stage-3">Stage 3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/overview.html#stage-4">Stage 4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/overview.html#stage-5">Stage 5</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/overview.html#stage-6">Stage 6</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/overview.html#stage-7">Stage 7</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="stages/stage1_lessons.html">Stage 1 Lessons Learned (ESP32-C3 Port)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage1_lessons.html#summary">Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage1_lessons.html#what-went-wrong">What went wrong</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage1_lessons.html#what-we-tried-and-failed">What we tried (and failed)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage1_lessons.html#what-we-tried-and-succeeded">What we tried (and succeeded)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage1_lessons.html#host-side-observations">Host-side observations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage1_lessons.html#final-working-configuration">Final working configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage1_lessons.html#recommendations-for-stage-2">Recommendations for Stage 2+</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="stages/stage1_qemu_lessons.html">Stage 1 QEMU Lessons Learned (ESP32-C3 Port)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage1_qemu_lessons.html#summary">Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage1_qemu_lessons.html#what-went-wrong">What went wrong</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage1_qemu_lessons.html#what-we-tried-and-failed">What we tried (and failed)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage1_qemu_lessons.html#what-we-tried-and-succeeded">What we tried (and succeeded)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage1_qemu_lessons.html#final-working-flow">Final working flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage1_qemu_lessons.html#recommendations-for-stage-2">Recommendations for Stage 2+</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="stages/stage2_plan.html">Stage 2 Plan - HAL + Driver Scaffolding (ESP32-C3)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage2_plan.html#goals">Goals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage2_plan.html#inputs-and-constraints">Inputs and constraints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage2_plan.html#deliverables">Deliverables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage2_plan.html#work-breakdown">Work breakdown</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage2_plan.html#acceptance-criteria">Acceptance criteria</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage2_plan.html#risks-and-mitigations">Risks and mitigations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage2_plan.html#open-questions-to-resolve-during-stage-2">Open questions (to resolve during Stage 2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage2_plan.html#test-notes">Test notes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="stages/stage3_plan.html">Stage 3 Plan - Core Peripheral Bring-up (ESP32-C3)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage3_plan.html#goals">Goals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage3_plan.html#constraints">Constraints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage3_plan.html#deliverables">Deliverables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage3_plan.html#work-breakdown">Work breakdown</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage3_plan.html#integration-steps">Integration steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage3_plan.html#acceptance-criteria">Acceptance criteria</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage3_plan.html#risks-and-mitigations">Risks and mitigations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage3_plan.html#open-questions">Open questions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage3_plan.html#test-notes">Test notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage3_plan.html#implementation-notes">Implementation notes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="stages/stage4_plan.html">Stage 4 Plan - Feature Porting by Subsystem (ESP32-C3)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage4_plan.html#goals">Goals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage4_plan.html#constraints">Constraints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage4_plan.html#deliverables">Deliverables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage4_plan.html#work-breakdown">Work breakdown</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage4_plan.html#integration-steps">Integration steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage4_plan.html#acceptance-criteria">Acceptance criteria</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage4_plan.html#risks-and-mitigations">Risks and mitigations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage4_plan.html#open-questions">Open questions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stages/stage4_plan.html#test-notes">Test notes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows (Make Targets)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="workflows.html#conventions">Conventions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflows.html#coupling-and-terminals">Coupling and terminals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflows.html#workflow-a-hardware-build-devkit">Workflow A: Hardware build (devkit)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflows.html#workflow-b-hardware-flash-monitor">Workflow B: Hardware flash + monitor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflows.html#workflow-c-qemu-smoke-test-qemu-install-only">Workflow C: QEMU smoke test (QEMU install only)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflows.html#workflow-d-qemu-run-with-monitor-recommended">Workflow D: QEMU run with monitor (recommended)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflows.html#workflow-e-qemu-run-two-terminals">Workflow E: QEMU run (two terminals)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflows.html#workflow-f-qemu-run-stdio-only">Workflow F: QEMU run (stdio only)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflows.html#workflow-g-qemu-reset">Workflow G: QEMU reset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflows.html#workflow-h-clean-builds">Workflow H: Clean builds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflows.html#workflow-i-fast-qemu-rerun">Workflow I: Fast QEMU rerun</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflows.html#workflow-j-flash-monitor-hardware">Workflow J: Flash + monitor (hardware)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflows.html#workflow-k-picsimlab-integration">Workflow K: PICSimLab integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflows.html#variable-overrides">Variable overrides</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tooling/picsimlab.html">PICSimLab Integration (ESP32-C3)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tooling/picsimlab.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tooling/picsimlab.html#quick-start-targets">Quick start targets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tooling/picsimlab.html#option-a-picsimlab-built-in-qemu-standalone">Option A: PICSimLab built-in QEMU (standalone)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tooling/picsimlab.html#option-b-picsimlab-external-qemu-tcp-serial">Option B: PICSimLab + external QEMU (TCP serial)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tooling/picsimlab.html#notes">Notes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tooling/qemu_setup.html">QEMU Setup for ESP32-C3 Emulation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tooling/qemu_setup.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tooling/qemu_setup.html#installation-steps">Installation Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tooling/qemu_setup.html#build-firmware">Build Firmware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tooling/qemu_setup.html#run-qemu">Run QEMU</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tooling/qemu_setup.html#debugging-with-gdb">Debugging with GDB</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tooling/qemu_setup.html#limitations">Limitations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tooling/qemu_setup.html#troubleshooting">Troubleshooting</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tooling/qemu_notes.html">QEMU Smoke Test (Stage 1)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tooling/qemu_notes.html#why-this-exists">Why this exists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tooling/qemu_notes.html#what-is-and-is-not-tracked">What is (and is not) tracked</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tooling/qemu_notes.html#smoke-test">Smoke test</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tooling/qemu_notes.html#qemu-setup-and-usage">QEMU setup and usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tooling/qemu_notes.html#limitations">Limitations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tooling/qemu_notes.html#notes-for-future-automation">Notes for future automation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tooling/qemu_summary.html">QEMU ESP32-C3 Emulation Setup - Summary</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tooling/qemu_summary.html#status">Status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tooling/qemu_summary.html#key-artifacts">Key artifacts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tooling/qemu_summary.html#typical-flow">Typical flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tooling/qemu_summary.html#known-limitations">Known limitations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">API Reference</a><ul class="simple">
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="#">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">PickPlaz ESP32-C3 Port</a><ul>
+<li><a class="reference internal" href="#structure">Structure</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="design/porting_design.html"
+                          title="next chapter">PickPlaz ESP32-C3 Port - Stage 0 (Scope + Pinout Alignment)</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="design/porting_design.html" title="PickPlaz ESP32-C3 Port - Stage 0 (Scope + Pinout Alignment)"
+             >next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">PickPlaz ESP32-C3 Port</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2026, Asterion Daedalus.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Stage 1 QEMU Lessons Learned (ESP32-C3 Port) &#8212; PickPlaz ESP32-C3 Port 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=2bf1fcf8" />
+    <link rel="stylesheet" type="text/css" href="../_static/collapsible-lists/css/tree_view.css?v=a885cde7" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=047d7ffa" />
+    
+    <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js?v=73120307"></script>
+    <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js?v=660e4f45"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Stage 2 Plan - HAL + Driver Scaffolding (ESP32-C3)" href="stage2_plan.html" />
+    <link rel="prev" title="Stage 1 Lessons Learned (ESP32-C3 Port)" href="stage1_lessons.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="stage2_plan.html" title="Stage 2 Plan - HAL + Driver Scaffolding (ESP32-C3)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="stage1_lessons.html" title="Stage 1 Lessons Learned (ESP32-C3 Port)"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Stage 1 QEMU Lessons Learned (ESP32-C3 Port)</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="stage-1-qemu-lessons-learned-esp32-c3-port">
+<h1>Stage 1 QEMU Lessons Learned (ESP32-C3 Port)<a class="headerlink" href="#stage-1-qemu-lessons-learned-esp32-c3-port" title="Link to this heading">¶</a></h1>
+<p>This document captures what went wrong while bringing up QEMU for Stage 1,
+what we tried, what failed, and what ultimately worked.</p>
+<section id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Link to this heading">¶</a></h2>
+<p>QEMU booted the Stage 1 firmware once three things aligned: correct build
+outputs for PlatformIO, a UART console (QEMU does not emulate USB Serial/JTAG),
+and a flash image size that matched the firmware header. The biggest blockers
+were path assumptions, console routing, and a 2MB vs 4MB flash mismatch.</p>
+</section>
+<section id="what-went-wrong">
+<h2>What went wrong<a class="headerlink" href="#what-went-wrong" title="Link to this heading">¶</a></h2>
+<section id="script-paths-and-working-directory-assumptions">
+<h3>1) Script paths and working directory assumptions<a class="headerlink" href="#script-paths-and-working-directory-assumptions" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Early attempts used scripts that did not exist in this repo, producing
+“No such file or directory”.</p></li>
+<li><p>Running <code class="docutils literal notranslate"><span class="pre">pio</span> <span class="pre">run</span></code> from the repo root failed because it is not a PlatformIO
+project directory.</p></li>
+</ul>
+</section>
+<section id="merge-script-assumptions-did-not-match-platformio-outputs">
+<h3>2) Merge script assumptions did not match PlatformIO outputs<a class="headerlink" href="#merge-script-assumptions-did-not-match-platformio-outputs" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Initial merge logic expected <code class="docutils literal notranslate"><span class="pre">bootloader/bootloader.bin</span></code> and
+<code class="docutils literal notranslate"><span class="pre">partition_table/partition-table.bin</span></code>, but the build produced
+<code class="docutils literal notranslate"><span class="pre">bootloader.bin</span></code> and <code class="docutils literal notranslate"><span class="pre">partitions.bin</span></code> at different paths.</p></li>
+<li><p>Result: merge failed or used incorrect inputs.</p></li>
+</ul>
+</section>
+<section id="console-routed-to-usb-serial-jtag">
+<h3>3) Console routed to USB Serial/JTAG<a class="headerlink" href="#console-routed-to-usb-serial-jtag" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>QEMU does not emulate USB Serial/JTAG, so logs never appeared even though
+the firmware was running.</p></li>
+</ul>
+</section>
+<section id="flash-size-mismatch-caused-repeated-reboots">
+<h3>4) Flash size mismatch caused repeated reboots<a class="headerlink" href="#flash-size-mismatch-caused-repeated-reboots" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">flash_image.bin</span></code> was 2MB, but the firmware header indicated 4MB.</p></li>
+<li><p>Boot log showed <code class="docutils literal notranslate"><span class="pre">Detected</span> <span class="pre">size(2048k)</span> <span class="pre">smaller</span> <span class="pre">than</span> <span class="pre">the</span> <span class="pre">size</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">binary</span> <span class="pre">image</span> <span class="pre">header(4096k)</span></code> followed by an assert and reboot loop.</p></li>
+</ul>
+</section>
+<section id="monitor-socket-race-and-port-conflicts">
+<h3>5) Monitor socket race and port conflicts<a class="headerlink" href="#monitor-socket-race-and-port-conflicts" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pio</span> <span class="pre">device</span> <span class="pre">monitor</span></code> exits immediately on connection refused, so starting it
+before QEMU guarantees failure.</p></li>
+<li><p>Port 5555 was already in use in one run, preventing QEMU from starting.</p></li>
+</ul>
+</section>
+</section>
+<section id="what-we-tried-and-failed">
+<h2>What we tried (and failed)<a class="headerlink" href="#what-we-tried-and-failed" title="Link to this heading">¶</a></h2>
+<section id="running-qemu-without-correct-build-artifacts">
+<h3>Running QEMU without correct build artifacts<a class="headerlink" href="#running-qemu-without-correct-build-artifacts" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Running merge/run scripts before building the <code class="docutils literal notranslate"><span class="pre">esp32-c3-qemu</span></code> environment
+led to missing bin files.</p></li>
+</ul>
+</section>
+<section id="running-qemu-with-usb-console-config">
+<h3>Running QEMU with USB console config<a class="headerlink" href="#running-qemu-with-usb-console-config" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Using the hardware <code class="docutils literal notranslate"><span class="pre">sdkconfig</span></code> (USB Serial/JTAG console) resulted in no
+output in QEMU.</p></li>
+</ul>
+</section>
+<section id="launching-monitor-before-qemu">
+<h3>Launching monitor before QEMU<a class="headerlink" href="#launching-monitor-before-qemu" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pio</span> <span class="pre">device</span> <span class="pre">monitor</span> <span class="pre">-p</span> <span class="pre">socket://localhost:4444</span></code> failed with
+“Connection refused” because QEMU had not opened the socket yet.</p></li>
+</ul>
+</section>
+</section>
+<section id="what-we-tried-and-succeeded">
+<h2>What we tried (and succeeded)<a class="headerlink" href="#what-we-tried-and-succeeded" title="Link to this heading">¶</a></h2>
+<section id="align-build-outputs-with-merge-expectations">
+<h3>1) Align build outputs with merge expectations<a class="headerlink" href="#align-build-outputs-with-merge-expectations" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">merge_flash.sh</span></code> now auto-detects:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">bootloader.bin</span></code> (or <code class="docutils literal notranslate"><span class="pre">bootloader/bootloader.bin</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">partitions.bin</span></code> (or <code class="docutils literal notranslate"><span class="pre">partition_table/partition-table.bin</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pickplazESP32Port.bin</span></code> (or <code class="docutils literal notranslate"><span class="pre">firmware.bin</span></code>)</p></li>
+</ul>
+</li>
+<li><p>QEMU scripts now accept <code class="docutils literal notranslate"><span class="pre">PIO_ENV</span></code> to target the correct build directory.</p></li>
+</ul>
+</section>
+<section id="add-a-qemu-specific-console-configuration">
+<h3>2) Add a QEMU-specific console configuration<a class="headerlink" href="#add-a-qemu-specific-console-configuration" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">sdkconfig.qemu</span></code> with UART0 console and USB Serial/JTAG disabled.</p></li>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">[env:esp32-c3-qemu]</span></code> in <code class="docutils literal notranslate"><span class="pre">platformio.ini</span></code>.</p></li>
+</ul>
+</section>
+<section id="pin-flash-size-to-4mb">
+<h3>3) Pin flash size to 4MB<a class="headerlink" href="#pin-flash-size-to-4mb" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Set <code class="docutils literal notranslate"><span class="pre">board_build.flash_size</span> <span class="pre">=</span> <span class="pre">4MB</span></code> to match the device.</p></li>
+<li><p>Rebuilt and re-merged to create a 4MB <code class="docutils literal notranslate"><span class="pre">flash_image.bin</span></code>.</p></li>
+<li><p>Result: boot continues past flash init with no assert.</p></li>
+</ul>
+</section>
+<section id="remove-the-socket-race">
+<h3>4) Remove the socket race<a class="headerlink" href="#remove-the-socket-race" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">scripts/run_qemu_with_monitor.sh</span></code> to:</p>
+<ul>
+<li><p>start QEMU</p></li>
+<li><p>wait for the serial socket</p></li>
+<li><p>attach <code class="docutils literal notranslate"><span class="pre">pio</span> <span class="pre">device</span> <span class="pre">monitor</span></code></p></li>
+</ul>
+</li>
+</ul>
+</section>
+</section>
+<section id="final-working-flow">
+<h2>Final working flow<a class="headerlink" href="#final-working-flow" title="Link to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pio<span class="w"> </span>run<span class="w"> </span>-e<span class="w"> </span>esp32-c3-qemu<span class="w"> </span>-t<span class="w"> </span>clean
+pio<span class="w"> </span>run<span class="w"> </span>-e<span class="w"> </span>esp32-c3-qemu
+scripts/merge_flash.sh
+scripts/run_qemu_with_monitor.sh
+</pre></div>
+</div>
+<p>Alternative two-terminal flow:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># terminal 1</span>
+scripts/run_qemu.sh
+
+<span class="c1"># terminal 2</span>
+pio<span class="w"> </span>device<span class="w"> </span>monitor<span class="w"> </span>-p<span class="w"> </span>socket://localhost:4444<span class="w"> </span>-b<span class="w"> </span><span class="m">115200</span>
+</pre></div>
+</div>
+</section>
+<section id="recommendations-for-stage-2">
+<h2>Recommendations for Stage 2+<a class="headerlink" href="#recommendations-for-stage-2" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">esp32-c3-qemu</span></code> only for QEMU and <code class="docutils literal notranslate"><span class="pre">esp32-c3-devkitm-1</span></code> for hardware.</p></li>
+<li><p>After config changes, clean build and verify:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">.pio/build/esp32-c3-qemu/flash_args</span></code> shows <code class="docutils literal notranslate"><span class="pre">--flash_size</span> <span class="pre">4MB</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.pio/build/esp32-c3-qemu/flash_image.bin</span></code> is 4,194,304 bytes</p></li>
+</ul>
+</li>
+<li><p>Prefer <code class="docutils literal notranslate"><span class="pre">run_qemu_with_monitor.sh</span></code> to avoid socket ordering issues.</p></li>
+<li><p>If QEMU is silent, double-check console settings in <code class="docutils literal notranslate"><span class="pre">sdkconfig.qemu</span></code>.</p></li>
+</ol>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Stage 1 QEMU Lessons Learned (ESP32-C3 Port)</a><ul>
+<li><a class="reference internal" href="#summary">Summary</a></li>
+<li><a class="reference internal" href="#what-went-wrong">What went wrong</a><ul>
+<li><a class="reference internal" href="#script-paths-and-working-directory-assumptions">1) Script paths and working directory assumptions</a></li>
+<li><a class="reference internal" href="#merge-script-assumptions-did-not-match-platformio-outputs">2) Merge script assumptions did not match PlatformIO outputs</a></li>
+<li><a class="reference internal" href="#console-routed-to-usb-serial-jtag">3) Console routed to USB Serial/JTAG</a></li>
+<li><a class="reference internal" href="#flash-size-mismatch-caused-repeated-reboots">4) Flash size mismatch caused repeated reboots</a></li>
+<li><a class="reference internal" href="#monitor-socket-race-and-port-conflicts">5) Monitor socket race and port conflicts</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#what-we-tried-and-failed">What we tried (and failed)</a><ul>
+<li><a class="reference internal" href="#running-qemu-without-correct-build-artifacts">Running QEMU without correct build artifacts</a></li>
+<li><a class="reference internal" href="#running-qemu-with-usb-console-config">Running QEMU with USB console config</a></li>
+<li><a class="reference internal" href="#launching-monitor-before-qemu">Launching monitor before QEMU</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#what-we-tried-and-succeeded">What we tried (and succeeded)</a><ul>
+<li><a class="reference internal" href="#align-build-outputs-with-merge-expectations">1) Align build outputs with merge expectations</a></li>
+<li><a class="reference internal" href="#add-a-qemu-specific-console-configuration">2) Add a QEMU-specific console configuration</a></li>
+<li><a class="reference internal" href="#pin-flash-size-to-4mb">3) Pin flash size to 4MB</a></li>
+<li><a class="reference internal" href="#remove-the-socket-race">4) Remove the socket race</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#final-working-flow">Final working flow</a></li>
+<li><a class="reference internal" href="#recommendations-for-stage-2">Recommendations for Stage 2+</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="stage1_lessons.html"
+                          title="previous chapter">Stage 1 Lessons Learned (ESP32-C3 Port)</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="stage2_plan.html"
+                          title="next chapter">Stage 2 Plan - HAL + Driver Scaffolding (ESP32-C3)</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/stages/stage1_qemu_lessons.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="stage2_plan.html" title="Stage 2 Plan - HAL + Driver Scaffolding (ESP32-C3)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="stage1_lessons.html" title="Stage 1 Lessons Learned (ESP32-C3 Port)"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Stage 1 QEMU Lessons Learned (ESP32-C3 Port)</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2026, Asterion Daedalus.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    </div>
+  </body>
+</html>

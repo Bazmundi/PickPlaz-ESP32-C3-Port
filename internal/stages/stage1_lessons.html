@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Stage 1 Lessons Learned (ESP32-C3 Port) &#8212; PickPlaz ESP32-C3 Port 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=2bf1fcf8" />
+    <link rel="stylesheet" type="text/css" href="../_static/collapsible-lists/css/tree_view.css?v=a885cde7" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=047d7ffa" />
+    
+    <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js?v=73120307"></script>
+    <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js?v=660e4f45"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Stage 1 QEMU Lessons Learned (ESP32-C3 Port)" href="stage1_qemu_lessons.html" />
+    <link rel="prev" title="Port stages" href="overview.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="stage1_qemu_lessons.html" title="Stage 1 QEMU Lessons Learned (ESP32-C3 Port)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="overview.html" title="Port stages"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Stage 1 Lessons Learned (ESP32-C3 Port)</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="stage-1-lessons-learned-esp32-c3-port">
+<h1>Stage 1 Lessons Learned (ESP32-C3 Port)<a class="headerlink" href="#stage-1-lessons-learned-esp32-c3-port" title="Link to this heading">¶</a></h1>
+<p>This document captures what went wrong during Stage 1 (boot + logging),
+what we tried, what failed, and what ultimately worked.</p>
+<section id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Link to this heading">¶</a></h2>
+<p>Stage 1 succeeded once the console was routed to USB Serial/JTAG and the
+PlatformIO build actually consumed the project <code class="docutils literal notranslate"><span class="pre">sdkconfig</span></code>. The board was
+not “fragged”; the biggest blockers were (1) console output going to UART0
+instead of USB, and (2) host USB enumeration flapping leading PIO to guess
+an invalid port.</p>
+</section>
+<section id="what-went-wrong">
+<h2>What went wrong<a class="headerlink" href="#what-went-wrong" title="Link to this heading">¶</a></h2>
+<section id="build-failed-due-to-log-format-warnings">
+<h3>1) Build failed due to log format warnings<a class="headerlink" href="#build-failed-due-to-log-format-warnings" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Initial boot log included <code class="docutils literal notranslate"><span class="pre">esp_chip_info_t</span></code> fields and flash size.</p></li>
+<li><p>IDF treated format warnings as errors (<code class="docutils literal notranslate"><span class="pre">cc1:</span> <span class="pre">some</span> <span class="pre">warnings</span> <span class="pre">being</span> <span class="pre">treated</span> <span class="pre">as</span> <span class="pre">errors</span></code>).</p></li>
+</ul>
+</section>
+<section id="no-serial-output-after-upload">
+<h3>2) No serial output after upload<a class="headerlink" href="#no-serial-output-after-upload" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>The monitor connected at 9600 baud initially, which is wrong for IDF.</p></li>
+<li><p>Even after setting 115200, nothing printed because the console was still
+configured for UART0, not USB Serial/JTAG.</p></li>
+</ul>
+</section>
+<section id="upload-failures-after-first-flash">
+<h3>3) Upload failures after first flash<a class="headerlink" href="#upload-failures-after-first-flash" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>PlatformIO auto-detected <code class="docutils literal notranslate"><span class="pre">/dev/ttyS0</span></code> (non-existent), causing upload failures.</p></li>
+<li><p>Linux did not show <code class="docutils literal notranslate"><span class="pre">/dev/ttyACM*</span></code> or <code class="docutils literal notranslate"><span class="pre">/dev/serial/by-id</span></code> at times, which
+made it look like the board disappeared.</p></li>
+<li><p>The USB device enumerated and then disconnected repeatedly (“flapping”),
+making the port unstable during reset/boot transitions.</p></li>
+</ul>
+</section>
+<section id="diagnostics-blocked-by-permissions-tools">
+<h3>4) Diagnostics blocked by permissions/tools<a class="headerlink" href="#diagnostics-blocked-by-permissions-tools" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">dmesg</span></code> access failed without elevated privileges.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rg</span></code> (ripgrep) was not installed on the host.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/dev/serial/by-id</span></code> did not exist on this system.</p></li>
+</ul>
+</section>
+</section>
+<section id="what-we-tried-and-failed">
+<h2>What we tried (and failed)<a class="headerlink" href="#what-we-tried-and-failed" title="Link to this heading">¶</a></h2>
+<section id="formatting-fixes">
+<h3>Formatting fixes<a class="headerlink" href="#formatting-fixes" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Switched to <code class="docutils literal notranslate"><span class="pre">PRIu32</span></code> formatting for revision/flash size logs.</p>
+<ul>
+<li><p>Still failed with format warning in this toolchain.</p></li>
+</ul>
+</li>
+<li><p>Switched to <code class="docutils literal notranslate"><span class="pre">%u</span></code> with casts.</p>
+<ul>
+<li><p>Still produced format-related build errors in the IDF log macros.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="monitor-changes-without-console-reconfiguration">
+<h3>Monitor changes without console reconfiguration<a class="headerlink" href="#monitor-changes-without-console-reconfiguration" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Set <code class="docutils literal notranslate"><span class="pre">monitor_speed</span> <span class="pre">=</span> <span class="pre">115200</span></code>.</p>
+<ul>
+<li><p>No output, because the console was still UART0.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="port-discovery-and-monitor-attempts">
+<h3>Port discovery and monitor attempts<a class="headerlink" href="#port-discovery-and-monitor-attempts" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pio</span> <span class="pre">device</span> <span class="pre">monitor</span> <span class="pre">-p</span> <span class="pre">/dev/ttyACM0</span> <span class="pre">-b</span> <span class="pre">115200</span></code> when the device did not
+enumerate consistently.</p>
+<ul>
+<li><p>Resulted in <code class="docutils literal notranslate"><span class="pre">Input/output</span> <span class="pre">error</span></code> or disconnect/reconnect loops.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="upload-attempts-without-a-stable-port">
+<h3>Upload attempts without a stable port<a class="headerlink" href="#upload-attempts-without-a-stable-port" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>PIO auto-detected <code class="docutils literal notranslate"><span class="pre">/dev/ttyS0</span></code> and failed.</p>
+<ul>
+<li><p>Root cause was missing USB CDC device due to enumeration instability.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+</section>
+<section id="what-we-tried-and-succeeded">
+<h2>What we tried (and succeeded)<a class="headerlink" href="#what-we-tried-and-succeeded" title="Link to this heading">¶</a></h2>
+<section id="simplified-the-boot-log-build-stability">
+<h3>1) Simplified the boot log (build stability)<a class="headerlink" href="#simplified-the-boot-log-build-stability" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Removed chip info + flash size log lines.</p></li>
+<li><p>Kept a minimal boot log with IDF version.</p></li>
+<li><p>Result: build succeeded without format warnings.</p></li>
+</ul>
+</section>
+<section id="ensured-the-project-sdkconfig-was-actually-used">
+<h3>2) Ensured the project <code class="docutils literal notranslate"><span class="pre">sdkconfig</span></code> was actually used<a class="headerlink" href="#ensured-the-project-sdkconfig-was-actually-used" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">board_build.sdkconfig</span> <span class="pre">=</span> <span class="pre">sdkconfig.esp32-c3-devkitm-1</span></code> to
+<code class="docutils literal notranslate"><span class="pre">platformio.ini</span></code>.</p></li>
+<li><p>Result: the console settings in <code class="docutils literal notranslate"><span class="pre">sdkconfig</span></code> were honored.</p></li>
+</ul>
+</section>
+<section id="switched-console-output-to-usb-serial-jtag">
+<h3>3) Switched console output to USB Serial/JTAG<a class="headerlink" href="#switched-console-output-to-usb-serial-jtag" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>In <code class="docutils literal notranslate"><span class="pre">sdkconfig.esp32-c3-devkitm-1</span></code>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG=y</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">CONFIG_ESP_CONSOLE_UART_DEFAULT</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">set</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CONFIG_ESP_CONSOLE_SECONDARY_NONE=y</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">CONFIG_ESP_CONSOLE_UART</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">set</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CONFIG_ESP_CONSOLE_ROM_SERIAL_PORT_NUM=3</span></code></p></li>
+</ul>
+</li>
+<li><p>Result: logs appeared on <code class="docutils literal notranslate"><span class="pre">/dev/ttyACM*</span></code> over USB‑C.</p></li>
+</ul>
+</section>
+<section id="stabilized-monitor-behavior">
+<h3>4) Stabilized monitor behavior<a class="headerlink" href="#stabilized-monitor-behavior" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Added to <code class="docutils literal notranslate"><span class="pre">platformio.ini</span></code>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">monitor_dtr</span> <span class="pre">=</span> <span class="pre">0</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">monitor_rts</span> <span class="pre">=</span> <span class="pre">0</span></code></p></li>
+</ul>
+</li>
+<li><p>Result: monitor stopped toggling the device, allowing logs to appear
+after a manual reset.</p></li>
+</ul>
+</section>
+<section id="confirmed-successful-boot-logs">
+<h3>5) Confirmed successful boot logs<a class="headerlink" href="#confirmed-successful-boot-logs" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>After upload and reset, console showed:</p>
+<ul>
+<li><p>ESP-IDF boot banner</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pickplaz:</span> <span class="pre">Booting</span> <span class="pre">PickPlaz</span> <span class="pre">ESP32-C3</span> <span class="pre">port</span> <span class="pre">(Stage</span> <span class="pre">1)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pickplaz:</span> <span class="pre">IDF</span> <span class="pre">version:</span> <span class="pre">5.3.1</span></code></p></li>
+</ul>
+</li>
+</ul>
+</section>
+</section>
+<section id="host-side-observations">
+<h2>Host-side observations<a class="headerlink" href="#host-side-observations" title="Link to this heading">¶</a></h2>
+<section id="usb-enumeration">
+<h3>USB enumeration<a class="headerlink" href="#usb-enumeration" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">lsusb</span></code> was the most reliable check:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">303a:1001</span> <span class="pre">Espressif</span> <span class="pre">USB</span> <span class="pre">JTAG/serial</span> <span class="pre">debug</span> <span class="pre">unit</span></code> indicates the device
+enumerated.</p></li>
+</ul>
+</li>
+<li><p>When <code class="docutils literal notranslate"><span class="pre">lsusb</span></code> showed no Espressif device, uploads failed because there was
+no CDC/ACM device for PIO to use.</p></li>
+</ul>
+</section>
+<section id="boot-sequence-quirks">
+<h3>Boot sequence quirks<a class="headerlink" href="#boot-sequence-quirks" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>The Super Mini required the BOOT/RESET sequence to enter download mode.</p></li>
+<li><p>A reconnect cycle was common, and monitor sometimes attached after the
+boot log already printed.</p></li>
+</ul>
+</section>
+</section>
+<section id="final-working-configuration">
+<h2>Final working configuration<a class="headerlink" href="#final-working-configuration" title="Link to this heading">¶</a></h2>
+<section id="platformio-ini">
+<h3><code class="docutils literal notranslate"><span class="pre">platformio.ini</span></code><a class="headerlink" href="#platformio-ini" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">monitor_speed</span> <span class="pre">=</span> <span class="pre">115200</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">board_build.sdkconfig</span> <span class="pre">=</span> <span class="pre">sdkconfig.esp32-c3-devkitm-1</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">monitor_dtr</span> <span class="pre">=</span> <span class="pre">0</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">monitor_rts</span> <span class="pre">=</span> <span class="pre">0</span></code></p></li>
+</ul>
+</section>
+<section id="sdkconfig-esp32-c3-devkitm-1">
+<h3><code class="docutils literal notranslate"><span class="pre">sdkconfig.esp32-c3-devkitm-1</span></code><a class="headerlink" href="#sdkconfig-esp32-c3-devkitm-1" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>USB Serial/JTAG console selected as primary output.</p></li>
+<li><p>UART console disabled.</p></li>
+</ul>
+</section>
+</section>
+<section id="recommendations-for-stage-2">
+<h2>Recommendations for Stage 2+<a class="headerlink" href="#recommendations-for-stage-2" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p>Keep USB Serial/JTAG as the primary console to avoid GPIO20/21 conflicts.</p></li>
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">lsusb</span></code> and <code class="docutils literal notranslate"><span class="pre">/dev/ttyACM*</span></code> to verify enumeration before blaming firmware.</p></li>
+<li><p>If logs disappear, verify the active build <code class="docutils literal notranslate"><span class="pre">sdkconfig</span></code> in
+<code class="docutils literal notranslate"><span class="pre">.pio/build/esp32-c3-devkitm-1/sdkconfig</span></code> rather than the source file.</p></li>
+<li><p>For port flapping, keep BOOT/RESET manual and avoid automatic DTR/RTS.</p></li>
+</ol>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Stage 1 Lessons Learned (ESP32-C3 Port)</a><ul>
+<li><a class="reference internal" href="#summary">Summary</a></li>
+<li><a class="reference internal" href="#what-went-wrong">What went wrong</a><ul>
+<li><a class="reference internal" href="#build-failed-due-to-log-format-warnings">1) Build failed due to log format warnings</a></li>
+<li><a class="reference internal" href="#no-serial-output-after-upload">2) No serial output after upload</a></li>
+<li><a class="reference internal" href="#upload-failures-after-first-flash">3) Upload failures after first flash</a></li>
+<li><a class="reference internal" href="#diagnostics-blocked-by-permissions-tools">4) Diagnostics blocked by permissions/tools</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#what-we-tried-and-failed">What we tried (and failed)</a><ul>
+<li><a class="reference internal" href="#formatting-fixes">Formatting fixes</a></li>
+<li><a class="reference internal" href="#monitor-changes-without-console-reconfiguration">Monitor changes without console reconfiguration</a></li>
+<li><a class="reference internal" href="#port-discovery-and-monitor-attempts">Port discovery and monitor attempts</a></li>
+<li><a class="reference internal" href="#upload-attempts-without-a-stable-port">Upload attempts without a stable port</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#what-we-tried-and-succeeded">What we tried (and succeeded)</a><ul>
+<li><a class="reference internal" href="#simplified-the-boot-log-build-stability">1) Simplified the boot log (build stability)</a></li>
+<li><a class="reference internal" href="#ensured-the-project-sdkconfig-was-actually-used">2) Ensured the project <code class="docutils literal notranslate"><span class="pre">sdkconfig</span></code> was actually used</a></li>
+<li><a class="reference internal" href="#switched-console-output-to-usb-serial-jtag">3) Switched console output to USB Serial/JTAG</a></li>
+<li><a class="reference internal" href="#stabilized-monitor-behavior">4) Stabilized monitor behavior</a></li>
+<li><a class="reference internal" href="#confirmed-successful-boot-logs">5) Confirmed successful boot logs</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#host-side-observations">Host-side observations</a><ul>
+<li><a class="reference internal" href="#usb-enumeration">USB enumeration</a></li>
+<li><a class="reference internal" href="#boot-sequence-quirks">Boot sequence quirks</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#final-working-configuration">Final working configuration</a><ul>
+<li><a class="reference internal" href="#platformio-ini"><code class="docutils literal notranslate"><span class="pre">platformio.ini</span></code></a></li>
+<li><a class="reference internal" href="#sdkconfig-esp32-c3-devkitm-1"><code class="docutils literal notranslate"><span class="pre">sdkconfig.esp32-c3-devkitm-1</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#recommendations-for-stage-2">Recommendations for Stage 2+</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="overview.html"
+                          title="previous chapter">Port stages</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="stage1_qemu_lessons.html"
+                          title="next chapter">Stage 1 QEMU Lessons Learned (ESP32-C3 Port)</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/stages/stage1_lessons.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="stage1_qemu_lessons.html" title="Stage 1 QEMU Lessons Learned (ESP32-C3 Port)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="overview.html" title="Port stages"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Stage 1 Lessons Learned (ESP32-C3 Port)</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2026, Asterion Daedalus.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    </div>
+  </body>
+</html>

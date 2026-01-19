@@ -1,0 +1,17 @@
+.. _exhale_struct_structhal__pwm__channel__t:
+
+Struct hal_pwm_channel_t
+========================
+
+- Defined in :ref:`file_src_hal.c`
+
+
+Struct Documentation
+--------------------
+
+
+.. doxygenstruct:: hal_pwm_channel_t
+   :project: pickplaz
+   :members:
+   :protected-members:
+   :undoc-members:

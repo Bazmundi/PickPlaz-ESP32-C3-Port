@@ -1,0 +1,14 @@
+.. _exhale_function_hal_8h_1a5ef9c5c01e84697df3a37b43ad75095c:
+
+Function hal_i2c_read(int, uint8_t, uint8_t \*, size_t)
+=======================================================
+
+- Defined in :ref:`file_include_hal.h`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: hal_i2c_read(int, uint8_t, uint8_t *, size_t)
+   :project: pickplaz

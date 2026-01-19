@@ -1,0 +1,14 @@
+.. _exhale_function_pickplaz__app_8c_1acfdcdad1fb7e0ff5c734a9f0d4fe995f:
+
+Function app_configure_inputs
+=============================
+
+- Defined in :ref:`file_src_pickplaz_app.c`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: app_configure_inputs(void)
+   :project: pickplaz

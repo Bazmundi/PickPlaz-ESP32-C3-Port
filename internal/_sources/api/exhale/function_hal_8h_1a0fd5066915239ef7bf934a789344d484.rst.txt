@@ -1,0 +1,14 @@
+.. _exhale_function_hal_8h_1a0fd5066915239ef7bf934a789344d484:
+
+Function hal_selftest_run
+=========================
+
+- Defined in :ref:`file_include_hal.h`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: hal_selftest_run(void)
+   :project: pickplaz

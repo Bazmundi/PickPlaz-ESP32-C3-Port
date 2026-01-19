@@ -1,0 +1,14 @@
+.. _exhale_define_hal__config_8h_1a104c7032aa0f72556775ecbc7ea8f571:
+
+Define HAL_SPI0_MOSI_PIN
+========================
+
+- Defined in :ref:`file_include_hal_config.h`
+
+
+Define Documentation
+--------------------
+
+
+.. doxygendefine:: HAL_SPI0_MOSI_PIN
+   :project: pickplaz

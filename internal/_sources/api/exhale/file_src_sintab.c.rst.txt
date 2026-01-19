@@ -1,0 +1,45 @@
+
+.. _file_src_sintab.c:
+
+File sintab.c
+=============
+
+|exhale_lsh| :ref:`Parent directory <dir_src>` (``src``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+Definition (``src/sintab.c``)
+-----------------------------
+
+
+.. toctree::
+   :maxdepth: 1
+
+   program_listing_file_src_sintab.c.rst
+
+
+
+
+
+Includes
+--------
+
+
+- ``stdint.h``
+
+
+
+
+
+
+Variables
+---------
+
+
+- :ref:`exhale_variable_sintab_8c_1adb079d4eef1291ab7e7cdbc6dc23ba7d`
+

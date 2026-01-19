@@ -1,0 +1,14 @@
+.. _exhale_define_hal__config_8h_1ab55703854ebffcb5ea025f4a7b2094c8:
+
+Define HAL_UART0_CTS_PIN
+========================
+
+- Defined in :ref:`file_include_hal_config.h`
+
+
+Define Documentation
+--------------------
+
+
+.. doxygendefine:: HAL_UART0_CTS_PIN
+   :project: pickplaz

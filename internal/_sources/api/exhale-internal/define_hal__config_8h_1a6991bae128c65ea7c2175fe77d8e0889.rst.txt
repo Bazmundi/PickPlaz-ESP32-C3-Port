@@ -1,0 +1,14 @@
+.. _exhale_define_hal__config_8h_1a6991bae128c65ea7c2175fe77d8e0889:
+
+Define HAL_PWM_DUTY_RES_BITS
+============================
+
+- Defined in :ref:`file_include_hal_config.h`
+
+
+Define Documentation
+--------------------
+
+
+.. doxygendefine:: HAL_PWM_DUTY_RES_BITS
+   :project: pickplaz

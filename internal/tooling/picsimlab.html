@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>PICSimLab Integration (ESP32-C3) &#8212; PickPlaz ESP32-C3 Port 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=2bf1fcf8" />
+    <link rel="stylesheet" type="text/css" href="../_static/collapsible-lists/css/tree_view.css?v=a885cde7" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=047d7ffa" />
+    
+    <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js?v=73120307"></script>
+    <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js?v=660e4f45"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="QEMU Setup for ESP32-C3 Emulation" href="qemu_setup.html" />
+    <link rel="prev" title="Workflows (Make Targets)" href="../workflows.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="qemu_setup.html" title="QEMU Setup for ESP32-C3 Emulation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../workflows.html" title="Workflows (Make Targets)"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">PICSimLab Integration (ESP32-C3)</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="picsimlab-integration-esp32-c3">
+<h1>PICSimLab Integration (ESP32-C3)<a class="headerlink" href="#picsimlab-integration-esp32-c3" title="Link to this heading">¶</a></h1>
+<p>This guide captures how to use PICSimLab with the ESP32-C3 port for a GUI view
+of the QEMU run and GPIO state.</p>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>PICSimLab installed (<code class="docutils literal notranslate"><span class="pre">picsimlab</span></code> on PATH).</p></li>
+<li><p>QEMU binaries installed at repo root (<code class="docutils literal notranslate"><span class="pre">qemu-install/</span></code>).</p></li>
+<li><p>A merged flash image produced by <code class="docutils literal notranslate"><span class="pre">scripts/merge_flash.sh</span></code>.</p></li>
+</ul>
+</section>
+<section id="quick-start-targets">
+<h2>Quick start targets<a class="headerlink" href="#quick-start-targets" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Standalone PICSimLab (built-in QEMU): <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">picsimlab-standalone</span></code></p></li>
+<li><p>Standalone PICSimLab (no self-test): <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">picsimlab-standalone-noselftest</span></code></p></li>
+<li><p>External QEMU + PICSimLab: <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">picsimlab-external</span></code> then in another terminal
+run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">picsimlab</span></code></p></li>
+<li><p>External QEMU + PICSimLab (no self-test): <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">picsimlab-external-noselftest</span></code>
+then in another terminal run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">picsimlab</span></code></p></li>
+</ul>
+</section>
+<section id="option-a-picsimlab-built-in-qemu-standalone">
+<h2>Option A: PICSimLab built-in QEMU (standalone)<a class="headerlink" href="#option-a-picsimlab-built-in-qemu-standalone" title="Link to this heading">¶</a></h2>
+<p>Use PICSimLab without the external QEMU process.</p>
+<ol class="arabic simple">
+<li><p>Build and merge:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>build-qemu
+make<span class="w"> </span>merge-qemu
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Launch PICSimLab:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>picsimlab
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>Select board:</p>
+<ul class="simple">
+<li><p><strong>ESP32-C3-DevKitC-02</strong></p></li>
+</ul>
+</li>
+<li><p>Load firmware:</p>
+<ul class="simple">
+<li><p>Prefer <code class="docutils literal notranslate"><span class="pre">flash_image.bin</span></code> from:
+<code class="docutils literal notranslate"><span class="pre">.pio/build/esp32-c3-qemu/flash_image.bin</span></code></p></li>
+<li><p>If PICSimLab requests an app-only image, use:
+<code class="docutils literal notranslate"><span class="pre">.pio/build/esp32-c3-qemu/firmware.bin</span></code></p></li>
+</ul>
+</li>
+<li><p>Open Pin Viewer (optional):</p>
+<ul class="simple">
+<li><p>Use <strong>View → Pin Viewer</strong> to inspect GPIO state changes.</p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="option-b-picsimlab-external-qemu-tcp-serial">
+<h2>Option B: PICSimLab + external QEMU (TCP serial)<a class="headerlink" href="#option-b-picsimlab-external-qemu-tcp-serial" title="Link to this heading">¶</a></h2>
+<p>Use PICSimLab as a GUI on top of our custom QEMU process.</p>
+<ol class="arabic simple">
+<li><p>Build and merge:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>build-qemu
+make<span class="w"> </span>merge-qemu
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Start QEMU with external integration flags:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>qemu-picsimlab
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>Launch PICSimLab:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>picsimlab
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>Configure PICSimLab serial:</p>
+<ul class="simple">
+<li><p>Serial port: <code class="docutils literal notranslate"><span class="pre">tcp:localhost:4444</span></code></p></li>
+</ul>
+</li>
+<li><p>Optional GDB:</p>
+<ul class="simple">
+<li><p>QEMU exposes <code class="docutils literal notranslate"><span class="pre">localhost:1234</span></code> for GDB.</p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>If QEMU fails to start, make sure ports 4444/5555/1234 are free.</p></li>
+<li><p>To disable self-test in QEMU:
+<code class="docutils literal notranslate"><span class="pre">PIO_ENV=esp32-c3-qemu-noselftest</span> <span class="pre">make</span> <span class="pre">qemu-picsimlab</span></code></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">PICSimLab Integration (ESP32-C3)</a><ul>
+<li><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li><a class="reference internal" href="#quick-start-targets">Quick start targets</a></li>
+<li><a class="reference internal" href="#option-a-picsimlab-built-in-qemu-standalone">Option A: PICSimLab built-in QEMU (standalone)</a></li>
+<li><a class="reference internal" href="#option-b-picsimlab-external-qemu-tcp-serial">Option B: PICSimLab + external QEMU (TCP serial)</a></li>
+<li><a class="reference internal" href="#notes">Notes</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="../workflows.html"
+                          title="previous chapter">Workflows (Make Targets)</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="qemu_setup.html"
+                          title="next chapter">QEMU Setup for ESP32-C3 Emulation</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/tooling/picsimlab.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="qemu_setup.html" title="QEMU Setup for ESP32-C3 Emulation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../workflows.html" title="Workflows (Make Targets)"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">PICSimLab Integration (ESP32-C3)</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2026, Asterion Daedalus.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    </div>
+  </body>
+</html>

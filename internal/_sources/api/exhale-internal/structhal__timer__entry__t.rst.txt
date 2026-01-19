@@ -1,0 +1,17 @@
+.. _exhale_struct_structhal__timer__entry__t:
+
+Struct hal_timer_entry_t
+========================
+
+- Defined in :ref:`file_src_hal.c`
+
+
+Struct Documentation
+--------------------
+
+
+.. doxygenstruct:: hal_timer_entry_t
+   :project: pickplaz
+   :members:
+   :protected-members:
+   :undoc-members:

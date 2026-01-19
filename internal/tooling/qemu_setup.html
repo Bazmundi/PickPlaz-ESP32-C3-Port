@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>QEMU Setup for ESP32-C3 Emulation &#8212; PickPlaz ESP32-C3 Port 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=2bf1fcf8" />
+    <link rel="stylesheet" type="text/css" href="../_static/collapsible-lists/css/tree_view.css?v=a885cde7" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=047d7ffa" />
+    
+    <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js?v=73120307"></script>
+    <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js?v=660e4f45"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="QEMU Smoke Test (Stage 1)" href="qemu_notes.html" />
+    <link rel="prev" title="PICSimLab Integration (ESP32-C3)" href="picsimlab.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="qemu_notes.html" title="QEMU Smoke Test (Stage 1)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="picsimlab.html" title="PICSimLab Integration (ESP32-C3)"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">QEMU Setup for ESP32-C3 Emulation</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="qemu-setup-for-esp32-c3-emulation">
+<h1>QEMU Setup for ESP32-C3 Emulation<a class="headerlink" href="#qemu-setup-for-esp32-c3-emulation" title="Link to this heading">¶</a></h1>
+<p>This guide captures the QEMU setup used in the earlier esp32version folder,
+adapted to the current ESP32 port project structure.</p>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Ubuntu/Debian-based Linux</p></li>
+<li><p>PlatformIO installed</p></li>
+<li><p>ESP-IDF toolchain available via PlatformIO</p></li>
+<li><p>Build tools (git, make)</p></li>
+</ul>
+</section>
+<section id="installation-steps">
+<h2>Installation Steps<a class="headerlink" href="#installation-steps" title="Link to this heading">¶</a></h2>
+<section id="install-dependencies">
+<h3>1) Install dependencies<a class="headerlink" href="#install-dependencies" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>apt-get<span class="w"> </span>update
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>libslirp-dev<span class="w"> </span>libglib2.0-dev<span class="w"> </span>libpixman-1-dev
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>gdb-multiarch<span class="w"> </span>telnet
+</pre></div>
+</div>
+</section>
+<section id="build-and-install-espressif-qemu-fork">
+<h3>2) Build and install Espressif QEMU fork<a class="headerlink" href="#build-and-install-espressif-qemu-fork" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">REPO_ROOT</span><span class="o">=</span>/home/asterion/3D/pick-plaz/pickplazfeederstm_ESP32Port
+<span class="nb">cd</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$REPO_ROOT</span><span class="s2">&quot;</span>
+
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/espressif/qemu.git
+<span class="nb">cd</span><span class="w"> </span>qemu
+
+./configure<span class="w"> </span>--target-list<span class="o">=</span>riscv32-softmmu
+make<span class="w"> </span>-j<span class="k">$(</span>nproc<span class="k">)</span>
+make<span class="w"> </span>install<span class="w"> </span><span class="nv">PREFIX</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$REPO_ROOT</span><span class="s2">/qemu-install&quot;</span>
+</pre></div>
+</div>
+<p>QEMU binaries will be at:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>${REPO_ROOT}/qemu-install/usr/local/bin/
+</pre></div>
+</div>
+</section>
+<section id="verify-qemu">
+<h3>3) Verify QEMU<a class="headerlink" href="#verify-qemu" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">$REPO_ROOT</span>/qemu-install/usr/local/bin/qemu-system-riscv32<span class="w"> </span>--version
+<span class="nv">$REPO_ROOT</span>/qemu-install/usr/local/bin/qemu-system-riscv32<span class="w"> </span>-machine<span class="w"> </span><span class="nb">help</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>esp32
+</pre></div>
+</div>
+</section>
+</section>
+<section id="build-firmware">
+<h2>Build Firmware<a class="headerlink" href="#build-firmware" title="Link to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/home/asterion/3D/pick-plaz/pickplazfeederstm_ESP32Port/ESP32Port/pickplazESP32Port
+pio<span class="w"> </span>run<span class="w"> </span>-e<span class="w"> </span>esp32-c3-qemu
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">esp32-c3-qemu</span></code> environment uses <code class="docutils literal notranslate"><span class="pre">sdkconfig.qemu</span></code> to force the console
+to UART0 (QEMU does not emulate USB Serial/JTAG). For hardware builds, use
+<code class="docutils literal notranslate"><span class="pre">pio</span> <span class="pre">run</span> <span class="pre">-e</span> <span class="pre">esp32-c3-devkitm-1</span></code>.
+Flash size is pinned to 4MB in <code class="docutils literal notranslate"><span class="pre">platformio.ini</span></code> to match the device and
+avoid header/flash-size mismatches.</p>
+<p>Create a merged flash image (required by the QEMU scripts). The script
+auto-detects PlatformIO output filenames (e.g., <code class="docutils literal notranslate"><span class="pre">firmware.bin</span></code>,
+<code class="docutils literal notranslate"><span class="pre">bootloader.bin</span></code>, <code class="docutils literal notranslate"><span class="pre">partitions.bin</span></code>) and uses <code class="docutils literal notranslate"><span class="pre">flash_args</span></code> only for flash
+settings (mode/freq/size). It prefers PlatformIO’s Python runtime if present.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ESP32Port/pickplazESP32Port/scripts/merge_flash.sh
+</pre></div>
+</div>
+<p>To use a different build environment, set <code class="docutils literal notranslate"><span class="pre">PIO_ENV</span></code>, for example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">PIO_ENV</span><span class="o">=</span>esp32-c3-qemu<span class="w"> </span>ESP32Port/pickplazESP32Port/scripts/merge_flash.sh
+</pre></div>
+</div>
+</section>
+<section id="run-qemu">
+<h2>Run QEMU<a class="headerlink" href="#run-qemu" title="Link to this heading">¶</a></h2>
+<section id="one-command-run-qemu-monitor">
+<h3>One-command run (QEMU + monitor)<a class="headerlink" href="#one-command-run-qemu-monitor" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ESP32Port/pickplazESP32Port/scripts/run_qemu_with_monitor.sh
+</pre></div>
+</div>
+<p>This starts QEMU, waits for the serial socket, and then attaches
+<code class="docutils literal notranslate"><span class="pre">pio</span> <span class="pre">device</span> <span class="pre">monitor</span></code>. It avoids the connection‑refused race.</p>
+</section>
+<section id="basic-run-tcp-serial-monitor">
+<h3>Basic run (TCP serial + monitor)<a class="headerlink" href="#basic-run-tcp-serial-monitor" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ESP32Port/pickplazESP32Port/scripts/run_qemu.sh
+</pre></div>
+</div>
+<p>Serial console (TCP):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>telnet<span class="w"> </span>localhost<span class="w"> </span><span class="m">4444</span>
+</pre></div>
+</div>
+<p>Order matters: start QEMU first, then attach the monitor.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># terminal 1</span>
+ESP32Port/pickplazESP32Port/scripts/run_qemu.sh
+
+<span class="c1"># terminal 2</span>
+pio<span class="w"> </span>device<span class="w"> </span>monitor<span class="w"> </span>-p<span class="w"> </span>socket://localhost:4444<span class="w"> </span>-b<span class="w"> </span><span class="m">115200</span>
+</pre></div>
+</div>
+<p>Monitor:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>telnet<span class="w"> </span>localhost<span class="w"> </span><span class="m">5555</span>
+</pre></div>
+</div>
+</section>
+<section id="console-on-stdio">
+<h3>Console on stdio<a class="headerlink" href="#console-on-stdio" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ESP32Port/pickplazESP32Port/scripts/run_flash_qemu.sh
+</pre></div>
+</div>
+</section>
+<section id="external-picsimlab-integration">
+<h3>External/PICSimLab integration<a class="headerlink" href="#external-picsimlab-integration" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ESP32Port/pickplazESP32Port/scripts/run_qemu_external.sh
+</pre></div>
+</div>
+</section>
+</section>
+<section id="debugging-with-gdb">
+<h2>Debugging with GDB<a class="headerlink" href="#debugging-with-gdb" title="Link to this heading">¶</a></h2>
+<p>Run QEMU with <code class="docutils literal notranslate"><span class="pre">-s</span> <span class="pre">-S</span></code> (see <code class="docutils literal notranslate"><span class="pre">run_qemu_external.sh</span></code>) then:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="si">${</span><span class="nv">HOME</span><span class="si">}</span>/.platformio/packages/toolchain-riscv32-esp/bin/riscv32-esp-elf-gdb<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>/home/asterion/3D/pick-plaz/pickplazfeederstm_ESP32Port/ESP32Port/pickplazESP32Port/.pio/build/esp32-c3-qemu/firmware.elf
+
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>target<span class="w"> </span>remote<span class="w"> </span>localhost:1234
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>monitor<span class="w"> </span>r<span class="w"> </span>gdb_sync
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>maintenance<span class="w"> </span>flush<span class="w"> </span>register-cache
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span><span class="k">continue</span>
+</pre></div>
+</div>
+</section>
+<section id="limitations">
+<h2>Limitations<a class="headerlink" href="#limitations" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>ADC input simulation is limited.</p></li>
+<li><p>PWM timing may not match real hardware.</p></li>
+<li><p>WiFi/BLE not emulated.</p></li>
+<li><p>Serial output behavior may differ from the real board.</p></li>
+</ul>
+</section>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p>QEMU not found:</p>
+<ul class="simple">
+<li><p>Ensure <code class="docutils literal notranslate"><span class="pre">qemu-install</span></code> exists at repo root.</p></li>
+</ul>
+</li>
+<li><p>No ESP32 machine:</p>
+<ul class="simple">
+<li><p>Ensure you used Espressif’s QEMU fork.</p></li>
+</ul>
+</li>
+<li><p>No serial output:</p>
+<ul class="simple">
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">run_flash_qemu.sh</span></code> for stdio or <code class="docutils literal notranslate"><span class="pre">telnet</span> <span class="pre">localhost</span> <span class="pre">4444</span></code> for TCP.</p></li>
+</ul>
+</li>
+</ol>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">QEMU Setup for ESP32-C3 Emulation</a><ul>
+<li><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li><a class="reference internal" href="#installation-steps">Installation Steps</a><ul>
+<li><a class="reference internal" href="#install-dependencies">1) Install dependencies</a></li>
+<li><a class="reference internal" href="#build-and-install-espressif-qemu-fork">2) Build and install Espressif QEMU fork</a></li>
+<li><a class="reference internal" href="#verify-qemu">3) Verify QEMU</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#build-firmware">Build Firmware</a></li>
+<li><a class="reference internal" href="#run-qemu">Run QEMU</a><ul>
+<li><a class="reference internal" href="#one-command-run-qemu-monitor">One-command run (QEMU + monitor)</a></li>
+<li><a class="reference internal" href="#basic-run-tcp-serial-monitor">Basic run (TCP serial + monitor)</a></li>
+<li><a class="reference internal" href="#console-on-stdio">Console on stdio</a></li>
+<li><a class="reference internal" href="#external-picsimlab-integration">External/PICSimLab integration</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#debugging-with-gdb">Debugging with GDB</a></li>
+<li><a class="reference internal" href="#limitations">Limitations</a></li>
+<li><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="picsimlab.html"
+                          title="previous chapter">PICSimLab Integration (ESP32-C3)</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="qemu_notes.html"
+                          title="next chapter">QEMU Smoke Test (Stage 1)</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/tooling/qemu_setup.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="qemu_notes.html" title="QEMU Smoke Test (Stage 1)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="picsimlab.html" title="PICSimLab Integration (ESP32-C3)"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">QEMU Setup for ESP32-C3 Emulation</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2026, Asterion Daedalus.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    </div>
+  </body>
+</html>

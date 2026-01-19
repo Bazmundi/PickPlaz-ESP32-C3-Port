@@ -1,0 +1,14 @@
+.. _exhale_variable_hal_8c_1af8e6de8ecceaf046d1758052c7a6a8b6:
+
+Variable hal_adc_initialized
+============================
+
+- Defined in :ref:`file_src_hal.c`
+
+
+Variable Documentation
+----------------------
+
+
+.. doxygenvariable:: hal_adc_initialized
+   :project: pickplaz

@@ -1,0 +1,14 @@
+.. _exhale_define_hal__config_8h_1aeab73aaf4687e38e0808b5346ec63c3a:
+
+Define HAL_FEED_PIN
+===================
+
+- Defined in :ref:`file_include_hal_config.h`
+
+
+Define Documentation
+--------------------
+
+
+.. doxygendefine:: HAL_FEED_PIN
+   :project: pickplaz

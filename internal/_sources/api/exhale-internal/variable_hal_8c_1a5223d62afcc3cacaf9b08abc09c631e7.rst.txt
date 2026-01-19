@@ -1,0 +1,14 @@
+.. _exhale_variable_hal_8c_1a5223d62afcc3cacaf9b08abc09c631e7:
+
+Variable hal_tick_callback
+==========================
+
+- Defined in :ref:`file_src_hal.c`
+
+
+Variable Documentation
+----------------------
+
+
+.. doxygenvariable:: hal_tick_callback
+   :project: pickplaz

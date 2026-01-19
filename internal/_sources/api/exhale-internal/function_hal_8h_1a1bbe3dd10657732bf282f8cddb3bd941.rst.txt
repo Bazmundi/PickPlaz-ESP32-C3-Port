@@ -1,0 +1,14 @@
+.. _exhale_function_hal_8h_1a1bbe3dd10657732bf282f8cddb3bd941:
+
+Function hal_uart_write(int, const uint8_t \*, size_t)
+======================================================
+
+- Defined in :ref:`file_include_hal.h`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: hal_uart_write(int, const uint8_t *, size_t)
+   :project: pickplaz

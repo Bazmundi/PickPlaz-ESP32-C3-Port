@@ -1,0 +1,14 @@
+.. _exhale_define_hal__config_8h_1a6d8a033cc71ed6d10d28e416ca9b4fc5:
+
+Define HAL_SPI0_SCLK_PIN
+========================
+
+- Defined in :ref:`file_include_hal_config.h`
+
+
+Define Documentation
+--------------------
+
+
+.. doxygendefine:: HAL_SPI0_SCLK_PIN
+   :project: pickplaz

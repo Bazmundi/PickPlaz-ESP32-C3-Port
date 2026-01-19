@@ -1,0 +1,73 @@
+
+.. _file_src_main.c:
+
+File main.c
+===========
+
+|exhale_lsh| :ref:`Parent directory <dir_src>` (``src``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+
+Entry point for the PickPlaz ESP32-C3 firmware. 
+
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+Definition (``src/main.c``)
+---------------------------
+
+
+.. toctree::
+   :maxdepth: 1
+
+   program_listing_file_src_main.c.rst
+
+
+
+Detailed Description
+--------------------
+
+Owns firmware startup sequencing: HAL bring-up, optional self-test, and application start. This file is the module boundary between ESP-IDF startup and PickPlaz application logic. 
+
+
+
+
+Includes
+--------
+
+
+- ``esp_log.h``
+
+- ``esp_system.h``
+
+- ``freertos/FreeRTOS.h``
+
+- ``freertos/task.h``
+
+- ``hal.h`` (:ref:`file_include_hal.h`)
+
+- ``pickplaz_app.h`` (:ref:`file_include_pickplaz_app.h`)
+
+
+
+
+
+
+Functions
+---------
+
+
+- :ref:`exhale_function_main_8c_1a630544a7f0a2cc40d8a7fefab7e2fe70`
+
+
+Variables
+---------
+
+
+- :ref:`exhale_variable_main_8c_1a5a85b9c772bbeb480b209a3e6ea92b4c`
+

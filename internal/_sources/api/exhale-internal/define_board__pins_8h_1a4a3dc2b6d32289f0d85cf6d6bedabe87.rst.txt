@@ -1,0 +1,14 @@
+.. _exhale_define_board__pins_8h_1a4a3dc2b6d32289f0d85cf6d6bedabe87:
+
+Define BOARD_GPIO_LED2
+======================
+
+- Defined in :ref:`file_include_board_pins.h`
+
+
+Define Documentation
+--------------------
+
+
+.. doxygendefine:: BOARD_GPIO_LED2
+   :project: pickplaz

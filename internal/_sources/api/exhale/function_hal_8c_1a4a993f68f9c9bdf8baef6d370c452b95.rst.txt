@@ -1,0 +1,14 @@
+.. _exhale_function_hal_8c_1a4a993f68f9c9bdf8baef6d370c452b95:
+
+Function hal_uart_read(int, uint8_t \*, size_t)
+===============================================
+
+- Defined in :ref:`file_src_hal.c`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: hal_uart_read(int, uint8_t *, size_t)
+   :project: pickplaz

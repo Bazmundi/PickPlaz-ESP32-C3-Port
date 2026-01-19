@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Stage 3 Plan - Core Peripheral Bring-up (ESP32-C3) &#8212; PickPlaz ESP32-C3 Port 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=2bf1fcf8" />
+    <link rel="stylesheet" type="text/css" href="../_static/collapsible-lists/css/tree_view.css?v=a885cde7" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=047d7ffa" />
+    
+    <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js?v=73120307"></script>
+    <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js?v=660e4f45"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Stage 4 Plan - Feature Porting by Subsystem (ESP32-C3)" href="stage4_plan.html" />
+    <link rel="prev" title="Stage 2 Plan - HAL + Driver Scaffolding (ESP32-C3)" href="stage2_plan.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="stage4_plan.html" title="Stage 4 Plan - Feature Porting by Subsystem (ESP32-C3)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="stage2_plan.html" title="Stage 2 Plan - HAL + Driver Scaffolding (ESP32-C3)"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Stage 3 Plan - Core Peripheral Bring-up (ESP32-C3)</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="stage-3-plan-core-peripheral-bring-up-esp32-c3">
+<h1>Stage 3 Plan - Core Peripheral Bring-up (ESP32-C3)<a class="headerlink" href="#stage-3-plan-core-peripheral-bring-up-esp32-c3" title="Link to this heading">¶</a></h1>
+<p>Stage 3 implements real ESP-IDF drivers for the HAL interfaces created in
+Stage 2. The goal is to bring up core peripherals in a controlled order with
+small self-tests after each step.</p>
+<section id="goals">
+<h2>Goals<a class="headerlink" href="#goals" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Replace Stage 2 stubbed HAL calls with ESP-IDF implementations.</p></li>
+<li><p>Validate GPIO + timing first, then UART/I2C/SPI, then ADC, then PWM (LEDC).</p></li>
+<li><p>Keep each peripheral bring-up isolated and testable.</p></li>
+<li><p>Preserve Stage 1 console behavior and Stage 2 HAL API stability.</p></li>
+</ul>
+</section>
+<section id="constraints">
+<h2>Constraints<a class="headerlink" href="#constraints" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Do not modify STM32 source files.</p></li>
+<li><p>Keep USB Serial/JTAG console for hardware builds.</p></li>
+<li><p>GPIO assignments and pin avoidance rules come from <code class="docutils literal notranslate"><span class="pre">PORTING_DESIGN.md</span></code>.</p></li>
+</ul>
+</section>
+<section id="deliverables">
+<h2>Deliverables<a class="headerlink" href="#deliverables" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p><strong>HAL GPIO implementation</strong></p>
+<ul class="simple">
+<li><p>Configure outputs and inputs via <code class="docutils literal notranslate"><span class="pre">driver/gpio.h</span></code>.</p></li>
+<li><p>Respect active-low button configuration.</p></li>
+</ul>
+</li>
+<li><p><strong>HAL timers + tick</strong></p>
+<ul class="simple">
+<li><p>Implement <code class="docutils literal notranslate"><span class="pre">hal_timer_start/stop</span></code> using <code class="docutils literal notranslate"><span class="pre">esp_timer</span></code>.</p></li>
+<li><p>Implement <code class="docutils literal notranslate"><span class="pre">hal_tick_start/stop</span></code> at 1 kHz.</p></li>
+</ul>
+</li>
+<li><p><strong>UART implementation</strong></p>
+<ul class="simple">
+<li><p>Use UART0 (console is USB Serial/JTAG; avoid conflicts).</p></li>
+<li><p>Provide basic read/write helpers.</p></li>
+</ul>
+</li>
+<li><p><strong>I2C and SPI skeletons</strong></p>
+<ul class="simple">
+<li><p>Initialize bus with safe default pins (if not yet assigned).</p></li>
+<li><p>Provide transfer stubs that return errors if bus not configured.</p></li>
+</ul>
+</li>
+<li><p><strong>ADC implementation (C3 limitations)</strong></p>
+<ul class="simple">
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">adc_oneshot</span></code> on ADC1 only.</p></li>
+<li><p>Decide which GPIO can serve ADC1 input or defer to digital input.</p></li>
+</ul>
+</li>
+<li><p><strong>PWM (LEDC) implementation</strong></p>
+<ul class="simple">
+<li><p>LEDC timer + channels for LEDs and motor pins.</p></li>
+<li><p>Provide duty conversion and frequency setup.</p></li>
+</ul>
+</li>
+<li><p><strong>Self-test hooks</strong></p>
+<ul class="simple">
+<li><p>A compile-time flag to enable tests per peripheral.</p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="work-breakdown">
+<h2>Work breakdown<a class="headerlink" href="#work-breakdown" title="Link to this heading">¶</a></h2>
+<section id="gpio-bring-up">
+<h3>3.1 GPIO bring-up<a class="headerlink" href="#gpio-bring-up" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Implement:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">hal_gpio_config_output</span></code>, <code class="docutils literal notranslate"><span class="pre">hal_gpio_config_input</span></code>,
+<code class="docutils literal notranslate"><span class="pre">hal_gpio_write</span></code>, <code class="docutils literal notranslate"><span class="pre">hal_gpio_read</span></code>.</p></li>
+</ul>
+</li>
+<li><p>Apply pull-ups for buttons:</p>
+<ul>
+<li><p>FWD (GPIO20), REV (GPIO21), active-low.</p></li>
+</ul>
+</li>
+<li><p>Self-test:</p>
+<ul>
+<li><p>Toggle LED0..LED3 sequentially.</p></li>
+<li><p>Log button states on change.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="timing-tick">
+<h3>3.2 Timing + tick<a class="headerlink" href="#timing-tick" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Implement:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">hal_timer_start/stop</span></code> using <code class="docutils literal notranslate"><span class="pre">esp_timer_create</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hal_tick_start/stop</span></code> with a 1 kHz periodic timer.</p></li>
+</ul>
+</li>
+<li><p>Self-test:</p>
+<ul>
+<li><p>Log tick count every 1000 ticks.</p></li>
+<li><p>Verify no watchdog resets.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="uart">
+<h3>3.3 UART<a class="headerlink" href="#uart" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Implement:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">hal_uart_init</span></code>, <code class="docutils literal notranslate"><span class="pre">hal_uart_write</span></code>, <code class="docutils literal notranslate"><span class="pre">hal_uart_read</span></code> using <code class="docutils literal notranslate"><span class="pre">driver/uart.h</span></code>.</p></li>
+</ul>
+</li>
+<li><p>Use UART0 for now and keep it optional (avoid breaking console).</p></li>
+<li><p>Self-test:</p>
+<ul>
+<li><p>Write a short banner if UART init succeeds.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="i2c-and-spi">
+<h3>3.4 I2C and SPI<a class="headerlink" href="#i2c-and-spi" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Implement:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">hal_i2c_init</span></code>, <code class="docutils literal notranslate"><span class="pre">hal_i2c_read/write</span></code> using <code class="docutils literal notranslate"><span class="pre">driver/i2c.h</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hal_spi_init</span></code>, <code class="docutils literal notranslate"><span class="pre">hal_spi_transfer</span></code> using <code class="docutils literal notranslate"><span class="pre">driver/spi_master.h</span></code>.</p></li>
+</ul>
+</li>
+<li><p>Keep pins configurable in a single header or compile-time defines.</p></li>
+<li><p>Self-test:</p>
+<ul>
+<li><p>Log bus init success.</p></li>
+<li><p>No external device required at this stage.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="adc-esp32-c3-limits">
+<h3>3.5 ADC (ESP32-C3 limits)<a class="headerlink" href="#adc-esp32-c3-limits" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Implement:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">hal_adc_init</span></code> and <code class="docutils literal notranslate"><span class="pre">hal_adc_read</span></code> using <code class="docutils literal notranslate"><span class="pre">adc_oneshot</span></code>.</p></li>
+</ul>
+</li>
+<li><p>Use ADC1-capable GPIO only.</p></li>
+<li><p>Self-test:</p>
+<ul>
+<li><p>Read sample value and log.</p></li>
+</ul>
+</li>
+<li><p>Decision gate:</p>
+<ul>
+<li><p>If opto is digital, keep ADC optional and return unsupported when unconfigured.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="pwm-ledc">
+<h3>3.6 PWM (LEDC)<a class="headerlink" href="#pwm-ledc" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Implement:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">hal_pwm_init</span></code>, <code class="docutils literal notranslate"><span class="pre">hal_pwm_set_duty</span></code> using <code class="docutils literal notranslate"><span class="pre">driver/ledc.h</span></code>.</p></li>
+</ul>
+</li>
+<li><p>Use:</p>
+<ul>
+<li><p>Motor IN1/IN2 (GPIO6/7) and LEDs (GPIO0/1/3/5).</p></li>
+</ul>
+</li>
+<li><p>Self-test:</p>
+<ul>
+<li><p>Sweep duty on LED channels.</p></li>
+<li><p>Pulse motor pins at low duty with no motor attached.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+</section>
+<section id="integration-steps">
+<h2>Integration steps<a class="headerlink" href="#integration-steps" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p>Replace HAL stubs in <code class="docutils literal notranslate"><span class="pre">src/hal.c</span></code> with ESP-IDF implementations.</p></li>
+<li><p>Add a <code class="docutils literal notranslate"><span class="pre">HAL_SELFTEST</span></code> compile-time flag to run test routines.</p></li>
+<li><p>Update <code class="docutils literal notranslate"><span class="pre">app_main</span></code> to run the staged self-tests when enabled.</p></li>
+</ol>
+</section>
+<section id="acceptance-criteria">
+<h2>Acceptance criteria<a class="headerlink" href="#acceptance-criteria" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Project builds with real HAL implementations.</p></li>
+<li><p>GPIO toggles and button reads are correct (logs).</p></li>
+<li><p>Tick timer runs stably at 1 kHz.</p></li>
+<li><p>UART init does not interfere with USB Serial/JTAG console.</p></li>
+<li><p>ADC read returns sensible values (or cleanly reports unsupported).</p></li>
+<li><p>PWM output visible on assigned GPIOs.</p></li>
+</ul>
+</section>
+<section id="risks-and-mitigations">
+<h2>Risks and mitigations<a class="headerlink" href="#risks-and-mitigations" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>Console conflicts (UART0)</strong>: keep UART init optional and do not change
+console routing.</p></li>
+<li><p><strong>ADC pin constraints</strong>: confirm which GPIO supports ADC1 on C3.</p></li>
+<li><p><strong>PWM frequency mismatch</strong>: document chosen frequencies and adjust later.</p></li>
+<li><p><strong>Power/reset loops</strong>: keep self-tests lightweight and optional.</p></li>
+</ul>
+</section>
+<section id="open-questions">
+<h2>Open questions<a class="headerlink" href="#open-questions" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Confirm whether opto input is analog or digital on ESP32-C3.</p></li>
+<li><p>Decide I2C/SPI pin assignments (if not already in design docs).</p></li>
+<li><p>Determine if FEED input is used and its GPIO.</p></li>
+</ul>
+</section>
+<section id="test-notes">
+<h2>Test notes<a class="headerlink" href="#test-notes" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>For QEMU, use <code class="docutils literal notranslate"><span class="pre">scripts/run_qemu_with_monitor.sh</span></code> to avoid socket ordering.</p></li>
+<li><p>For hardware, keep monitor at 115200 and avoid DTR/RTS toggles.</p></li>
+</ul>
+</section>
+<section id="implementation-notes">
+<h2>Implementation notes<a class="headerlink" href="#implementation-notes" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>HAL is now backed by ESP-IDF drivers: GPIO, esp_timer, LEDC, UART, I2C, SPI, and ADC oneshot.</p></li>
+<li><p>Peripheral pins default to disabled in the HAL config; enable by setting values in <code class="docutils literal notranslate"><span class="pre">hal_config.h</span></code>.</p></li>
+<li><p>UART0 init is optional and will return unsupported unless TX/RX pins are configured; console routing is unchanged.</p></li>
+<li><p>I2C and SPI init return unsupported until valid pins are assigned.</p></li>
+<li><p>ADC uses <code class="docutils literal notranslate"><span class="pre">adc_oneshot</span></code> on ADC1; <code class="docutils literal notranslate"><span class="pre">hal_adc_read</span></code> expects an ADC channel number (not a GPIO).</p></li>
+<li><p>PWM uses LEDC low-speed mode; LEDs use timer 0 and motor pins use timer 1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">HAL_SELFTEST</span></code> enables a basic self-test path; add a compile-time flag to run it.</p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Stage 3 Plan - Core Peripheral Bring-up (ESP32-C3)</a><ul>
+<li><a class="reference internal" href="#goals">Goals</a></li>
+<li><a class="reference internal" href="#constraints">Constraints</a></li>
+<li><a class="reference internal" href="#deliverables">Deliverables</a></li>
+<li><a class="reference internal" href="#work-breakdown">Work breakdown</a><ul>
+<li><a class="reference internal" href="#gpio-bring-up">3.1 GPIO bring-up</a></li>
+<li><a class="reference internal" href="#timing-tick">3.2 Timing + tick</a></li>
+<li><a class="reference internal" href="#uart">3.3 UART</a></li>
+<li><a class="reference internal" href="#i2c-and-spi">3.4 I2C and SPI</a></li>
+<li><a class="reference internal" href="#adc-esp32-c3-limits">3.5 ADC (ESP32-C3 limits)</a></li>
+<li><a class="reference internal" href="#pwm-ledc">3.6 PWM (LEDC)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#integration-steps">Integration steps</a></li>
+<li><a class="reference internal" href="#acceptance-criteria">Acceptance criteria</a></li>
+<li><a class="reference internal" href="#risks-and-mitigations">Risks and mitigations</a></li>
+<li><a class="reference internal" href="#open-questions">Open questions</a></li>
+<li><a class="reference internal" href="#test-notes">Test notes</a></li>
+<li><a class="reference internal" href="#implementation-notes">Implementation notes</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="stage2_plan.html"
+                          title="previous chapter">Stage 2 Plan - HAL + Driver Scaffolding (ESP32-C3)</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="stage4_plan.html"
+                          title="next chapter">Stage 4 Plan - Feature Porting by Subsystem (ESP32-C3)</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/stages/stage3_plan.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="stage4_plan.html" title="Stage 4 Plan - Feature Porting by Subsystem (ESP32-C3)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="stage2_plan.html" title="Stage 2 Plan - HAL + Driver Scaffolding (ESP32-C3)"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Stage 3 Plan - Core Peripheral Bring-up (ESP32-C3)</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2026, Asterion Daedalus.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    </div>
+  </body>
+</html>

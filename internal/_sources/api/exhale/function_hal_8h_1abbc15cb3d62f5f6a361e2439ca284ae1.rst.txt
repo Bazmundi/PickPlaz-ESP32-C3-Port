@@ -1,0 +1,14 @@
+.. _exhale_function_hal_8h_1abbc15cb3d62f5f6a361e2439ca284ae1:
+
+Function hal_adc_read
+=====================
+
+- Defined in :ref:`file_include_hal.h`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: hal_adc_read(int)
+   :project: pickplaz

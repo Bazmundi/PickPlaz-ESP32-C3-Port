@@ -1,0 +1,14 @@
+.. _exhale_variable_pickplaz__app_8c_1adb079d4eef1291ab7e7cdbc6dc23ba7d:
+
+Variable sintab
+===============
+
+- Defined in :ref:`file_src_pickplaz_app.c`
+
+
+Variable Documentation
+----------------------
+
+
+.. doxygenvariable:: sintab
+   :project: pickplaz

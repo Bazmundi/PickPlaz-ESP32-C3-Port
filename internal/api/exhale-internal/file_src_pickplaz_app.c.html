@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>File pickplaz_app.c &#8212; PickPlaz ESP32-C3 Port 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/classic.css?v=2bf1fcf8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/collapsible-lists/css/tree_view.css?v=a885cde7" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=047d7ffa" />
+    
+    <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/collapsible-lists/js/CollapsibleLists.compressed.js?v=73120307"></script>
+    <script src="../../_static/collapsible-lists/js/apply-collapsible-lists.js?v=660e4f45"></script>
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">File pickplaz_app.c</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="file-pickplaz-app-c">
+<span id="file-src-pickplaz-app-c"></span><h1>File pickplaz_app.c<a class="headerlink" href="#file-pickplaz-app-c" title="Link to this heading">¶</a></h1>
+<p>↰ <a class="reference internal" href="../exhale/dir_src.html#dir-src"><span class="std std-ref">Parent directory</span></a> (<code class="docutils literal notranslate"><span class="pre">src</span></code>)</p>
+<p>Implements the PickPlaz application state machine and IO orchestration.</p>
+<nav class="contents local" id="contents">
+<p class="topic-title">Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#definition-src-pickplaz-app-c" id="id1">Definition (<code class="docutils literal notranslate"><span class="pre">src/pickplaz_app.c</span></code>)</a></p></li>
+<li><p><a class="reference internal" href="#detailed-description" id="id2">Detailed Description</a></p></li>
+<li><p><a class="reference internal" href="#includes" id="id3">Includes</a></p></li>
+<li><p><a class="reference internal" href="#classes" id="id4">Classes</a></p></li>
+<li><p><a class="reference internal" href="#enums" id="id5">Enums</a></p></li>
+<li><p><a class="reference internal" href="#functions" id="id6">Functions</a></p></li>
+<li><p><a class="reference internal" href="#variables" id="id7">Variables</a></p></li>
+</ul>
+</nav>
+<section id="definition-src-pickplaz-app-c">
+<h2>Definition (<code class="docutils literal notranslate"><span class="pre">src/pickplaz_app.c</span></code>)<a class="headerlink" href="#definition-src-pickplaz-app-c" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="program_listing_file_src_pickplaz_app.c.html">Program Listing for File pickplaz_app.c</a></li>
+</ul>
+</div>
+</section>
+<section id="detailed-description">
+<h2>Detailed Description<a class="headerlink" href="#detailed-description" title="Link to this heading">¶</a></h2>
+<p>Owns the 1 kHz application tick, translates button/opto/feed inputs into state transitions, and drives LED/motor outputs through the HAL. This module is platform-agnostic and relies on board pin mappings defined in <code class="docutils literal notranslate"><span class="pre">board_pins.h</span></code> plus optional overrides in <code class="docutils literal notranslate"><span class="pre">hal_config.h</span></code>.</p>
+<p>Thread-safety:</p>
+<ul class="simple">
+<li><p>Not thread-safe; intended to run from a single periodic tick.</p></li>
+</ul>
+</section>
+<section id="includes">
+<h2>Includes<a class="headerlink" href="#includes" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">board_pins.h</span></code> (<a class="reference internal" href="../exhale/file_include_board_pins.h.html#file-include-board-pins-h"><span class="std std-ref">File board_pins.h</span></a>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">esp_log.h</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hal.h</span></code> (<a class="reference internal" href="../exhale/file_include_hal.h.html#file-include-hal-h"><span class="std std-ref">File hal.h</span></a>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hal_config.h</span></code> (<a class="reference internal" href="../exhale/file_include_hal_config.h.html#file-include-hal-config-h"><span class="std std-ref">File hal_config.h</span></a>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">inttypes.h</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pickplaz_app.h</span></code> (<a class="reference internal" href="../exhale/file_include_pickplaz_app.h.html#file-include-pickplaz-app-h"><span class="std std-ref">File pickplaz_app.h</span></a>)</p></li>
+</ul>
+</section>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../exhale/structapp__button__t.html#exhale-struct-structapp-button-t"><span class="std std-ref">Struct app_button_t</span></a></p></li>
+</ul>
+</section>
+<section id="enums">
+<h2>Enums<a class="headerlink" href="#enums" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../exhale/enum_pickplaz__app_8c_1a3bc392ee57265296e85539d21fc93435.html#exhale-enum-pickplaz-app-8c-1a3bc392ee57265296e85539d21fc93435"><span class="std std-ref">Enum app_constants</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/enum_pickplaz__app_8c_1a716d9a867ff82580102db46fcee05080.html#exhale-enum-pickplaz-app-8c-1a716d9a867ff82580102db46fcee05080"><span class="std std-ref">Enum app_pwm_channels</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/enum_pickplaz__app_8c_1a5bb27460721cc90620d197fabf50d4bb.html#exhale-enum-pickplaz-app-8c-1a5bb27460721cc90620d197fabf50d4bb"><span class="std std-ref">Enum app_state_t</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/enum_pickplaz__app_8c_1aba6fb58d4ff9355f14b08a276b38058a.html#exhale-enum-pickplaz-app-8c-1aba6fb58d4ff9355f14b08a276b38058a"><span class="std std-ref">Enum button_event_t</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/enum_pickplaz__app_8c_1a8aec75bc0407dbc08d59573c338a3ca7.html#exhale-enum-pickplaz-app-8c-1a8aec75bc0407dbc08d59573c338a3ca7"><span class="std std-ref">Enum feed_fsm_t</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/enum_pickplaz__app_8c_1a280a591df2bc0e3ddf5a5dc7c9d90f3e.html#exhale-enum-pickplaz-app-8c-1a280a591df2bc0e3ddf5a5dc7c9d90f3e"><span class="std std-ref">Enum feed_signal_t</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/enum_pickplaz__app_8c_1aad68d698039c4951886dca6e47840d7d.html#exhale-enum-pickplaz-app-8c-1aad68d698039c4951886dca6e47840d7d"><span class="std std-ref">Enum motor_pwm_constants</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/enum_pickplaz__app_8c_1ab261a5f660ee185f6574b191c393ded6.html#exhale-enum-pickplaz-app-8c-1ab261a5f660ee185f6574b191c393ded6"><span class="std std-ref">Enum motor_state_t</span></a></p></li>
+</ul>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../exhale/function_pickplaz__app_8c_1a748e3d2ce04c1411e6878ae176e857b7.html#exhale-function-pickplaz-app-8c-1a748e3d2ce04c1411e6878ae176e857b7"><span class="std std-ref">Function app_button_update</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_pickplaz__app_8c_1acfdcdad1fb7e0ff5c734a9f0d4fe995f.html#exhale-function-pickplaz-app-8c-1acfdcdad1fb7e0ff5c734a9f0d4fe995f"><span class="std std-ref">Function app_configure_inputs</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_pickplaz__app_8c_1ae8a27307d299092f67077a8822a02a35.html#exhale-function-pickplaz-app-8c-1ae8a27307d299092f67077a8822a02a35"><span class="std std-ref">Function app_configure_pwm_outputs</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_pickplaz__app_8c_1a1aecce630d0bd995ca455ad9405d996f.html#exhale-function-pickplaz-app-8c-1a1aecce630d0bd995ca455ad9405d996f"><span class="std std-ref">Function app_gpio_is_active</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_pickplaz__app_8c_1a5855b84f755058f744ebcf3aeb9b3e37.html#exhale-function-pickplaz-app-8c-1a5855b84f755058f744ebcf3aeb9b3e37"><span class="std std-ref">Function app_pin_valid</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_pickplaz__app_8c_1a84cc3feee60d557b7711a9ddeed4f972.html#exhale-function-pickplaz-app-8c-1a84cc3feee60d557b7711a9ddeed4f972"><span class="std std-ref">Function app_pull_for_active_low</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_pickplaz__app_8c_1a03a880342c715bc2704536e69947825c.html#exhale-function-pickplaz-app-8c-1a03a880342c715bc2704536e69947825c"><span class="std std-ref">Function app_pwm_max</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_pickplaz__app_8c_1a778c1841a3f106a2404d89ee3043a2e5.html#exhale-function-pickplaz-app-8c-1a778c1841a3f106a2404d89ee3043a2e5"><span class="std std-ref">Function app_pwm_scale</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_pickplaz__app_8c_1a1bb2a8ab977e18ee2bdf0a3c77ea126d.html#exhale-function-pickplaz-app-8c-1a1bb2a8ab977e18ee2bdf0a3c77ea126d"><span class="std std-ref">Function app_set_led_duty</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_pickplaz__app_8c_1ac9a816f24a9b61f84ba8a06ce022a02d.html#exhale-function-pickplaz-app-8c-1ac9a816f24a9b61f84ba8a06ce022a02d"><span class="std std-ref">Function app_set_motor</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_pickplaz__app_8c_1a89ec102a4528fd88c009fe2f0cd12fce.html#exhale-function-pickplaz-app-8c-1a89ec102a4528fd88c009fe2f0cd12fce"><span class="std std-ref">Function app_tick</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_pickplaz__app_8c_1a0ff722d6741c5db86e38eedb797cb4f9.html#exhale-function-pickplaz-app-8c-1a0ff722d6741c5db86e38eedb797cb4f9"><span class="std std-ref">Function app_update_opto</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_pickplaz__app_8c_1a67a16cf658d6280ab069295005977e75.html#exhale-function-pickplaz-app-8c-1a67a16cf658d6280ab069295005977e75"><span class="std std-ref">Function eval_led_feed</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_pickplaz__app_8c_1aa8bee7aa8b20782d67b980812ddbb07d.html#exhale-function-pickplaz-app-8c-1aa8bee7aa8b20782d67b980812ddbb07d"><span class="std std-ref">Function eval_led_pwm</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_pickplaz__app_8c_1a6fa0ebb603db0c7a2e39a24a8aa17246.html#exhale-function-pickplaz-app-8c-1a6fa0ebb603db0c7a2e39a24a8aa17246"><span class="std std-ref">Function pickplaz_app_init(void)</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_pickplaz__app_8c_1acec691e2e6ae375695325f24c7ac949c.html#exhale-function-pickplaz-app-8c-1acec691e2e6ae375695325f24c7ac949c"><span class="std std-ref">Function pickplaz_app_start(void)</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_pickplaz__app_8c_1a875651c2669e74d0842ba0505049cfb6.html#exhale-function-pickplaz-app-8c-1a875651c2669e74d0842ba0505049cfb6"><span class="std std-ref">Function pickplaz_app_stop(void)</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_pickplaz__app_8c_1a68e301886a96c2ad8d73246861e15c21.html#exhale-function-pickplaz-app-8c-1a68e301886a96c2ad8d73246861e15c21"><span class="std std-ref">Function run_app_fsm</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_pickplaz__app_8c_1a60c7da526fc7524c8703fb9fe0e103e9.html#exhale-function-pickplaz-app-8c-1a60c7da526fc7524c8703fb9fe0e103e9"><span class="std std-ref">Function run_feed_fsm</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/function_pickplaz__app_8c_1a464ded86dc13a77e6a36445613542e81.html#exhale-function-pickplaz-app-8c-1a464ded86dc13a77e6a36445613542e81"><span class="std std-ref">Function run_motor_fsm</span></a></p></li>
+</ul>
+</section>
+<section id="variables">
+<h2>Variables<a class="headerlink" href="#variables" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../exhale/variable_pickplaz__app_8c_1a70a9d70a3b4bcd2adbf57559a7380599.html#exhale-variable-pickplaz-app-8c-1a70a9d70a3b4bcd2adbf57559a7380599"><span class="std std-ref">Variable app_backward_continuous_rq</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_pickplaz__app_8c_1a4b780c519d01ba28e86e9b83fd92977e.html#exhale-variable-pickplaz-app-8c-1a4b780c519d01ba28e86e9b83fd92977e"><span class="std std-ref">Variable app_backward_request</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_pickplaz__app_8c_1ae2252544867ec5ed1833c430d75c424e.html#exhale-variable-pickplaz-app-8c-1ae2252544867ec5ed1833c430d75c424e"><span class="std std-ref">Variable app_forward_continuous_rq</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_pickplaz__app_8c_1ada7b5233237efbfa288690a26a782dae.html#exhale-variable-pickplaz-app-8c-1ada7b5233237efbfa288690a26a782dae"><span class="std std-ref">Variable app_forward_request</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_pickplaz__app_8c_1a2449136de585743af854a91438f17bb9.html#exhale-variable-pickplaz-app-8c-1a2449136de585743af854a91438f17bb9"><span class="std std-ref">Variable app_state</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_pickplaz__app_8c_1af4020dfcc6fb9a0d7b6e5f35c70aa021.html#exhale-variable-pickplaz-app-8c-1af4020dfcc6fb9a0d7b6e5f35c70aa021"><span class="std std-ref">Variable app_tick_ms</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_pickplaz__app_8c_1a9da9d4b929c57ead8851d3148c104315.html#exhale-variable-pickplaz-app-8c-1a9da9d4b929c57ead8851d3148c104315"><span class="std std-ref">Variable app_timer</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_pickplaz__app_8c_1a262ed90b519b3674d7a62bd99d50a9c8.html#exhale-variable-pickplaz-app-8c-1a262ed90b519b3674d7a62bd99d50a9c8"><span class="std std-ref">Variable button_backward</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_pickplaz__app_8c_1a1a2ecd1ee64a1409e1d2628b9f1b14a8.html#exhale-variable-pickplaz-app-8c-1a1a2ecd1ee64a1409e1d2628b9f1b14a8"><span class="std std-ref">Variable button_forward</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_pickplaz__app_8c_1a5ce5d63a5809193da7ca242a2aa510c6.html#exhale-variable-pickplaz-app-8c-1a5ce5d63a5809193da7ca242a2aa510c6"><span class="std std-ref">Variable feed_led_counter</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_pickplaz__app_8c_1af6cc8d585750d63da0ad2ba35b650520.html#exhale-variable-pickplaz-app-8c-1af6cc8d585750d63da0ad2ba35b650520"><span class="std std-ref">Variable feed_signal_state</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_pickplaz__app_8c_1a6d55451289ef92e1a9a80d4eb4b9af07.html#exhale-variable-pickplaz-app-8c-1a6d55451289ef92e1a9a80d4eb4b9af07"><span class="std std-ref">Variable feed_state</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_pickplaz__app_8c_1a4bb9d5c11584a2577be6a6b7fb68710b.html#exhale-variable-pickplaz-app-8c-1a4bb9d5c11584a2577be6a6b7fb68710b"><span class="std std-ref">Variable feed_timer</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_pickplaz__app_8c_1a80a012662d7f0be212e105ecad1e762b.html#exhale-variable-pickplaz-app-8c-1a80a012662d7f0be212e105ecad1e762b"><span class="std std-ref">Variable motor_brake_forward</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_pickplaz__app_8c_1a94e5dd51da8c8aea7b7811cc4856cce2.html#exhale-variable-pickplaz-app-8c-1a94e5dd51da8c8aea7b7811cc4856cce2"><span class="std std-ref">Variable motor_brake_pwm</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_pickplaz__app_8c_1a98abbeec38627b6b48c90e287a0de780.html#exhale-variable-pickplaz-app-8c-1a98abbeec38627b6b48c90e287a0de780"><span class="std std-ref">Variable motor_last_forward</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_pickplaz__app_8c_1ac2c6b9c29ae11cc78ef5a5983360f1c9.html#exhale-variable-pickplaz-app-8c-1ac2c6b9c29ae11cc78ef5a5983360f1c9"><span class="std std-ref">Variable motor_last_pwm</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_pickplaz__app_8c_1a7af6a9b5d245fd9b617c23dc7371b82a.html#exhale-variable-pickplaz-app-8c-1a7af6a9b5d245fd9b617c23dc7371b82a"><span class="std std-ref">Variable motor_state</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_pickplaz__app_8c_1aa3ece49aa9c4702d2ecacdf108bcd0af.html#exhale-variable-pickplaz-app-8c-1aa3ece49aa9c4702d2ecacdf108bcd0af"><span class="std std-ref">Variable motor_target</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_pickplaz__app_8c_1a8801cd9860b266bfd3006812cd131533.html#exhale-variable-pickplaz-app-8c-1a8801cd9860b266bfd3006812cd131533"><span class="std std-ref">Variable motor_timer</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_pickplaz__app_8c_1aec4e5ac3d70dce88a34c4dcbf0d9f048.html#exhale-variable-pickplaz-app-8c-1aec4e5ac3d70dce88a34c4dcbf0d9f048"><span class="std std-ref">Variable opto_is_indexed</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_pickplaz__app_8c_1a87e7ec99bee0f5ed1e02b91b8685b0a6.html#exhale-variable-pickplaz-app-8c-1a87e7ec99bee0f5ed1e02b91b8685b0a6"><span class="std std-ref">Variable sine_speed</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_pickplaz__app_8c_1adb079d4eef1291ab7e7cdbc6dc23ba7d.html#exhale-variable-pickplaz-app-8c-1adb079d4eef1291ab7e7cdbc6dc23ba7d"><span class="std std-ref">Variable sintab</span></a></p></li>
+<li><p><a class="reference internal" href="../exhale/variable_pickplaz__app_8c_1a5a85b9c772bbeb480b209a3e6ea92b4c.html#exhale-variable-pickplaz-app-8c-1a5a85b9c772bbeb480b209a3e6ea92b4c"><span class="std std-ref">Variable TAG</span></a></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">File pickplaz_app.c</a><ul>
+<li><a class="reference internal" href="#definition-src-pickplaz-app-c">Definition (<code class="docutils literal notranslate"><span class="pre">src/pickplaz_app.c</span></code>)</a></li>
+<li><a class="reference internal" href="#detailed-description">Detailed Description</a></li>
+<li><a class="reference internal" href="#includes">Includes</a></li>
+<li><a class="reference internal" href="#classes">Classes</a></li>
+<li><a class="reference internal" href="#enums">Enums</a></li>
+<li><a class="reference internal" href="#functions">Functions</a></li>
+<li><a class="reference internal" href="#variables">Variables</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/api/exhale-internal/file_src_pickplaz_app.c.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">File pickplaz_app.c</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2026, Asterion Daedalus.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    </div>
+  </body>
+</html>

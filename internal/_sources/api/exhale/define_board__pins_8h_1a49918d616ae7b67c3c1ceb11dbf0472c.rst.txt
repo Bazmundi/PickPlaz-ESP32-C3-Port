@@ -1,0 +1,14 @@
+.. _exhale_define_board__pins_8h_1a49918d616ae7b67c3c1ceb11dbf0472c:
+
+Define BOARD_GPIO_MOTOR_IN2
+===========================
+
+- Defined in :ref:`file_include_board_pins.h`
+
+
+Define Documentation
+--------------------
+
+
+.. doxygendefine:: BOARD_GPIO_MOTOR_IN2
+   :project: pickplaz

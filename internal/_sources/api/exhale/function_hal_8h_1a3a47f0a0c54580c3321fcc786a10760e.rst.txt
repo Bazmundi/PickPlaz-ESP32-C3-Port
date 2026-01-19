@@ -1,0 +1,14 @@
+.. _exhale_function_hal_8h_1a3a47f0a0c54580c3321fcc786a10760e:
+
+Function hal_gpio_read
+======================
+
+- Defined in :ref:`file_include_hal.h`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: hal_gpio_read(int)
+   :project: pickplaz

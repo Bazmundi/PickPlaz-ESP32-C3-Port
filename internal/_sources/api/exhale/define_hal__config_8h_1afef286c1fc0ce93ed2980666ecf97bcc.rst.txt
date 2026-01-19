@@ -1,0 +1,14 @@
+.. _exhale_define_hal__config_8h_1afef286c1fc0ce93ed2980666ecf97bcc:
+
+Define HAL_I2C0_SCL_PIN
+=======================
+
+- Defined in :ref:`file_include_hal_config.h`
+
+
+Define Documentation
+--------------------
+
+
+.. doxygendefine:: HAL_I2C0_SCL_PIN
+   :project: pickplaz

@@ -1,0 +1,65 @@
+
+.. _program_listing_file_include_hal_config.h:
+
+Program Listing for File hal_config.h
+=====================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file_include_hal_config.h>` (``include/hal_config.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   /*
+    * PickPlaz ESP32-C3 Port
+    * Copyright (c) 2026 Asterion Daedalus https://github.com/Bazmundi
+    * SPDX-License-Identifier: MIT
+    *
+    * This file is part of PickPlaz ESP32-C3 Port and is licensed under the MIT License.
+    * See the LICENSE file in the project root for full license text.
+    */
+   
+   #ifndef PICKPLAZ_HAL_CONFIG_H_
+   #define PICKPLAZ_HAL_CONFIG_H_
+   
+   #ifdef __cplusplus
+   extern "C" {
+   #endif
+   
+   #include "board_pins.h"
+   
+   #define HAL_UART0_TX_PIN BOARD_GPIO_UNUSED
+   #define HAL_UART0_RX_PIN BOARD_GPIO_UNUSED
+   #define HAL_UART0_RTS_PIN BOARD_GPIO_UNUSED
+   #define HAL_UART0_CTS_PIN BOARD_GPIO_UNUSED
+   #define HAL_UART0_BAUD_DEFAULT 115200
+   
+   #define HAL_I2C0_SDA_PIN BOARD_GPIO_UNUSED
+   #define HAL_I2C0_SCL_PIN BOARD_GPIO_UNUSED
+   #define HAL_I2C0_CLOCK_HZ 100000
+   
+   #define HAL_SPI0_MOSI_PIN BOARD_GPIO_UNUSED
+   #define HAL_SPI0_MISO_PIN BOARD_GPIO_UNUSED
+   #define HAL_SPI0_SCLK_PIN BOARD_GPIO_UNUSED
+   #define HAL_SPI0_CS_PIN BOARD_GPIO_UNUSED
+   #define HAL_SPI0_CLOCK_HZ 1000000
+   #define HAL_SPI0_MODE 0
+   
+   #define HAL_ADC_DEFAULT_CHANNEL BOARD_GPIO_UNUSED
+   #define HAL_OPTO_ADC_CHANNEL BOARD_GPIO_UNUSED
+   #define HAL_OPTO_ADC_LOW_THRESHOLD 2800
+   #define HAL_OPTO_ADC_HIGH_THRESHOLD 3200
+   #define HAL_OPTO_ACTIVE_HIGH 1
+   
+   #define HAL_FEED_PIN BOARD_GPIO_UNUSED
+   #define HAL_FEED_ACTIVE_LOW 1
+   
+   #define HAL_PWM_LED_FREQ_HZ 1000
+   #define HAL_PWM_MOTOR_FREQ_HZ 20000
+   #define HAL_PWM_DUTY_RES_BITS 10
+   
+   #ifdef __cplusplus
+   }
+   #endif
+   
+   #endif

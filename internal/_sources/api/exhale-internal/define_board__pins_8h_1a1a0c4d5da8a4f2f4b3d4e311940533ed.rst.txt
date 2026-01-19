@@ -1,0 +1,14 @@
+.. _exhale_define_board__pins_8h_1a1a0c4d5da8a4f2f4b3d4e311940533ed:
+
+Define BOARD_GPIO_OPTO_INT_DEFAULT
+==================================
+
+- Defined in :ref:`file_include_board_pins.h`
+
+
+Define Documentation
+--------------------
+
+
+.. doxygendefine:: BOARD_GPIO_OPTO_INT_DEFAULT
+   :project: pickplaz

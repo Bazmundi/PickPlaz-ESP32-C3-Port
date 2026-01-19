@@ -1,0 +1,14 @@
+.. _exhale_function_hal_8c_1a891d05cc4410d477471204a4952b14ac:
+
+Function hal_timer_dispatch
+===========================
+
+- Defined in :ref:`file_src_hal.c`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: hal_timer_dispatch(void *)
+   :project: pickplaz

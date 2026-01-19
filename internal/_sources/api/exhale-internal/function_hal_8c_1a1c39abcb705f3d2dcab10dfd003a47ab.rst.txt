@@ -1,0 +1,14 @@
+.. _exhale_function_hal_8c_1a1c39abcb705f3d2dcab10dfd003a47ab:
+
+Function hal_spi_init(int, uint32_t, uint8_t)
+=============================================
+
+- Defined in :ref:`file_src_hal.c`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: hal_spi_init(int, uint32_t, uint8_t)
+   :project: pickplaz

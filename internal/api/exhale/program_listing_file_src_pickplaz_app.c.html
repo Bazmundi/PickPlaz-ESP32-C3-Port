@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Program Listing for File pickplaz_app.c &#8212; PickPlaz ESP32-C3 Port 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/classic.css?v=2bf1fcf8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/collapsible-lists/css/tree_view.css?v=a885cde7" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=047d7ffa" />
+    
+    <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/collapsible-lists/js/CollapsibleLists.compressed.js?v=73120307"></script>
+    <script src="../../_static/collapsible-lists/js/apply-collapsible-lists.js?v=660e4f45"></script>
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Program Listing for File pickplaz_app.c</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="program-listing-for-file-pickplaz-app-c">
+<span id="program-listing-file-src-pickplaz-app-c"></span><h1>Program Listing for File pickplaz_app.c<a class="headerlink" href="#program-listing-for-file-pickplaz-app-c" title="Link to this heading">¶</a></h1>
+<p>↰ <a class="reference internal" href="file_src_pickplaz_app.c.html#file-src-pickplaz-app-c"><span class="std std-ref">Return to documentation for file</span></a> (<code class="docutils literal notranslate"><span class="pre">src/pickplaz_app.c</span></code>)</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cm">/*</span>
+<span class="cm"> * PickPlaz ESP32-C3 Port</span>
+<span class="cm"> * Copyright (c) 2026 Asterion Daedalus https://github.com/Bazmundi</span>
+<span class="cm"> * SPDX-License-Identifier: MIT</span>
+<span class="cm"> *</span>
+<span class="cm"> * This file is part of PickPlaz ESP32-C3 Port and is licensed under the MIT License.</span>
+<span class="cm"> * See the LICENSE file in the project root for full license text.</span>
+<span class="cm"> */</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @file pickplaz_app.c</span>
+<span class="cm"> * @brief Implements the PickPlaz application state machine and IO orchestration.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @details</span>
+<span class="cm"> * Owns the 1 kHz application tick, translates button/opto/feed inputs into</span>
+<span class="cm"> * state transitions, and drives LED/motor outputs through the HAL. This</span>
+<span class="cm"> * module is platform-agnostic and relies on board pin mappings defined in</span>
+<span class="cm"> * `board_pins.h` plus optional overrides in `hal_config.h`.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Thread-safety:</span>
+<span class="cm"> * - Not thread-safe; intended to run from a single periodic tick.</span>
+<span class="cm"> */</span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;pickplaz_app.h&quot;</span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;inttypes.h&gt;</span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;board_pins.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;esp_log.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;hal.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;hal_config.h&quot;</span>
+
+<span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">TAG</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;pickplaz_app&quot;</span><span class="p">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief Provides a 256-entry sine lookup table for LED animation.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @details</span>
+<span class="cm"> * Values range from 0..256 and are scaled by APP_SINE_SCALE to reach the</span>
+<span class="cm"> * STM32-style 0..APP_PWM_STM32_MAX duty range.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @note Indexed modulo APP_SINE_LEN.</span>
+<span class="cm"> */</span>
+<span class="k">extern</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">sintab</span><span class="p">[</span><span class="mi">256</span><span class="p">];</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief Application timing and scaling constants.</span>
+<span class="cm"> */</span>
+<span class="k">enum</span><span class="w"> </span><span class="nc">app_constants</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">APP_PWM_STM32_MAX</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2048</span><span class="p">,</span>
+<span class="w">    </span><span class="n">APP_TICK_HZ</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span>
+<span class="w">    </span><span class="n">APP_SINE_LEN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">256</span><span class="p">,</span>
+<span class="w">    </span><span class="n">APP_SINE_SCALE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span>
+<span class="w">    </span><span class="n">APP_FEED_PULSE_MS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">500</span><span class="p">,</span>
+<span class="w">    </span><span class="n">APP_BUTTON_CNT_MAX</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span>
+<span class="w">    </span><span class="n">APP_BUTTON_LONGPRESS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">400</span><span class="p">,</span>
+<span class="p">};</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief Represents a decoded feed input event.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @details</span>
+<span class="cm"> * The feed input is sampled at 1 kHz and converted into a short or long event</span>
+<span class="cm"> * consumed by the application FSM.</span>
+<span class="cm"> */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/** No feed event has been detected. */</span>
+<span class="w">    </span><span class="n">FEED_none</span><span class="p">,</span>
+<span class="w">    </span><span class="cm">/** A short feed pulse was latched. */</span>
+<span class="w">    </span><span class="n">FEED_short</span><span class="p">,</span>
+<span class="w">    </span><span class="cm">/** A long feed pulse was latched. */</span>
+<span class="w">    </span><span class="n">FEED_long</span>
+<span class="p">}</span><span class="w"> </span><span class="n">feed_signal_t</span><span class="p">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief Tracks the raw feed input level for pulse detection.</span>
+<span class="cm"> */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/** Feed input is low; waiting for a rising edge. */</span>
+<span class="w">    </span><span class="n">FEED_fsm_low</span><span class="p">,</span>
+<span class="w">    </span><span class="cm">/** Feed input is high; timing the pulse width. */</span>
+<span class="w">    </span><span class="n">FEED_fsm_high</span>
+<span class="p">}</span><span class="w"> </span><span class="n">feed_fsm_t</span><span class="p">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief Describes the motor control state machine.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @details</span>
+<span class="cm"> * Tracks whether the motor is idle, running, or in active braking.</span>
+<span class="cm"> */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/** Initial state after reset; forces outputs to a stopped condition. */</span>
+<span class="w">    </span><span class="n">MOTOR_init</span><span class="p">,</span>
+<span class="w">    </span><span class="cm">/** Motor is stopped and waiting for a target. */</span>
+<span class="w">    </span><span class="n">MOTOR_idle</span><span class="p">,</span>
+<span class="w">    </span><span class="cm">/** Motor is driving forward with PWM. */</span>
+<span class="w">    </span><span class="n">MOTOR_running_forward</span><span class="p">,</span>
+<span class="w">    </span><span class="cm">/** Motor is driving backward with PWM. */</span>
+<span class="w">    </span><span class="n">MOTOR_running_backward</span><span class="p">,</span>
+<span class="w">    </span><span class="cm">/** Motor is actively braking after a stop request. */</span>
+<span class="w">    </span><span class="n">MOTOR_brake</span>
+<span class="p">}</span><span class="w"> </span><span class="n">motor_state_t</span><span class="p">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief Represents the main application state machine.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @details</span>
+<span class="cm"> * States mirror the STM32 firmware behavior for indexed moves and continuous</span>
+<span class="cm"> * motion while a button is held.</span>
+<span class="cm"> */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/** Initial state after reset. */</span>
+<span class="w">    </span><span class="n">APP_init</span><span class="p">,</span>
+<span class="w">    </span><span class="cm">/** Idle state waiting for button or feed events. */</span>
+<span class="w">    </span><span class="n">APP_idle</span><span class="p">,</span>
+<span class="w">    </span><span class="cm">/** Forward step: move until the opto leaves index or timeout. */</span>
+<span class="w">    </span><span class="n">APP_increment_forward1</span><span class="p">,</span>
+<span class="w">    </span><span class="cm">/** Reverse step: move until the opto leaves index or timeout. */</span>
+<span class="w">    </span><span class="n">APP_increment_backward1</span><span class="p">,</span>
+<span class="w">    </span><span class="cm">/** Forward step: continue until opto returns to index or timeout. */</span>
+<span class="w">    </span><span class="n">APP_increment_forward2</span><span class="p">,</span>
+<span class="w">    </span><span class="cm">/** Reverse step: continue until opto returns to index or timeout. */</span>
+<span class="w">    </span><span class="n">APP_increment_backward2</span><span class="p">,</span>
+<span class="w">    </span><span class="cm">/** Continuous forward motion while the forward request is held. */</span>
+<span class="w">    </span><span class="n">APP_free_forward</span><span class="p">,</span>
+<span class="w">    </span><span class="cm">/** Continuous reverse motion while the reverse request is held. */</span>
+<span class="w">    </span><span class="n">APP_free_backward</span>
+<span class="p">}</span><span class="w"> </span><span class="n">app_state_t</span><span class="p">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief Represents the debounced button event for a single tick.</span>
+<span class="cm"> */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/** No event this tick. */</span>
+<span class="w">    </span><span class="n">BUTTON_none</span><span class="p">,</span>
+<span class="w">    </span><span class="cm">/** Short press released after debounce timing. */</span>
+<span class="w">    </span><span class="n">BUTTON_short</span><span class="p">,</span>
+<span class="w">    </span><span class="cm">/** Long press released after exceeding the long-press threshold. */</span>
+<span class="w">    </span><span class="n">BUTTON_long</span><span class="p">,</span>
+<span class="w">    </span><span class="cm">/** Button remains held; emitted while pressed. */</span>
+<span class="w">    </span><span class="n">BUTTON_hold</span>
+<span class="p">}</span><span class="w"> </span><span class="n">button_event_t</span><span class="p">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief Holds debounce and press timing state for a button input.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @details</span>
+<span class="cm"> * The debounce counter saturates at APP_BUTTON_CNT_MAX and press counts are</span>
+<span class="cm"> * measured in 1 kHz ticks.</span>
+<span class="cm"> */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">pin</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">active_low</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">cnt</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">press</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="n">app_button_t</span><span class="p">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief PWM values for motor control modes.</span>
+<span class="cm"> */</span>
+<span class="k">enum</span><span class="w"> </span><span class="nc">motor_pwm_constants</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">MOTOR_FORWARD_NORMAL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2048</span><span class="p">,</span>
+<span class="w">    </span><span class="n">MOTOR_BACKWARD_NORMAL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">-2048</span><span class="p">,</span>
+<span class="w">    </span><span class="n">MOTOR_FORWARD_FAST</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2048</span><span class="p">,</span>
+<span class="w">    </span><span class="n">MOTOR_BACKWARD_FAST</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">-2048</span><span class="p">,</span>
+<span class="w">    </span><span class="n">MOTOR_STOP</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="p">};</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief PWM channel assignments for LEDs and motor outputs.</span>
+<span class="cm"> */</span>
+<span class="k">enum</span><span class="w"> </span><span class="nc">app_pwm_channels</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">APP_PWM_LED0_CH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="n">APP_PWM_LED1_CH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="n">APP_PWM_LED2_CH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">    </span><span class="n">APP_PWM_LED3_CH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="w">    </span><span class="n">APP_PWM_MOTOR_IN1_CH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
+<span class="w">    </span><span class="n">APP_PWM_MOTOR_IN2_CH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span>
+<span class="p">};</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">app_button_t</span><span class="w"> </span><span class="n">button_forward</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="p">.</span><span class="n">pin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BOARD_GPIO_BUTTON_FWD</span><span class="p">,</span>
+<span class="w">    </span><span class="p">.</span><span class="n">active_low</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BOARD_BUTTON_ACTIVE_LOW</span><span class="p">,</span>
+<span class="w">    </span><span class="p">.</span><span class="n">cnt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="p">.</span><span class="n">press</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="p">};</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">app_button_t</span><span class="w"> </span><span class="n">button_backward</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="p">.</span><span class="n">pin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BOARD_GPIO_BUTTON_REV</span><span class="p">,</span>
+<span class="w">    </span><span class="p">.</span><span class="n">active_low</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BOARD_BUTTON_ACTIVE_LOW</span><span class="p">,</span>
+<span class="w">    </span><span class="p">.</span><span class="n">cnt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="p">.</span><span class="n">press</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="p">};</span>
+
+<span class="k">static</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">app_tick_ms</span><span class="p">;</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">opto_is_indexed</span><span class="p">;</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">feed_fsm_t</span><span class="w"> </span><span class="n">feed_state</span><span class="p">;</span>
+<span class="k">static</span><span class="w"> </span><span class="n">feed_signal_t</span><span class="w"> </span><span class="n">feed_signal_state</span><span class="p">;</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">feed_timer</span><span class="p">;</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">feed_led_counter</span><span class="p">;</span>
+
+<span class="k">static</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">app_forward_request</span><span class="p">;</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">app_backward_request</span><span class="p">;</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">app_forward_continuous_rq</span><span class="p">;</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">app_backward_continuous_rq</span><span class="p">;</span>
+<span class="k">static</span><span class="w"> </span><span class="n">app_state_t</span><span class="w"> </span><span class="n">app_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">APP_init</span><span class="p">;</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">app_timer</span><span class="p">;</span>
+
+<span class="k">static</span><span class="w"> </span><span class="kt">int32_t</span><span class="w"> </span><span class="n">motor_target</span><span class="p">;</span>
+<span class="k">static</span><span class="w"> </span><span class="n">motor_state_t</span><span class="w"> </span><span class="n">motor_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MOTOR_init</span><span class="p">;</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">motor_timer</span><span class="p">;</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">motor_brake_pwm</span><span class="p">;</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">motor_brake_forward</span><span class="p">;</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">motor_last_pwm</span><span class="p">;</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">motor_last_forward</span><span class="p">;</span>
+
+<span class="k">static</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">sine_speed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">55</span><span class="p">;</span>
+
+<span class="k">static</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">app_pin_valid</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">pin</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">pin</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">BOARD_GPIO_UNUSED</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">hal_gpio_pull_t</span><span class="w"> </span><span class="nf">app_pull_for_active_low</span><span class="p">(</span><span class="kt">bool</span><span class="w"> </span><span class="n">active_low</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">active_low</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">HAL_GPIO_PULL_UP</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">HAL_GPIO_PULL_DOWN</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="nf">app_pwm_max</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">HAL_PWM_DUTY_RES_BITS</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">31</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mh">0xFFFFFFFFU</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="mi">1U</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">HAL_PWM_DUTY_RES_BITS</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1U</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="nf">app_pwm_scale</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">max_duty</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">app_pwm_max</span><span class="p">();</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">value</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">APP_PWM_STM32_MAX</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">max_duty</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">value</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">max_duty</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">APP_PWM_STM32_MAX</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">app_set_led_duty</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">channel</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">stm32_value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">stm32_value</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">APP_PWM_STM32_MAX</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">stm32_value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">APP_PWM_STM32_MAX</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">hal_pwm_set_duty</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span><span class="w"> </span><span class="n">app_pwm_scale</span><span class="p">(</span><span class="n">stm32_value</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">app_gpio_is_active</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">pin</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">active_low</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">app_pin_valid</span><span class="p">(</span><span class="n">pin</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">hal_gpio_level_t</span><span class="w"> </span><span class="n">level</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hal_gpio_read</span><span class="p">(</span><span class="n">pin</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">active_low</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="p">(</span><span class="n">level</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">HAL_GPIO_LOW</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="n">level</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">HAL_GPIO_HIGH</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief Samples and debounces a button, returning edge events.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @details</span>
+<span class="cm"> * Implements the STM32 timing model: a debounce counter followed by press</span>
+<span class="cm"> * timing. Returns BUTTON_short/BUTTON_long on release and BUTTON_hold while</span>
+<span class="cm"> * the button remains held.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Preconditions:</span>
+<span class="cm"> * - button must be non-null and initialized with pin and polarity.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Postconditions:</span>
+<span class="cm"> * - Debounce and press counters are updated.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Side effects:</span>
+<span class="cm"> * - Reads GPIO through the HAL.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param button Button state storage. Must not be NULL.</span>
+<span class="cm"> * @return Button event for this tick.</span>
+<span class="cm"> */</span>
+<span class="k">static</span><span class="w"> </span><span class="n">button_event_t</span><span class="w"> </span><span class="nf">app_button_update</span><span class="p">(</span><span class="n">app_button_t</span><span class="w"> </span><span class="o">*</span><span class="n">button</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">pressed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">app_gpio_is_active</span><span class="p">(</span><span class="n">button</span><span class="o">-&gt;</span><span class="n">pin</span><span class="p">,</span><span class="w"> </span><span class="n">button</span><span class="o">-&gt;</span><span class="n">active_low</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">pressed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">button</span><span class="o">-&gt;</span><span class="n">cnt</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">APP_BUTTON_CNT_MAX</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">button</span><span class="o">-&gt;</span><span class="n">cnt</span><span class="o">++</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">button</span><span class="o">-&gt;</span><span class="n">cnt</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">button</span><span class="o">-&gt;</span><span class="n">cnt</span><span class="o">--</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">debounced</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">button</span><span class="o">-&gt;</span><span class="n">cnt</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="p">(</span><span class="n">APP_BUTTON_CNT_MAX</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">debounced</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">button</span><span class="o">-&gt;</span><span class="n">press</span><span class="o">++</span><span class="p">;</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">button</span><span class="o">-&gt;</span><span class="n">press</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">APP_BUTTON_LONGPRESS</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">BUTTON_hold</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">BUTTON_none</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">button</span><span class="o">-&gt;</span><span class="n">press</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">button_event_t</span><span class="w"> </span><span class="n">ev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BUTTON_none</span><span class="p">;</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">button</span><span class="o">-&gt;</span><span class="n">press</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">APP_BUTTON_LONGPRESS</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">ev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BUTTON_long</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">ev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BUTTON_short</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="n">button</span><span class="o">-&gt;</span><span class="n">press</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">ev</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">BUTTON_none</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief Drives the motor H-bridge outputs with scaled PWM.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @details</span>
+<span class="cm"> * Applies the STM32-style duty value (0..2048) to the ESP32 LEDC channels.</span>
+<span class="cm"> * Forward drives IN2, backward drives IN1, matching the STM32 polarity model.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Preconditions:</span>
+<span class="cm"> * - Motor PWM channels are initialized via hal_pwm_init().</span>
+<span class="cm"> *</span>
+<span class="cm"> * Side effects:</span>
+<span class="cm"> * - Updates LEDC duty on the motor output channels.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param pwm Duty value in STM32 units (0..2048).</span>
+<span class="cm"> * @param forward True for forward direction, false for reverse.</span>
+<span class="cm"> */</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">app_set_motor</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">pwm</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">forward</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">duty</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">app_pwm_scale</span><span class="p">(</span><span class="n">pwm</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">forward</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">hal_pwm_set_duty</span><span class="p">(</span><span class="n">APP_PWM_MOTOR_IN1_CH</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">        </span><span class="n">hal_pwm_set_duty</span><span class="p">(</span><span class="n">APP_PWM_MOTOR_IN2_CH</span><span class="p">,</span><span class="w"> </span><span class="n">duty</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">hal_pwm_set_duty</span><span class="p">(</span><span class="n">APP_PWM_MOTOR_IN1_CH</span><span class="p">,</span><span class="w"> </span><span class="n">duty</span><span class="p">);</span>
+<span class="w">        </span><span class="n">hal_pwm_set_duty</span><span class="p">(</span><span class="n">APP_PWM_MOTOR_IN2_CH</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief Updates the feed pulse FSM.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @details</span>
+<span class="cm"> * Detects short/long feed pulses on HAL_FEED_PIN using the 1 kHz tick and</span>
+<span class="cm"> * updates feed_signal_state accordingly. If the feed pin is not configured,</span>
+<span class="cm"> * the FSM remains idle.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Preconditions:</span>
+<span class="cm"> * - HAL_FEED_PIN is configured as input when enabled.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Postconditions:</span>
+<span class="cm"> * - feed_signal_state reflects the most recent pulse classification.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Side effects:</span>
+<span class="cm"> * - Reads GPIO through the HAL.</span>
+<span class="cm"> */</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">run_feed_fsm</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">app_pin_valid</span><span class="p">(</span><span class="n">HAL_FEED_PIN</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">feed_pin_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">app_gpio_is_active</span><span class="p">(</span><span class="n">HAL_FEED_PIN</span><span class="p">,</span><span class="w"> </span><span class="n">HAL_FEED_ACTIVE_LOW</span><span class="p">);</span>
+<span class="w">    </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">feed_state</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">FEED_fsm_low</span><span class="p">:</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">feed_pin_state</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">feed_timer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">            </span><span class="n">feed_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FEED_fsm_high</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">FEED_fsm_high</span><span class="p">:</span>
+<span class="w">    </span><span class="k">default</span><span class="o">:</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">feed_pin_state</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">feed_timer</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">feed_signal_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FEED_long</span><span class="p">;</span>
+<span class="w">            </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">feed_signal_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FEED_short</span><span class="p">;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="n">feed_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FEED_fsm_low</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="n">feed_timer</span><span class="o">++</span><span class="p">;</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief Advances the main application FSM.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @details</span>
+<span class="cm"> * Updates application state transitions, timers, and motor_target based on</span>
+<span class="cm"> * button requests, feed signals, and opto indexing status.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Preconditions:</span>
+<span class="cm"> * - app_state and request flags are initialized.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Postconditions:</span>
+<span class="cm"> * - app_state, app_timer, and motor_target are updated.</span>
+<span class="cm"> */</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">run_app_fsm</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">app_state</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">APP_init</span><span class="p">:</span>
+<span class="w">        </span><span class="n">app_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">APP_idle</span><span class="p">;</span>
+<span class="w">        </span><span class="n">app_timer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">200</span><span class="p">;</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">APP_idle</span><span class="p">:</span>
+<span class="w">        </span><span class="n">motor_target</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MOTOR_STOP</span><span class="p">;</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app_forward_request</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">feed_signal_state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">FEED_short</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">app_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">APP_increment_forward1</span><span class="p">;</span>
+<span class="w">            </span><span class="n">app_forward_request</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">            </span><span class="n">app_timer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">500</span><span class="p">;</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">feed_signal_state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">FEED_short</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">feed_signal_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FEED_none</span><span class="p">;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app_backward_request</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">feed_signal_state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">FEED_long</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">app_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">APP_increment_backward1</span><span class="p">;</span>
+<span class="w">            </span><span class="n">app_backward_request</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">            </span><span class="n">app_timer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">500</span><span class="p">;</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">feed_signal_state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">FEED_long</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">feed_signal_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FEED_none</span><span class="p">;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app_forward_continuous_rq</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">app_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">APP_free_forward</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app_backward_continuous_rq</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">app_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">APP_free_backward</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">APP_increment_forward1</span><span class="p">:</span>
+<span class="w">        </span><span class="n">motor_target</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MOTOR_FORWARD_NORMAL</span><span class="p">;</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">opto_is_indexed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">app_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">APP_increment_forward2</span><span class="p">;</span>
+<span class="w">            </span><span class="n">app_timer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1500</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app_timer</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">app_timer</span><span class="o">--</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">app_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">APP_idle</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">APP_increment_forward2</span><span class="p">:</span>
+<span class="w">        </span><span class="n">motor_target</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MOTOR_FORWARD_NORMAL</span><span class="p">;</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">opto_is_indexed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">app_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">APP_idle</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app_timer</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">app_timer</span><span class="o">--</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">app_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">APP_idle</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">APP_increment_backward1</span><span class="p">:</span>
+<span class="w">        </span><span class="n">motor_target</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MOTOR_BACKWARD_NORMAL</span><span class="p">;</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">opto_is_indexed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">app_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">APP_increment_backward2</span><span class="p">;</span>
+<span class="w">            </span><span class="n">app_timer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1500</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app_timer</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">app_timer</span><span class="o">--</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">app_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">APP_idle</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">APP_increment_backward2</span><span class="p">:</span>
+<span class="w">        </span><span class="n">motor_target</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MOTOR_BACKWARD_NORMAL</span><span class="p">;</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">opto_is_indexed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">app_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">APP_idle</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app_timer</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">app_timer</span><span class="o">--</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">app_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">APP_idle</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">APP_free_forward</span><span class="p">:</span>
+<span class="w">        </span><span class="n">motor_target</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MOTOR_FORWARD_FAST</span><span class="p">;</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">app_forward_continuous_rq</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">app_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">APP_increment_forward2</span><span class="p">;</span>
+<span class="w">            </span><span class="n">app_timer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1500</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">APP_free_backward</span><span class="p">:</span>
+<span class="w">        </span><span class="n">motor_target</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MOTOR_BACKWARD_FAST</span><span class="p">;</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">app_backward_continuous_rq</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">app_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">APP_increment_backward2</span><span class="p">;</span>
+<span class="w">            </span><span class="n">app_timer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1500</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">default</span><span class="o">:</span>
+<span class="w">        </span><span class="n">app_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">APP_init</span><span class="p">;</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief Advances the motor control FSM.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @details</span>
+<span class="cm"> * Translates motor_target into PWM outputs, applies active braking when</span>
+<span class="cm"> * stopping, and tracks the last commanded direction for brake polarity.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Preconditions:</span>
+<span class="cm"> * - motor_target is updated by run_app_fsm().</span>
+<span class="cm"> *</span>
+<span class="cm"> * Postconditions:</span>
+<span class="cm"> * - PWM outputs reflect the desired motor behavior.</span>
+<span class="cm"> */</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">run_motor_fsm</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">motor_state</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">MOTOR_init</span><span class="p">:</span>
+<span class="w">        </span><span class="n">app_set_motor</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span>
+<span class="w">        </span><span class="n">motor_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MOTOR_idle</span><span class="p">;</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">MOTOR_idle</span><span class="p">:</span>
+<span class="w">        </span><span class="n">app_set_motor</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">motor_target</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">motor_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MOTOR_running_forward</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">motor_target</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">motor_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MOTOR_running_backward</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">MOTOR_running_forward</span><span class="p">:</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">motor_target</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">motor_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MOTOR_brake</span><span class="p">;</span>
+<span class="w">            </span><span class="n">motor_timer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">8</span><span class="p">;</span>
+<span class="w">            </span><span class="n">motor_brake_pwm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">motor_last_pwm</span><span class="p">;</span>
+<span class="w">            </span><span class="n">motor_brake_forward</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">!</span><span class="n">motor_last_forward</span><span class="p">;</span>
+<span class="w">            </span><span class="n">app_set_motor</span><span class="p">(</span><span class="n">motor_brake_pwm</span><span class="p">,</span><span class="w"> </span><span class="n">motor_brake_forward</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">motor_last_pwm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">uint32_t</span><span class="p">)</span><span class="n">motor_target</span><span class="p">;</span>
+<span class="w">            </span><span class="n">motor_last_forward</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">            </span><span class="n">app_set_motor</span><span class="p">((</span><span class="kt">uint32_t</span><span class="p">)</span><span class="n">motor_target</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">MOTOR_running_backward</span><span class="p">:</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">motor_target</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">motor_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MOTOR_brake</span><span class="p">;</span>
+<span class="w">            </span><span class="n">motor_timer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">8</span><span class="p">;</span>
+<span class="w">            </span><span class="n">motor_brake_pwm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">motor_last_pwm</span><span class="p">;</span>
+<span class="w">            </span><span class="n">motor_brake_forward</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">!</span><span class="n">motor_last_forward</span><span class="p">;</span>
+<span class="w">            </span><span class="n">app_set_motor</span><span class="p">(</span><span class="n">motor_brake_pwm</span><span class="p">,</span><span class="w"> </span><span class="n">motor_brake_forward</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">motor_last_pwm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">uint32_t</span><span class="p">)(</span><span class="o">-</span><span class="n">motor_target</span><span class="p">);</span>
+<span class="w">            </span><span class="n">motor_last_forward</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">            </span><span class="n">app_set_motor</span><span class="p">((</span><span class="kt">uint32_t</span><span class="p">)(</span><span class="o">-</span><span class="n">motor_target</span><span class="p">),</span><span class="w"> </span><span class="nb">false</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">MOTOR_brake</span><span class="p">:</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">motor_timer</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">motor_timer</span><span class="o">--</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">motor_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MOTOR_idle</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">motor_target</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">motor_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MOTOR_idle</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">default</span><span class="o">:</span>
+<span class="w">        </span><span class="n">motor_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MOTOR_init</span><span class="p">;</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief Computes LED animation PWM values for the current state.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @details</span>
+<span class="cm"> * Reproduces STM32 LED patterns: idle/indexed, idle/unindexed, forward and</span>
+<span class="cm"> * backward motion waves, and the default sine animation.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Side effects:</span>
+<span class="cm"> * - Updates LED PWM channels via the HAL when LEDs are enabled.</span>
+<span class="cm"> */</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">eval_led_pwm</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">led0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">led1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">led2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">led3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app_state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">APP_idle</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">opto_is_indexed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">led3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">APP_PWM_STM32_MAX</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">t1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">app_tick_ms</span><span class="p">;</span>
+<span class="w">            </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">t2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">128</span><span class="p">;</span>
+<span class="w">            </span><span class="n">led1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sintab</span><span class="p">[</span><span class="n">t1</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">APP_SINE_LEN</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">APP_SINE_SCALE</span><span class="p">;</span>
+<span class="w">            </span><span class="n">led2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sintab</span><span class="p">[</span><span class="n">t2</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">APP_SINE_LEN</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">APP_SINE_SCALE</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app_state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">APP_increment_forward1</span><span class="w"> </span><span class="o">||</span>
+<span class="w">               </span><span class="n">app_state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">APP_increment_forward2</span><span class="w"> </span><span class="o">||</span>
+<span class="w">               </span><span class="n">app_state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">APP_free_forward</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">t1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">app_tick_ms</span><span class="p">;</span>
+<span class="w">        </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">t2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">sine_speed</span><span class="p">;</span>
+<span class="w">        </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">t3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">sine_speed</span><span class="p">;</span>
+<span class="w">        </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">t4</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t3</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">sine_speed</span><span class="p">;</span>
+<span class="w">        </span><span class="n">led0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sintab</span><span class="p">[</span><span class="n">t1</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">APP_SINE_LEN</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">APP_SINE_SCALE</span><span class="p">;</span>
+<span class="w">        </span><span class="n">led1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sintab</span><span class="p">[</span><span class="n">t2</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">APP_SINE_LEN</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">APP_SINE_SCALE</span><span class="p">;</span>
+<span class="w">        </span><span class="n">led2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sintab</span><span class="p">[</span><span class="n">t3</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">APP_SINE_LEN</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">APP_SINE_SCALE</span><span class="p">;</span>
+<span class="w">        </span><span class="n">led3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sintab</span><span class="p">[</span><span class="n">t4</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">APP_SINE_LEN</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">APP_SINE_SCALE</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app_state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">APP_increment_backward1</span><span class="w"> </span><span class="o">||</span>
+<span class="w">               </span><span class="n">app_state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">APP_increment_backward2</span><span class="w"> </span><span class="o">||</span>
+<span class="w">               </span><span class="n">app_state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">APP_free_backward</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">t4</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">app_tick_ms</span><span class="p">;</span>
+<span class="w">        </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">t3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t4</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">sine_speed</span><span class="p">;</span>
+<span class="w">        </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">t2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t3</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">sine_speed</span><span class="p">;</span>
+<span class="w">        </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">t1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">sine_speed</span><span class="p">;</span>
+<span class="w">        </span><span class="n">led0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sintab</span><span class="p">[</span><span class="n">t1</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">APP_SINE_LEN</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">APP_SINE_SCALE</span><span class="p">;</span>
+<span class="w">        </span><span class="n">led1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sintab</span><span class="p">[</span><span class="n">t2</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">APP_SINE_LEN</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">APP_SINE_SCALE</span><span class="p">;</span>
+<span class="w">        </span><span class="n">led2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sintab</span><span class="p">[</span><span class="n">t3</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">APP_SINE_LEN</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">APP_SINE_SCALE</span><span class="p">;</span>
+<span class="w">        </span><span class="n">led3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sintab</span><span class="p">[</span><span class="n">t4</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">APP_SINE_LEN</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">APP_SINE_SCALE</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">t1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">app_tick_ms</span><span class="p">;</span>
+<span class="w">        </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">t2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">128</span><span class="p">;</span>
+<span class="w">        </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">t3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">128</span><span class="p">;</span>
+<span class="w">        </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">t4</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t3</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">128</span><span class="p">;</span>
+<span class="w">        </span><span class="n">led0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sintab</span><span class="p">[</span><span class="n">t1</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">APP_SINE_LEN</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">APP_SINE_SCALE</span><span class="p">;</span>
+<span class="w">        </span><span class="n">led1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sintab</span><span class="p">[</span><span class="n">t2</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">APP_SINE_LEN</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">APP_SINE_SCALE</span><span class="p">;</span>
+<span class="w">        </span><span class="n">led2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sintab</span><span class="p">[</span><span class="n">t3</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">APP_SINE_LEN</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">APP_SINE_SCALE</span><span class="p">;</span>
+<span class="w">        </span><span class="n">led3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sintab</span><span class="p">[</span><span class="n">t4</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">APP_SINE_LEN</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">APP_SINE_SCALE</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app_pin_valid</span><span class="p">(</span><span class="n">BOARD_GPIO_LED0</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">app_set_led_duty</span><span class="p">(</span><span class="n">APP_PWM_LED0_CH</span><span class="p">,</span><span class="w"> </span><span class="n">led0</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app_pin_valid</span><span class="p">(</span><span class="n">BOARD_GPIO_LED1</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">app_set_led_duty</span><span class="p">(</span><span class="n">APP_PWM_LED1_CH</span><span class="p">,</span><span class="w"> </span><span class="n">led1</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app_pin_valid</span><span class="p">(</span><span class="n">BOARD_GPIO_LED2</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">app_set_led_duty</span><span class="p">(</span><span class="n">APP_PWM_LED2_CH</span><span class="p">,</span><span class="w"> </span><span class="n">led2</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app_pin_valid</span><span class="p">(</span><span class="n">BOARD_GPIO_LED3</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">app_set_led_duty</span><span class="p">(</span><span class="n">APP_PWM_LED3_CH</span><span class="p">,</span><span class="w"> </span><span class="n">led3</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief Drives the feed indicator LED.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @details</span>
+<span class="cm"> * Emits a 500 ms pulse when a feed event is detected. Uses LED4 when</span>
+<span class="cm"> * available; otherwise falls back to LED3 to preserve visibility.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Side effects:</span>
+<span class="cm"> * - Updates LED4 GPIO or LED3 PWM output.</span>
+<span class="cm"> */</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">eval_led_feed</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">feed_signal_state</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">FEED_none</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">feed_led_counter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">APP_FEED_PULSE_MS</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">feed_led_counter</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">feed_led_counter</span><span class="o">--</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app_pin_valid</span><span class="p">(</span><span class="n">BOARD_GPIO_LED4</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">hal_gpio_write</span><span class="p">(</span><span class="n">BOARD_GPIO_LED4</span><span class="p">,</span>
+<span class="w">                       </span><span class="n">feed_led_counter</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">HAL_GPIO_HIGH</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">HAL_GPIO_LOW</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">feed_led_counter</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">app_set_led_duty</span><span class="p">(</span><span class="n">APP_PWM_LED3_CH</span><span class="p">,</span><span class="w"> </span><span class="n">APP_PWM_STM32_MAX</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief Updates opto indexing status from ADC or GPIO.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @details</span>
+<span class="cm"> * If HAL_OPTO_ADC_CHANNEL is configured, uses hysteresis thresholds to avoid</span>
+<span class="cm"> * flapping. Otherwise reads BOARD_GPIO_OPTO_INT with configurable polarity.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Postconditions:</span>
+<span class="cm"> * - opto_is_indexed reflects the latest sampled input.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Side effects:</span>
+<span class="cm"> * - Reads ADC or GPIO through the HAL.</span>
+<span class="cm"> */</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">app_update_opto</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app_pin_valid</span><span class="p">(</span><span class="n">HAL_OPTO_ADC_CHANNEL</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">adc_value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hal_adc_read</span><span class="p">(</span><span class="n">HAL_OPTO_ADC_CHANNEL</span><span class="p">);</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">adc_value</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">opto_is_indexed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">opto_is_indexed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">uint32_t</span><span class="p">)</span><span class="n">adc_value</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">HAL_OPTO_ADC_LOW_THRESHOLD</span><span class="p">;</span>
+<span class="w">            </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">opto_is_indexed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">uint32_t</span><span class="p">)</span><span class="n">adc_value</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">HAL_OPTO_ADC_HIGH_THRESHOLD</span><span class="p">;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">return</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app_pin_valid</span><span class="p">(</span><span class="n">BOARD_GPIO_OPTO_INT</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">bool</span><span class="w"> </span><span class="n">active</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">app_gpio_is_active</span><span class="p">(</span><span class="n">BOARD_GPIO_OPTO_INT</span><span class="p">,</span><span class="w"> </span><span class="o">!</span><span class="n">HAL_OPTO_ACTIVE_HIGH</span><span class="p">);</span>
+<span class="w">        </span><span class="n">opto_is_indexed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">active</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mi">1U</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mi">0U</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief Executes one 1 kHz application tick.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @details</span>
+<span class="cm"> * Samples buttons, updates opto/feed state, advances the application and motor</span>
+<span class="cm"> * FSMs, and refreshes LED outputs.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Preconditions:</span>
+<span class="cm"> * - pickplaz_app_init() has configured IO and initialized state.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Side effects:</span>
+<span class="cm"> * - Reads GPIO/ADC inputs and updates PWM/GPIO outputs.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param user_data Unused; reserved for future tick context.</span>
+<span class="cm"> */</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">app_tick</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">user_data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">user_data</span><span class="p">;</span>
+<span class="w">    </span><span class="n">app_tick_ms</span><span class="o">++</span><span class="p">;</span>
+<span class="cp">#ifdef PICKPLAZ_APP_HEARTBEAT</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">app_tick_ms</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">APP_TICK_HZ</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">ESP_LOGI</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Heartbeat tick=%&quot;</span><span class="w"> </span><span class="n">PRIu32</span><span class="w"> </span><span class="s">&quot; state=%d motor=%ld opto=%&quot;</span><span class="w"> </span><span class="n">PRIu32</span><span class="p">,</span>
+<span class="w">                 </span><span class="n">app_tick_ms</span><span class="p">,</span><span class="w"> </span><span class="n">app_state</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">long</span><span class="p">)</span><span class="n">motor_target</span><span class="p">,</span><span class="w"> </span><span class="n">opto_is_indexed</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="cp">#endif</span>
+
+<span class="w">    </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">app_button_update</span><span class="p">(</span><span class="o">&amp;</span><span class="n">button_forward</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">BUTTON_short</span><span class="p">:</span>
+<span class="w">        </span><span class="n">app_forward_request</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">BUTTON_hold</span><span class="p">:</span>
+<span class="w">        </span><span class="n">app_forward_continuous_rq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">BUTTON_none</span><span class="p">:</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">BUTTON_long</span><span class="p">:</span>
+<span class="w">    </span><span class="k">default</span><span class="o">:</span>
+<span class="w">        </span><span class="n">app_forward_continuous_rq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">app_button_update</span><span class="p">(</span><span class="o">&amp;</span><span class="n">button_backward</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">BUTTON_short</span><span class="p">:</span>
+<span class="w">        </span><span class="n">app_backward_request</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">BUTTON_hold</span><span class="p">:</span>
+<span class="w">        </span><span class="n">app_backward_continuous_rq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">BUTTON_none</span><span class="p">:</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">BUTTON_long</span><span class="p">:</span>
+<span class="w">    </span><span class="k">default</span><span class="o">:</span>
+<span class="w">        </span><span class="n">app_backward_continuous_rq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">app_update_opto</span><span class="p">();</span>
+<span class="w">    </span><span class="n">run_feed_fsm</span><span class="p">();</span>
+<span class="w">    </span><span class="n">run_app_fsm</span><span class="p">();</span>
+<span class="w">    </span><span class="n">run_motor_fsm</span><span class="p">();</span>
+<span class="w">    </span><span class="n">eval_led_pwm</span><span class="p">();</span>
+<span class="w">    </span><span class="n">eval_led_feed</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief Configures PWM outputs for LEDs and motor channels.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @details</span>
+<span class="cm"> * Initializes LEDC channels only for pins that are enabled in the current</span>
+<span class="cm"> * board pinmap.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Side effects:</span>
+<span class="cm"> * - Allocates LEDC timers/channels via the HAL.</span>
+<span class="cm"> */</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">app_configure_pwm_outputs</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app_pin_valid</span><span class="p">(</span><span class="n">BOARD_GPIO_LED0</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">hal_pwm_init</span><span class="p">(</span><span class="n">APP_PWM_LED0_CH</span><span class="p">,</span><span class="w"> </span><span class="n">BOARD_GPIO_LED0</span><span class="p">,</span><span class="w"> </span><span class="n">HAL_PWM_LED_FREQ_HZ</span><span class="p">,</span>
+<span class="w">                     </span><span class="n">HAL_PWM_DUTY_RES_BITS</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app_pin_valid</span><span class="p">(</span><span class="n">BOARD_GPIO_LED1</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">hal_pwm_init</span><span class="p">(</span><span class="n">APP_PWM_LED1_CH</span><span class="p">,</span><span class="w"> </span><span class="n">BOARD_GPIO_LED1</span><span class="p">,</span><span class="w"> </span><span class="n">HAL_PWM_LED_FREQ_HZ</span><span class="p">,</span>
+<span class="w">                     </span><span class="n">HAL_PWM_DUTY_RES_BITS</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app_pin_valid</span><span class="p">(</span><span class="n">BOARD_GPIO_LED2</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">hal_pwm_init</span><span class="p">(</span><span class="n">APP_PWM_LED2_CH</span><span class="p">,</span><span class="w"> </span><span class="n">BOARD_GPIO_LED2</span><span class="p">,</span><span class="w"> </span><span class="n">HAL_PWM_LED_FREQ_HZ</span><span class="p">,</span>
+<span class="w">                     </span><span class="n">HAL_PWM_DUTY_RES_BITS</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app_pin_valid</span><span class="p">(</span><span class="n">BOARD_GPIO_LED3</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">hal_pwm_init</span><span class="p">(</span><span class="n">APP_PWM_LED3_CH</span><span class="p">,</span><span class="w"> </span><span class="n">BOARD_GPIO_LED3</span><span class="p">,</span><span class="w"> </span><span class="n">HAL_PWM_LED_FREQ_HZ</span><span class="p">,</span>
+<span class="w">                     </span><span class="n">HAL_PWM_DUTY_RES_BITS</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app_pin_valid</span><span class="p">(</span><span class="n">BOARD_GPIO_MOTOR_IN1</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">hal_pwm_init</span><span class="p">(</span><span class="n">APP_PWM_MOTOR_IN1_CH</span><span class="p">,</span><span class="w"> </span><span class="n">BOARD_GPIO_MOTOR_IN1</span><span class="p">,</span>
+<span class="w">                     </span><span class="n">HAL_PWM_MOTOR_FREQ_HZ</span><span class="p">,</span><span class="w"> </span><span class="n">HAL_PWM_DUTY_RES_BITS</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app_pin_valid</span><span class="p">(</span><span class="n">BOARD_GPIO_MOTOR_IN2</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">hal_pwm_init</span><span class="p">(</span><span class="n">APP_PWM_MOTOR_IN2_CH</span><span class="p">,</span><span class="w"> </span><span class="n">BOARD_GPIO_MOTOR_IN2</span><span class="p">,</span>
+<span class="w">                     </span><span class="n">HAL_PWM_MOTOR_FREQ_HZ</span><span class="p">,</span><span class="w"> </span><span class="n">HAL_PWM_DUTY_RES_BITS</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief Configures GPIO inputs for buttons, feed, and opto.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @details</span>
+<span class="cm"> * Applies active-low or active-high pull configuration based on pin settings.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Side effects:</span>
+<span class="cm"> * - Configures GPIO input mode via the HAL.</span>
+<span class="cm"> */</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">app_configure_inputs</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app_pin_valid</span><span class="p">(</span><span class="n">button_forward</span><span class="p">.</span><span class="n">pin</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">hal_gpio_config_input</span><span class="p">(</span><span class="n">button_forward</span><span class="p">.</span><span class="n">pin</span><span class="p">,</span>
+<span class="w">                              </span><span class="n">app_pull_for_active_low</span><span class="p">(</span><span class="n">button_forward</span><span class="p">.</span><span class="n">active_low</span><span class="p">));</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app_pin_valid</span><span class="p">(</span><span class="n">button_backward</span><span class="p">.</span><span class="n">pin</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">        </span><span class="n">hal_gpio_config_input</span><span class="p">(</span><span class="n">button_backward</span><span class="p">.</span><span class="n">pin</span><span class="p">,</span>
+<span class="w">                              </span><span class="n">app_pull_for_active_low</span><span class="p">(</span><span class="n">button_backward</span><span class="p">.</span><span class="n">active_low</span><span class="p">));</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app_pin_valid</span><span class="p">(</span><span class="n">HAL_FEED_PIN</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">hal_gpio_config_input</span><span class="p">(</span><span class="n">HAL_FEED_PIN</span><span class="p">,</span><span class="w"> </span><span class="n">app_pull_for_active_low</span><span class="p">(</span><span class="n">HAL_FEED_ACTIVE_LOW</span><span class="p">));</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app_pin_valid</span><span class="p">(</span><span class="n">BOARD_GPIO_OPTO_INT</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">hal_gpio_config_input</span><span class="p">(</span><span class="n">BOARD_GPIO_OPTO_INT</span><span class="p">,</span>
+<span class="w">                              </span><span class="n">app_pull_for_active_low</span><span class="p">(</span><span class="o">!</span><span class="n">HAL_OPTO_ACTIVE_HIGH</span><span class="p">));</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief Initializes PickPlaz application state and IO.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @details</span>
+<span class="cm"> * Configures PWM outputs, input GPIOs, and optional ADC usage, then resets all</span>
+<span class="cm"> * application state machines and counters.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Preconditions:</span>
+<span class="cm"> * - hal_init() has been called.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Postconditions:</span>
+<span class="cm"> * - Application state machines are reset to APP_init/MOTOR_init.</span>
+<span class="cm"> * - GPIO/PWM resources are configured for enabled pins.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Side effects:</span>
+<span class="cm"> * - Configures PWM, GPIO, and ADC resources through the HAL.</span>
+<span class="cm"> * - Logs initialization status.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Error handling:</span>
+<span class="cm"> * - Returns HAL_OK; initialization failures are reported via HAL logs.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @return HAL_OK on completion.</span>
+<span class="cm"> */</span>
+<span class="n">hal_status_t</span><span class="w"> </span><span class="nf">pickplaz_app_init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">ESP_LOGI</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;PickPlaz app init (Stage 4)&quot;</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">app_configure_pwm_outputs</span><span class="p">();</span>
+<span class="w">    </span><span class="n">app_configure_inputs</span><span class="p">();</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app_pin_valid</span><span class="p">(</span><span class="n">BOARD_GPIO_LED4</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">hal_gpio_config_output</span><span class="p">(</span><span class="n">BOARD_GPIO_LED4</span><span class="p">,</span><span class="w"> </span><span class="n">HAL_GPIO_LOW</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app_pin_valid</span><span class="p">(</span><span class="n">HAL_OPTO_ADC_CHANNEL</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">hal_adc_init</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">feed_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FEED_fsm_low</span><span class="p">;</span>
+<span class="w">    </span><span class="n">feed_signal_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FEED_none</span><span class="p">;</span>
+<span class="w">    </span><span class="n">app_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">APP_init</span><span class="p">;</span>
+<span class="w">    </span><span class="n">motor_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MOTOR_init</span><span class="p">;</span>
+<span class="w">    </span><span class="n">motor_target</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MOTOR_STOP</span><span class="p">;</span>
+<span class="w">    </span><span class="n">motor_timer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">motor_last_pwm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">motor_last_forward</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">    </span><span class="n">feed_timer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">feed_led_counter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">app_tick_ms</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">HAL_OK</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief Starts the PickPlaz application tick.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @details</span>
+<span class="cm"> * Registers the 1 kHz tick callback with the HAL timer service.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Preconditions:</span>
+<span class="cm"> * - pickplaz_app_init() has been called.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Postconditions:</span>
+<span class="cm"> * - The application tick is running.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Side effects:</span>
+<span class="cm"> * - Allocates and starts a periodic timer via the HAL.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Error handling:</span>
+<span class="cm"> * - Returns HAL_ERR_* codes from hal_tick_start().</span>
+<span class="cm"> *</span>
+<span class="cm"> * @return HAL_OK on success, or a HAL_ERR_* code on failure.</span>
+<span class="cm"> */</span>
+<span class="n">hal_status_t</span><span class="w"> </span><span class="nf">pickplaz_app_start</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">hal_tick_start</span><span class="p">(</span><span class="n">APP_TICK_HZ</span><span class="p">,</span><span class="w"> </span><span class="n">app_tick</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief Stops the PickPlaz application tick.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @details</span>
+<span class="cm"> * Cancels the periodic tick timer created by pickplaz_app_start().</span>
+<span class="cm"> *</span>
+<span class="cm"> * Side effects:</span>
+<span class="cm"> * - Stops the periodic timer via the HAL.</span>
+<span class="cm"> */</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">pickplaz_app_stop</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">hal_tick_stop</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/api/exhale/program_listing_file_src_pickplaz_app.c.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Program Listing for File pickplaz_app.c</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2026, Asterion Daedalus.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    </div>
+  </body>
+</html>

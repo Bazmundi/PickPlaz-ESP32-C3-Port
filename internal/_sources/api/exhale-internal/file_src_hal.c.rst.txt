@@ -1,0 +1,191 @@
+
+.. _file_src_hal.c:
+
+File hal.c
+==========
+
+|exhale_lsh| :ref:`Parent directory <dir_src>` (``src``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+
+Implements the ESP32-C3 hardware abstraction layer. 
+
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+Definition (``src/hal.c``)
+--------------------------
+
+
+.. toctree::
+   :maxdepth: 1
+
+   program_listing_file_src_hal.c.rst
+
+
+
+Detailed Description
+--------------------
+
+Provides GPIO, timers, PWM, UART, SPI, I2C, ADC, and optional self-test services using ESP-IDF drivers. The HAL hides platform specifics from the application layer.
+
+Thread-safety:
+
+- Not thread-safe; callers should serialize access when sharing resources. 
+
+
+
+
+
+
+Includes
+--------
+
+
+- ``driver/gpio.h``
+
+- ``driver/i2c.h``
+
+- ``driver/ledc.h``
+
+- ``driver/spi_master.h``
+
+- ``driver/uart.h``
+
+- ``esp_adc/adc_oneshot.h``
+
+- ``esp_err.h``
+
+- ``esp_log.h``
+
+- ``esp_timer.h``
+
+- ``freertos/FreeRTOS.h``
+
+- ``freertos/task.h``
+
+- ``hal.h`` (:ref:`file_include_hal.h`)
+
+- ``hal_config.h`` (:ref:`file_include_hal_config.h`)
+
+
+
+
+
+
+Classes
+-------
+
+
+- :ref:`exhale_struct_structhal__pwm__channel__t`
+
+- :ref:`exhale_struct_structhal__timer__entry__t`
+
+
+Functions
+---------
+
+
+- :ref:`exhale_function_hal_8c_1ad2b0628033ffbd261bcf9b76766084de`
+
+- :ref:`exhale_function_hal_8c_1abbc15cb3d62f5f6a361e2439ca284ae1`
+
+- :ref:`exhale_function_hal_8c_1a57165466685c07db56639eefa2c7762c`
+
+- :ref:`exhale_function_hal_8c_1a8e015bdd62711d772d0234e867552c9b`
+
+- :ref:`exhale_function_hal_8c_1aa47580b596362a723c64253b6f96da7f`
+
+- :ref:`exhale_function_hal_8c_1a0393c84325eca1b4409f0e16e333d032`
+
+- :ref:`exhale_function_hal_8c_1a3a47f0a0c54580c3321fcc786a10760e`
+
+- :ref:`exhale_function_hal_8c_1aade48bdd2daa3d361e064c7550adccd9`
+
+- :ref:`exhale_function_hal_8c_1a0db3b7f6e6c7a39cf8d844458e2d6a12`
+
+- :ref:`exhale_function_hal_8c_1a81481505356e62563e80581dd9cf6c82`
+
+- :ref:`exhale_function_hal_8c_1a5ef9c5c01e84697df3a37b43ad75095c`
+
+- :ref:`exhale_function_hal_8c_1aeb14317f896030f3633262f975ecaca5`
+
+- :ref:`exhale_function_hal_8c_1ae6bf9db2c00129a4e389e3697ae0f82e`
+
+- :ref:`exhale_function_hal_8c_1a7f3bf9248d72bdb2a3de774a672f732d`
+
+- :ref:`exhale_function_hal_8c_1a4c49acebd21873268743c97e3819e251`
+
+- :ref:`exhale_function_hal_8c_1a563449b223b376f87e4fbead08e6a228`
+
+- :ref:`exhale_function_hal_8c_1a92f001aca66be66a6d4fe1d269ea54a7`
+
+- :ref:`exhale_function_hal_8c_1a0fd5066915239ef7bf934a789344d484`
+
+- :ref:`exhale_function_hal_8c_1a1c39abcb705f3d2dcab10dfd003a47ab`
+
+- :ref:`exhale_function_hal_8c_1aa1fa817a67ff2caab80e12a8a6f7fa27`
+
+- :ref:`exhale_function_hal_8c_1a32c6e93ceec92767cd9ddd91d7bbd9d0`
+
+- :ref:`exhale_function_hal_8c_1ae089162c529176b1b41ed31b0c443106`
+
+- :ref:`exhale_function_hal_8c_1a23978cfc488ed31c3ce490e8964bff2d`
+
+- :ref:`exhale_function_hal_8c_1a891d05cc4410d477471204a4952b14ac`
+
+- :ref:`exhale_function_hal_8c_1a4c4c4497084339299dfa367f1186e819`
+
+- :ref:`exhale_function_hal_8c_1a24be8ca1c0912025c86497e9521e7682`
+
+- :ref:`exhale_function_hal_8c_1a04de98a22522468aaaacd4140626d6e3`
+
+- :ref:`exhale_function_hal_8c_1a4a993f68f9c9bdf8baef6d370c452b95`
+
+- :ref:`exhale_function_hal_8c_1a1bbe3dd10657732bf282f8cddb3bd941`
+
+
+Defines
+-------
+
+
+- :ref:`exhale_define_hal_8c_1a3e9fd53c6c2d9b964e06e2f36329a576`
+
+
+Variables
+---------
+
+
+- :ref:`exhale_variable_hal_8c_1a8ecb4277a213ccb3f9e60c9faa0db12a`
+
+- :ref:`exhale_variable_hal_8c_1af8e6de8ecceaf046d1758052c7a6a8b6`
+
+- :ref:`exhale_variable_hal_8c_1a2503324e556f50f84731ee7004786ba4`
+
+- :ref:`exhale_variable_hal_8c_1a1cd5df15df4e267a3e694d2e39d07b7b`
+
+- :ref:`exhale_variable_hal_8c_1acb0148585a3b8d9d8570f50865521e29`
+
+- :ref:`exhale_variable_hal_8c_1a15cfca1f569460aa1e47e92c65c14cb8`
+
+- :ref:`exhale_variable_hal_8c_1a5f8f5dc62b177995447d5525948b1219`
+
+- :ref:`exhale_variable_hal_8c_1adb9e2e243f5f0cab814e13fb9087bd53`
+
+- :ref:`exhale_variable_hal_8c_1a78f99cd17fd3513e2cd0ff942cac3091`
+
+- :ref:`exhale_variable_hal_8c_1a5223d62afcc3cacaf9b08abc09c631e7`
+
+- :ref:`exhale_variable_hal_8c_1ab6dfe53f9a47179293b8de175c89fdf3`
+
+- :ref:`exhale_variable_hal_8c_1a50e428074639c8531dce6bf48797db18`
+
+- :ref:`exhale_variable_hal_8c_1a8fc71bf7d0e535093155b224351cad15`
+
+- :ref:`exhale_variable_hal_8c_1a5a85b9c772bbeb480b209a3e6ea92b4c`
+

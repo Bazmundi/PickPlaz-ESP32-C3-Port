@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Port stages &#8212; PickPlaz ESP32-C3 Port 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=2bf1fcf8" />
+    <link rel="stylesheet" type="text/css" href="../_static/collapsible-lists/css/tree_view.css?v=a885cde7" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=047d7ffa" />
+    
+    <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js?v=73120307"></script>
+    <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js?v=660e4f45"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Stage 1 Lessons Learned (ESP32-C3 Port)" href="stage1_lessons.html" />
+    <link rel="prev" title="Motor PWM Analysis Report" href="../design/MOTOR_PWM_ANALYSIS.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="stage1_lessons.html" title="Stage 1 Lessons Learned (ESP32-C3 Port)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../design/MOTOR_PWM_ANALYSIS.html" title="Motor PWM Analysis Report"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Port stages</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="port-stages">
+<h1>Port stages<a class="headerlink" href="#port-stages" title="Link to this heading">¶</a></h1>
+<section id="stage-0">
+<h2>Stage 0<a class="headerlink" href="#stage-0" title="Link to this heading">¶</a></h2>
+<p>Scope + pinout alignment — confirm ESP32‑C3 Super Mini pin mapping, voltage levels, peripherals, and ensure the target board definition is correct in platformio.ini.
+Design details: <a class="reference internal" href="../design/porting_design.html"><span class="std std-doc">Porting design</span></a>.</p>
+</section>
+<section id="stage-1">
+<h2>Stage 1<a class="headerlink" href="#stage-1" title="Link to this heading">¶</a></h2>
+<p>Build skeleton + boot — get a minimal ESP‑IDF app compiling, flashing, and logging; establish serial console and reset/boot flow.
+Lessons learned: <a class="reference internal" href="stage1_lessons.html"><span class="std std-doc">Stage 1</span></a>, <a class="reference internal" href="stage1_qemu_lessons.html"><span class="std std-doc">Stage 1 QEMU</span></a>.</p>
+</section>
+<section id="stage-2">
+<h2>Stage 2<a class="headerlink" href="#stage-2" title="Link to this heading">¶</a></h2>
+<p>HAL abstraction — define a platform layer (GPIO, timers, PWM, UART, SPI/I2C, ADC) with stubbed APIs so higher‑level logic can compile without STM32 dependencies.
+Plan: <a class="reference internal" href="stage2_plan.html"><span class="std std-doc">Stage 2 plan</span></a>.</p>
+</section>
+<section id="stage-3">
+<h2>Stage 3<a class="headerlink" href="#stage-3" title="Link to this heading">¶</a></h2>
+<p>Core peripherals bring‑up — implement GPIO + timing first, then UART/I2C/SPI, then ADC (noting C3 limitations), then PWM (LEDC), each with a quick self‑test.
+Plan: <a class="reference internal" href="stage3_plan.html"><span class="std std-doc">Stage 3 plan</span></a>.</p>
+</section>
+<section id="stage-4">
+<h2>Stage 4<a class="headerlink" href="#stage-4" title="Link to this heading">¶</a></h2>
+<p>Feature porting by subsystem — migrate motor control, sensor inputs, and any safety/limit logic one module at a time, validating behavior against STM32 output.
+Plan: <a class="reference internal" href="stage4_plan.html"><span class="std std-doc">Stage 4 plan</span></a>.</p>
+</section>
+<section id="stage-5">
+<h2>Stage 5<a class="headerlink" href="#stage-5" title="Link to this heading">¶</a></h2>
+<p>Runtime robustness — add watchdog, brownout considerations, error handling, and logging; confirm power/performance constraints on C3.</p>
+</section>
+<section id="stage-6">
+<h2>Stage 6<a class="headerlink" href="#stage-6" title="Link to this heading">¶</a></h2>
+<p>Integration + calibration — run end‑to‑end behavior with calibration steps and validate motion/sensing timing.</p>
+</section>
+<section id="stage-7">
+<h2>Stage 7<a class="headerlink" href="#stage-7" title="Link to this heading">¶</a></h2>
+<p>Verification + polish — consolidate configuration, clean up build flags, and document pin maps and bring‑up notes.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Port stages</a><ul>
+<li><a class="reference internal" href="#stage-0">Stage 0</a></li>
+<li><a class="reference internal" href="#stage-1">Stage 1</a></li>
+<li><a class="reference internal" href="#stage-2">Stage 2</a></li>
+<li><a class="reference internal" href="#stage-3">Stage 3</a></li>
+<li><a class="reference internal" href="#stage-4">Stage 4</a></li>
+<li><a class="reference internal" href="#stage-5">Stage 5</a></li>
+<li><a class="reference internal" href="#stage-6">Stage 6</a></li>
+<li><a class="reference internal" href="#stage-7">Stage 7</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="../design/MOTOR_PWM_ANALYSIS.html"
+                          title="previous chapter">Motor PWM Analysis Report</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="stage1_lessons.html"
+                          title="next chapter">Stage 1 Lessons Learned (ESP32-C3 Port)</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/stages/overview.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="stage1_lessons.html" title="Stage 1 Lessons Learned (ESP32-C3 Port)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../design/MOTOR_PWM_ANALYSIS.html" title="Motor PWM Analysis Report"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Port stages</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2026, Asterion Daedalus.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    </div>
+  </body>
+</html>

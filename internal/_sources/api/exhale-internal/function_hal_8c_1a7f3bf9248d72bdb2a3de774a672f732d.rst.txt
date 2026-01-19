@@ -1,0 +1,14 @@
+.. _exhale_function_hal_8c_1a7f3bf9248d72bdb2a3de774a672f732d:
+
+Function hal_pwm_bits_to_ledc
+=============================
+
+- Defined in :ref:`file_src_hal.c`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: hal_pwm_bits_to_ledc(uint32_t)
+   :project: pickplaz

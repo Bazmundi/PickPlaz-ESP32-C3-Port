@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>QEMU Smoke Test (Stage 1) &#8212; PickPlaz ESP32-C3 Port 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=2bf1fcf8" />
+    <link rel="stylesheet" type="text/css" href="../_static/collapsible-lists/css/tree_view.css?v=a885cde7" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=047d7ffa" />
+    
+    <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js?v=73120307"></script>
+    <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js?v=660e4f45"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="QEMU ESP32-C3 Emulation Setup - Summary" href="qemu_summary.html" />
+    <link rel="prev" title="QEMU Setup for ESP32-C3 Emulation" href="qemu_setup.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="qemu_summary.html" title="QEMU ESP32-C3 Emulation Setup - Summary"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="qemu_setup.html" title="QEMU Setup for ESP32-C3 Emulation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">QEMU Smoke Test (Stage 1)</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="qemu-smoke-test-stage-1">
+<h1>QEMU Smoke Test (Stage 1)<a class="headerlink" href="#qemu-smoke-test-stage-1" title="Link to this heading">¶</a></h1>
+<p>This doc records a lightweight smoke test for the local QEMU setup.
+It is <strong>not</strong> a functional ESP32 simulation yet; it only verifies that the
+QEMU toolchain exists and can be invoked without errors.</p>
+<section id="why-this-exists">
+<h2>Why this exists<a class="headerlink" href="#why-this-exists" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Keep QEMU available as an optional tool without tracking its source/build.</p></li>
+<li><p>Provide a fast check before Stage 2+ adds more hardware‑dependent logic.</p></li>
+<li><p>Record the QEMU setup story used in the earlier esp32version work.</p></li>
+</ul>
+</section>
+<section id="what-is-and-is-not-tracked">
+<h2>What is (and is not) tracked<a class="headerlink" href="#what-is-and-is-not-tracked" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">qemu/</span></code> and <code class="docutils literal notranslate"><span class="pre">qemu-install/</span></code> live at repo root and are <strong>ignored</strong> by git.</p></li>
+<li><p>This repo tracks the smoke test script and the QEMU setup docs under <code class="docutils literal notranslate"><span class="pre">docs/</span></code>.</p></li>
+</ul>
+</section>
+<section id="smoke-test">
+<h2>Smoke test<a class="headerlink" href="#smoke-test" title="Link to this heading">¶</a></h2>
+<p>Run from the repo root:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ESP32Port/pickplazESP32Port/scripts/qemu_smoke.sh
+</pre></div>
+</div>
+<p>Expected output:</p>
+<ul class="simple">
+<li><p>A list of <code class="docutils literal notranslate"><span class="pre">qemu-system-*</span></code> binaries found under <code class="docutils literal notranslate"><span class="pre">qemu-install/usr/local/bin</span></code>.</p></li>
+<li><p>Version info for each binary.</p></li>
+<li><p>A confirmation line if <code class="docutils literal notranslate"><span class="pre">qemu-system-riscv32</span></code> can list machines.</p></li>
+</ul>
+</section>
+<section id="qemu-setup-and-usage">
+<h2>QEMU setup and usage<a class="headerlink" href="#qemu-setup-and-usage" title="Link to this heading">¶</a></h2>
+<p>For the full setup story and ESP32-C3 run scripts, see:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ESP32Port/pickplazESP32Port/docs/QEMU_SETUP.md</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ESP32Port/pickplazESP32Port/docs/QEMU_SUMMARY.md</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ESP32Port/pickplazESP32Port/scripts/merge_flash.sh</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ESP32Port/pickplazESP32Port/scripts/run_qemu.sh</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ESP32Port/pickplazESP32Port/scripts/run_qemu_with_monitor.sh</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ESP32Port/pickplazESP32Port/scripts/run_flash_qemu.sh</span></code></p></li>
+</ul>
+<p>The QEMU build uses the <code class="docutils literal notranslate"><span class="pre">esp32-c3-qemu</span></code> environment with <code class="docutils literal notranslate"><span class="pre">sdkconfig.qemu</span></code>
+to force a UART console (QEMU does not emulate USB Serial/JTAG).
+Flash size is pinned to 4MB in <code class="docutils literal notranslate"><span class="pre">platformio.ini</span></code> to match the device.</p>
+</section>
+<section id="limitations">
+<h2>Limitations<a class="headerlink" href="#limitations" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>This does <strong>not</strong> boot the ESP32-C3 firmware.</p></li>
+<li><p>The current QEMU install includes <code class="docutils literal notranslate"><span class="pre">qemu-system-riscv32</span></code>; there is no
+guarantee of an ESP32-compatible target in this tree.</p></li>
+<li><p>If we later adopt an ESP32‑capable QEMU fork, the smoke script can be
+extended to launch a real firmware run.</p></li>
+</ul>
+</section>
+<section id="notes-for-future-automation">
+<h2>Notes for future automation<a class="headerlink" href="#notes-for-future-automation" title="Link to this heading">¶</a></h2>
+<p>If we decide to formalize QEMU testing:</p>
+<ul class="simple">
+<li><p>Pin the QEMU fork/version and target machine in this repo.</p></li>
+<li><p>Add a small harness to run the firmware and capture serial output.</p></li>
+<li><p>Keep any generated outputs in a dedicated, ignored folder.</p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">QEMU Smoke Test (Stage 1)</a><ul>
+<li><a class="reference internal" href="#why-this-exists">Why this exists</a></li>
+<li><a class="reference internal" href="#what-is-and-is-not-tracked">What is (and is not) tracked</a></li>
+<li><a class="reference internal" href="#smoke-test">Smoke test</a></li>
+<li><a class="reference internal" href="#qemu-setup-and-usage">QEMU setup and usage</a></li>
+<li><a class="reference internal" href="#limitations">Limitations</a></li>
+<li><a class="reference internal" href="#notes-for-future-automation">Notes for future automation</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="qemu_setup.html"
+                          title="previous chapter">QEMU Setup for ESP32-C3 Emulation</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="qemu_summary.html"
+                          title="next chapter">QEMU ESP32-C3 Emulation Setup - Summary</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/tooling/qemu_notes.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="qemu_summary.html" title="QEMU ESP32-C3 Emulation Setup - Summary"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="qemu_setup.html" title="QEMU Setup for ESP32-C3 Emulation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">QEMU Smoke Test (Stage 1)</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2026, Asterion Daedalus.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    </div>
+  </body>
+</html>

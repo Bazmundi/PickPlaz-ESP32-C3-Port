@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>LED Analysis Report &#8212; PickPlaz ESP32-C3 Port 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=2bf1fcf8" />
+    <link rel="stylesheet" type="text/css" href="../_static/collapsible-lists/css/tree_view.css?v=a885cde7" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=047d7ffa" />
+    
+    <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js?v=73120307"></script>
+    <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js?v=660e4f45"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Motor PWM Analysis Report" href="MOTOR_PWM_ANALYSIS.html" />
+    <link rel="prev" title="PickPlaz ESP32-C3 Port - Stage 0 (Scope + Pinout Alignment)" href="porting_design.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="MOTOR_PWM_ANALYSIS.html" title="Motor PWM Analysis Report"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="porting_design.html" title="PickPlaz ESP32-C3 Port - Stage 0 (Scope + Pinout Alignment)"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">LED Analysis Report</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="led-analysis-report">
+<h1>LED Analysis Report<a class="headerlink" href="#led-analysis-report" title="Link to this heading">¶</a></h1>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
+<p>This report analyzes the LED implementation in the pickplazfeederstm project. The system uses PWM-controlled LEDs through Timer 1 (TIM1) and a single GPIO-controlled LED.</p>
+</section>
+<section id="led-components">
+<h2>LED Components<a class="headerlink" href="#led-components" title="Link to this heading">¶</a></h2>
+<section id="pwm-controlled-leds-led0-led3-for-animations">
+<h3>PWM-Controlled LEDs (LED0-LED3) for animations<a class="headerlink" href="#pwm-controlled-leds-led0-led3-for-animations" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong>Timer</strong>: TIM1</p></li>
+<li><p><strong>PWM Channels</strong>: 4 channels (CH1-CH4)</p></li>
+<li><p><strong>Pins</strong>:</p>
+<ul>
+<li><p>LED0: PA11 (TIM1_CH4)</p></li>
+<li><p>LED1: PA10 (TIM1_CH3)</p></li>
+<li><p>LED2: PA9 (TIM1_CH2)</p></li>
+<li><p>LED3: PA8 (TIM1_CH1)</p></li>
+</ul>
+</li>
+<li><p><strong>PWM Configuration</strong>:</p>
+<ul>
+<li><p>Period: 2048</p></li>
+<li><p>Prescaler: 0</p></li>
+<li><p>Mode: PWM1</p></li>
+<li><p>Polarity: High</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="gpio-controlled-led-led4">
+<h3>GPIO-Controlled LED (LED4)<a class="headerlink" href="#gpio-controlled-led-led4" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong>Pin</strong>: PB11</p></li>
+<li><p><strong>Control Method</strong>: Simple GPIO on/off</p></li>
+<li><p><strong>Usage</strong>: Feed operation indicator</p></li>
+</ul>
+</section>
+<section id="opto-sensor-led">
+<h3>Opto Sensor LED<a class="headerlink" href="#opto-sensor-led" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong>Pin</strong>: PA5</p></li>
+<li><p><strong>Control Method</strong>: Always on during operation</p></li>
+<li><p><strong>Purpose</strong>: Illuminates the opto sensor.</p></li>
+</ul>
+</section>
+</section>
+<section id="led-behavior-analysis">
+<h2>LED Behavior Analysis<a class="headerlink" href="#led-behavior-analysis" title="Link to this heading">¶</a></h2>
+<section id="led0-led3-pwm-behavior">
+<h3>LED0-LED3 PWM Behavior<a class="headerlink" href="#led0-led3-pwm-behavior" title="Link to this heading">¶</a></h3>
+<p>The four PWM-controlled LEDs are managed by the <code class="docutils literal notranslate"><span class="pre">eval_led_pwm()</span></code> function in <code class="docutils literal notranslate"><span class="pre">application.cpp</span></code>, which creates distinct patterns based on the application state:</p>
+<section id="idle-state-with-opto-indexed">
+<h4>1. Idle State with Opto Indexed<a class="headerlink" href="#idle-state-with-opto-indexed" title="Link to this heading">¶</a></h4>
+<p><strong>Condition</strong>: <code class="docutils literal notranslate"><span class="pre">app_state</span> <span class="pre">==</span> <span class="pre">APP_idle</span></code> and <code class="docutils literal notranslate"><span class="pre">opto_is_indexed</span> <span class="pre">==</span> <span class="pre">true</span></code></p>
+<p><strong>Behavior</strong>:</p>
+<ul class="simple">
+<li><p>LED0: OFF (0)</p></li>
+<li><p>LED1: OFF (0)</p></li>
+<li><p>LED2: OFF (0)</p></li>
+<li><p>LED3: ON (2048) - Full brightness</p></li>
+</ul>
+<p><strong>Purpose</strong>: Indicates system is idle and opto sensor is detecting the indexed position.</p>
+<figure class="doc-figure align-center" id="id2">
+<img alt="../_images/IndexIdle.gif" src="../_images/IndexIdle.gif" />
+<figcaption>
+<p><span class="caption-text">Index Idle LED simulation</span><a class="headerlink" href="#id2" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="idle-state-without-opto-indexed">
+<h4>2. Idle State without Opto Indexed<a class="headerlink" href="#idle-state-without-opto-indexed" title="Link to this heading">¶</a></h4>
+<p><strong>Condition</strong>: <code class="docutils literal notranslate"><span class="pre">app_state</span> <span class="pre">==</span> <span class="pre">APP_idle</span></code> and <code class="docutils literal notranslate"><span class="pre">opto_is_indexed</span> <span class="pre">==</span> <span class="pre">false</span></code></p>
+<p><strong>Behavior</strong>:</p>
+<ul class="simple">
+<li><p>LED0: OFF (0)</p></li>
+<li><p>LED1: Sine wave animation based on <code class="docutils literal notranslate"><span class="pre">sintab[t2</span> <span class="pre">%</span> <span class="pre">256]</span> <span class="pre">*</span> <span class="pre">8</span></code></p></li>
+<li><p>LED2: Sine wave animation based on <code class="docutils literal notranslate"><span class="pre">sintab[t1</span> <span class="pre">%</span> <span class="pre">256]</span> <span class="pre">*</span> <span class="pre">8</span></code></p></li>
+<li><p>LED3: OFF (0)</p></li>
+<li><p>Phase difference: 128 steps between LED1 and LED2</p></li>
+</ul>
+<p><strong>Purpose</strong>: Creates a wave-like animation to indicate idle state without indexing.</p>
+<figure class="doc-figure align-center" id="id3">
+<img alt="../_images/Unindexed.gif" src="../_images/Unindexed.gif" />
+<figcaption>
+<p><span class="caption-text">Unindexed LED simulation</span><a class="headerlink" href="#id3" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+</section>
+</section>
+<section id="understanding-idle-states">
+<h3>Understanding Idle States<a class="headerlink" href="#understanding-idle-states" title="Link to this heading">¶</a></h3>
+<p>The system distinguishes between two idle conditions based on the opto sensor state:</p>
+<section id="idle-with-indexing-opto-is-indexed-true">
+<h4>Idle with Indexing (opto_is_indexed = true)<a class="headerlink" href="#idle-with-indexing-opto-is-indexed-true" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p>The system is idle AND the opto sensor is currently detecting the reference/index position</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">opto_is_indexed</span></code> variable is set to 1 when ADC reading from the opto sensor is above the threshold (2800-3200)</p></li>
+<li><p>Visual indication: Solid light on LED3 indicates “ready and positioned at known reference point”</p></li>
+</ul>
+</section>
+<section id="idle-without-indexing-opto-is-indexed-false">
+<h4>Idle without Indexing (opto_is_indexed = false)<a class="headerlink" href="#idle-without-indexing-opto-is-indexed-false" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p>The system is idle BUT the opto sensor is NOT detecting the reference position</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">opto_is_indexed</span></code> variable is set to 0 when ADC reading from the opto sensor is below the threshold</p></li>
+<li><p>Visual indication: Wave animation on LED1-LED2 indicates “ready but looking for index position”</p></li>
+</ul>
+</section>
+<section id="practical-significance">
+<h4>Practical Significance<a class="headerlink" href="#practical-significance" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><strong>Indexed</strong>: The feeder mechanism knows exactly where it is (at the known reference position)</p></li>
+<li><p><strong>Not Indexed</strong>: The feeder mechanism doesn’t know its position and might need a calibration sequence</p></li>
+<li><p>The different LED patterns help operators understand whether the system is simply waiting (solid LED) or needs attention/positioning (animated LEDs)</p></li>
+</ul>
+</section>
+<section id="forward-movement-states">
+<h4>3. Forward Movement States<a class="headerlink" href="#forward-movement-states" title="Link to this heading">¶</a></h4>
+<p><strong>Condition</strong>: <code class="docutils literal notranslate"><span class="pre">app_state</span></code> is APP_increment_forward1, APP_increment_forward2, or APP_free_forward</p>
+<p><strong>Behavior</strong>:</p>
+<ul class="simple">
+<li><p>LED0: <code class="docutils literal notranslate"><span class="pre">sintab[t1</span> <span class="pre">%</span> <span class="pre">256]</span> <span class="pre">*</span> <span class="pre">8</span></code> (wave pattern)</p></li>
+<li><p>LED1: <code class="docutils literal notranslate"><span class="pre">sintab[t2</span> <span class="pre">%</span> <span class="pre">256]</span> <span class="pre">*</span> <span class="pre">8</span></code> (wave pattern)</p></li>
+<li><p>LED2: <code class="docutils literal notranslate"><span class="pre">sintab[t3</span> <span class="pre">%</span> <span class="pre">256]</span> <span class="pre">*</span> <span class="pre">8</span></code> (wave pattern)</p></li>
+<li><p>LED3: <code class="docutils literal notranslate"><span class="pre">sintab[t4</span> <span class="pre">%</span> <span class="pre">256]</span> <span class="pre">*</span> <span class="pre">8</span></code> (wave pattern)</p></li>
+<li><p>Phase spacing: <code class="docutils literal notranslate"><span class="pre">sine_speed</span></code> (55 steps) between each LED</p></li>
+</ul>
+<p><strong>Purpose</strong>: Creates a forward-moving wave animation to indicate forward motor movement.</p>
+<figure class="doc-figure align-center" id="id4">
+<img alt="../_images/Forward.gif" src="../_images/Forward.gif" />
+<figcaption>
+<p><span class="caption-text">Forward LED simulation</span><a class="headerlink" href="#id4" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="backward-movement-states">
+<h4>4. Backward Movement States<a class="headerlink" href="#backward-movement-states" title="Link to this heading">¶</a></h4>
+<p><strong>Condition</strong>: <code class="docutils literal notranslate"><span class="pre">app_state</span></code> is APP_increment_backward1, APP_increment_backward2, or APP_free_backward</p>
+<p><strong>Behavior</strong>:</p>
+<ul class="simple">
+<li><p>LED3: <code class="docutils literal notranslate"><span class="pre">sintab[t1</span> <span class="pre">%</span> <span class="pre">256]</span> <span class="pre">*</span> <span class="pre">8</span></code> (wave pattern)</p></li>
+<li><p>LED2: <code class="docutils literal notranslate"><span class="pre">sintab[t2</span> <span class="pre">%</span> <span class="pre">256]</span> <span class="pre">*</span> <span class="pre">8</span></code> (wave pattern)</p></li>
+<li><p>LED1: <code class="docutils literal notranslate"><span class="pre">sintab[t3</span> <span class="pre">%</span> <span class="pre">256]</span> <span class="pre">*</span> <span class="pre">8</span></code> (wave pattern)</p></li>
+<li><p>LED0: <code class="docutils literal notranslate"><span class="pre">sintab[t4</span> <span class="pre">%</span> <span class="pre">256]</span> <span class="pre">*</span> <span class="pre">8</span></code> (wave pattern)</p></li>
+<li><p>Phase spacing: <code class="docutils literal notranslate"><span class="pre">sine_speed</span></code> (55 steps) between each LED, but in reverse order</p></li>
+</ul>
+<p><strong>Purpose</strong>: Creates a backward-moving wave animation to indicate backward motor movement.</p>
+<figure class="doc-figure align-center" id="id5">
+<img alt="../_images/Backward.gif" src="../_images/Backward.gif" />
+<figcaption>
+<p><span class="caption-text">Backward LED simulation</span><a class="headerlink" href="#id5" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="other-states-default">
+<h4>5. Other States (Default)<a class="headerlink" href="#other-states-default" title="Link to this heading">¶</a></h4>
+<p><strong>Condition</strong>: All other application states</p>
+<p><strong>Behavior</strong>:</p>
+<ul class="simple">
+<li><p>LED0: <code class="docutils literal notranslate"><span class="pre">sintab[t1</span> <span class="pre">%</span> <span class="pre">256]</span> <span class="pre">*</span> <span class="pre">8</span></code> (wave pattern)</p></li>
+<li><p>LED1: <code class="docutils literal notranslate"><span class="pre">sintab[t2</span> <span class="pre">%</span> <span class="pre">256]</span> <span class="pre">*</span> <span class="pre">8</span></code> (wave pattern)</p></li>
+<li><p>LED2: <code class="docutils literal notranslate"><span class="pre">sintab[t3</span> <span class="pre">%</span> <span class="pre">256]</span> <span class="pre">*</span> <span class="pre">8</span></code> (wave pattern)</p></li>
+<li><p>LED3: <code class="docutils literal notranslate"><span class="pre">sintab[t4</span> <span class="pre">%</span> <span class="pre">256]</span> <span class="pre">*</span> <span class="pre">8</span></code> (wave pattern)</p></li>
+<li><p>Phase spacing: 128 steps between each LED</p></li>
+</ul>
+<p><strong>Purpose</strong>: Creates a standard wave animation for undefined states.</p>
+<figure class="doc-figure align-center" id="id6">
+<img alt="../_images/DefaultSine.gif" src="../_images/DefaultSine.gif" />
+<figcaption>
+<p><span class="caption-text">Default Sine LED simulation</span><a class="headerlink" href="#id6" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+</section>
+</section>
+<section id="led4-gpio-controlled">
+<h3>LED4 (GPIO-Controlled)<a class="headerlink" href="#led4-gpio-controlled" title="Link to this heading">¶</a></h3>
+<p>LED4 is controlled by the <code class="docutils literal notranslate"><span class="pre">eval_led_feed()</span></code> function:</p>
+<p><strong>Behavior</strong>:</p>
+<ul class="simple">
+<li><p>Turns ON for a duration of 500ms when <code class="docutils literal notranslate"><span class="pre">feed_signal_state</span></code> changes from <code class="docutils literal notranslate"><span class="pre">FEED_none</span></code></p></li>
+<li><p>Gradually counts down and turns OFF</p></li>
+<li><p>Controlled via <code class="docutils literal notranslate"><span class="pre">gpio_write(LED4_GPIO_Port,</span> <span class="pre">LED4_Pin,</span> <span class="pre">counter)</span></code></p></li>
+</ul>
+<p><strong>Purpose</strong>: Provides visual feedback during feed operations.</p>
+</section>
+<section id="id1">
+<h3>Opto Sensor LED<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<p>The opto sensor LED is controlled in <code class="docutils literal notranslate"><span class="pre">app_init()</span></code>:</p>
+<p><strong>Behavior</strong>:</p>
+<ul class="simple">
+<li><p>Set to ON permanently with <code class="docutils literal notranslate"><span class="pre">gpio_SetPin(OPTO_LED_GPIO_Port,</span> <span class="pre">OPTO_LED_Pin)</span></code></p></li>
+</ul>
+<p><strong>Purpose</strong>: Illuminates the opto sensor for proper operation.</p>
+</section>
+</section>
+<section id="current-led-configuration-summary">
+<h2>Current LED Configuration Summary<a class="headerlink" href="#current-led-configuration-summary" title="Link to this heading">¶</a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>LED</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Control Method</p></th>
+<th class="head"><p>Pin</p></th>
+<th class="head"><p>Primary Function</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>LED0</p></td>
+<td><p>PWM</p></td>
+<td><p>Timer 1 CH4</p></td>
+<td><p>PA11</p></td>
+<td><p>System state indication</p></td>
+</tr>
+<tr class="row-odd"><td><p>LED1</p></td>
+<td><p>PWM</p></td>
+<td><p>Timer 1 CH3</p></td>
+<td><p>PA10</p></td>
+<td><p>System state indication</p></td>
+</tr>
+<tr class="row-even"><td><p>LED2</p></td>
+<td><p>PWM</p></td>
+<td><p>Timer 1 CH2</p></td>
+<td><p>PA9</p></td>
+<td><p>System state indication</p></td>
+</tr>
+<tr class="row-odd"><td><p>LED3</p></td>
+<td><p>PWM</p></td>
+<td><p>Timer 1 CH1</p></td>
+<td><p>PA8</p></td>
+<td><p>System state indication</p></td>
+</tr>
+<tr class="row-even"><td><p>LED4</p></td>
+<td><p>GPIO</p></td>
+<td><p>Counter</p></td>
+<td><p>PB11</p></td>
+<td><p>Feed operation feedback</p></td>
+</tr>
+<tr class="row-odd"><td><p>OPTO_LED</p></td>
+<td><p>GPIO</p></td>
+<td><p>Static ON</p></td>
+<td><p>PA5</p></td>
+<td><p>Opto sensor illumination</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>Total: 5 status LEDs + 1 opto LED = 6 LEDs</em></p>
+</section>
+<section id="timing-and-animation-details">
+<h2>Timing and Animation Details<a class="headerlink" href="#timing-and-animation-details" title="Link to this heading">¶</a></h2>
+<section id="sine-wave-table">
+<h3>Sine Wave Table<a class="headerlink" href="#sine-wave-table" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>256-step sine lookup table</p></li>
+<li><p>Values range from 0-256</p></li>
+<li><p>Multiplied by 8 for LED brightness (0-2048 range)</p></li>
+<li><p>Creates smooth brightness transitions</p></li>
+</ul>
+</section>
+<section id="animation-speed">
+<h3>Animation Speed<a class="headerlink" href="#animation-speed" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">sine_speed</span> <span class="pre">=</span> <span class="pre">55</span></code> (used for movement animations)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">uwTick</span></code> system timer provides time base</p></li>
+<li><p>Each LED updates on every SysTick interrupt (1kHz)</p></li>
+</ul>
+</section>
+</section>
+<section id="current-behavior-mapping">
+<h2>Current Behavior Mapping<a class="headerlink" href="#current-behavior-mapping" title="Link to this heading">¶</a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Application State</p></th>
+<th class="head"><p>LED Pattern</p></th>
+<th class="head"><p>Visual Indication</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Idle (indexed)</p></td>
+<td><p>LED3=ON, LED0=LED1=LED2=OFF</p></td>
+<td><p>System ready at index position</p></td>
+</tr>
+<tr class="row-odd"><td><p>Idle (not indexed)</p></td>
+<td><p>LED1=sinusoidal, LED2=sinusoidal+phase, LED0=LED3=OFF</p></td>
+<td><p>System ready, searching for index</p></td>
+</tr>
+<tr class="row-even"><td><p>Forward motion</p></td>
+<td><p>LED0→LED3 sequential wave</p></td>
+<td><p>Motor moving forward</p></td>
+</tr>
+<tr class="row-odd"><td><p>Backward motion</p></td>
+<td><p>LED3→LED0 sequential wave</p></td>
+<td><p>Motor moving backward</p></td>
+</tr>
+<tr class="row-even"><td><p>Other states</p></td>
+<td><p>All LEDs sinusoidal pattern</p></td>
+<td><p>Other system activity</p></td>
+</tr>
+<tr class="row-odd"><td><p>Feed operation</p></td>
+<td><p>LED4 pulses for 500ms</p></td>
+<td><p>Feed operation active</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">LED Analysis Report</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#led-components">LED Components</a><ul>
+<li><a class="reference internal" href="#pwm-controlled-leds-led0-led3-for-animations">PWM-Controlled LEDs (LED0-LED3) for animations</a></li>
+<li><a class="reference internal" href="#gpio-controlled-led-led4">GPIO-Controlled LED (LED4)</a></li>
+<li><a class="reference internal" href="#opto-sensor-led">Opto Sensor LED</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#led-behavior-analysis">LED Behavior Analysis</a><ul>
+<li><a class="reference internal" href="#led0-led3-pwm-behavior">LED0-LED3 PWM Behavior</a><ul>
+<li><a class="reference internal" href="#idle-state-with-opto-indexed">1. Idle State with Opto Indexed</a></li>
+<li><a class="reference internal" href="#idle-state-without-opto-indexed">2. Idle State without Opto Indexed</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#understanding-idle-states">Understanding Idle States</a><ul>
+<li><a class="reference internal" href="#idle-with-indexing-opto-is-indexed-true">Idle with Indexing (opto_is_indexed = true)</a></li>
+<li><a class="reference internal" href="#idle-without-indexing-opto-is-indexed-false">Idle without Indexing (opto_is_indexed = false)</a></li>
+<li><a class="reference internal" href="#practical-significance">Practical Significance</a></li>
+<li><a class="reference internal" href="#forward-movement-states">3. Forward Movement States</a></li>
+<li><a class="reference internal" href="#backward-movement-states">4. Backward Movement States</a></li>
+<li><a class="reference internal" href="#other-states-default">5. Other States (Default)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#led4-gpio-controlled">LED4 (GPIO-Controlled)</a></li>
+<li><a class="reference internal" href="#id1">Opto Sensor LED</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#current-led-configuration-summary">Current LED Configuration Summary</a></li>
+<li><a class="reference internal" href="#timing-and-animation-details">Timing and Animation Details</a><ul>
+<li><a class="reference internal" href="#sine-wave-table">Sine Wave Table</a></li>
+<li><a class="reference internal" href="#animation-speed">Animation Speed</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#current-behavior-mapping">Current Behavior Mapping</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="porting_design.html"
+                          title="previous chapter">PickPlaz ESP32-C3 Port - Stage 0 (Scope + Pinout Alignment)</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="MOTOR_PWM_ANALYSIS.html"
+                          title="next chapter">Motor PWM Analysis Report</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/design/LED_ANALYSIS.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="MOTOR_PWM_ANALYSIS.html" title="Motor PWM Analysis Report"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="porting_design.html" title="PickPlaz ESP32-C3 Port - Stage 0 (Scope + Pinout Alignment)"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">LED Analysis Report</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2026, Asterion Daedalus.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    </div>
+  </body>
+</html>

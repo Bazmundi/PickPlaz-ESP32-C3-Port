@@ -1,0 +1,14 @@
+.. _exhale_variable_pickplaz__app_8c_1a94e5dd51da8c8aea7b7811cc4856cce2:
+
+Variable motor_brake_pwm
+========================
+
+- Defined in :ref:`file_src_pickplaz_app.c`
+
+
+Variable Documentation
+----------------------
+
+
+.. doxygenvariable:: motor_brake_pwm
+   :project: pickplaz

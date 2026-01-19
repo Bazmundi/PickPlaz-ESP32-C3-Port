@@ -1,0 +1,14 @@
+.. _exhale_variable_pickplaz__app_8c_1ada7b5233237efbfa288690a26a782dae:
+
+Variable app_forward_request
+============================
+
+- Defined in :ref:`file_src_pickplaz_app.c`
+
+
+Variable Documentation
+----------------------
+
+
+.. doxygenvariable:: app_forward_request
+   :project: pickplaz

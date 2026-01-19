@@ -1,0 +1,14 @@
+.. _exhale_define_hal__config_8h_1a59ad33660114e40ba4bb01c938358432:
+
+Define HAL_OPTO_ADC_CHANNEL
+===========================
+
+- Defined in :ref:`file_include_hal_config.h`
+
+
+Define Documentation
+--------------------
+
+
+.. doxygendefine:: HAL_OPTO_ADC_CHANNEL
+   :project: pickplaz

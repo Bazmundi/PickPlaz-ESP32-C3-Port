@@ -1,0 +1,27 @@
+var hal_8c =
+[
+    [ "HAL_TIMER_MAX", "hal_8c.html#a3e9fd53c6c2d9b964e06e2f36329a576", null ],
+    [ "hal_adc_init", "hal_8c.html#ad2b0628033ffbd261bcf9b76766084de", null ],
+    [ "hal_adc_read", "hal_8c.html#abbc15cb3d62f5f6a361e2439ca284ae1", null ],
+    [ "hal_delay_ms", "hal_8c.html#a57165466685c07db56639eefa2c7762c", null ],
+    [ "hal_gpio_config_input", "hal_8c.html#a8e015bdd62711d772d0234e867552c9b", null ],
+    [ "hal_gpio_config_output", "hal_8c.html#aa47580b596362a723c64253b6f96da7f", null ],
+    [ "hal_gpio_read", "hal_8c.html#a3a47f0a0c54580c3321fcc786a10760e", null ],
+    [ "hal_gpio_write", "hal_8c.html#a0db3b7f6e6c7a39cf8d844458e2d6a12", null ],
+    [ "hal_i2c_init", "hal_8c.html#a81481505356e62563e80581dd9cf6c82", null ],
+    [ "hal_i2c_read", "hal_8c.html#a5ef9c5c01e84697df3a37b43ad75095c", null ],
+    [ "hal_i2c_write", "hal_8c.html#aeb14317f896030f3633262f975ecaca5", null ],
+    [ "hal_init", "hal_8c.html#ae6bf9db2c00129a4e389e3697ae0f82e", null ],
+    [ "hal_pwm_init", "hal_8c.html#a4c49acebd21873268743c97e3819e251", null ],
+    [ "hal_pwm_set_duty", "hal_8c.html#a92f001aca66be66a6d4fe1d269ea54a7", null ],
+    [ "hal_selftest_run", "hal_8c.html#a0fd5066915239ef7bf934a789344d484", null ],
+    [ "hal_spi_init", "hal_8c.html#a1c39abcb705f3d2dcab10dfd003a47ab", null ],
+    [ "hal_spi_transfer", "hal_8c.html#aa1fa817a67ff2caab80e12a8a6f7fa27", null ],
+    [ "hal_tick_start", "hal_8c.html#ae089162c529176b1b41ed31b0c443106", null ],
+    [ "hal_tick_stop", "hal_8c.html#a23978cfc488ed31c3ce490e8964bff2d", null ],
+    [ "hal_timer_start", "hal_8c.html#a4c4c4497084339299dfa367f1186e819", null ],
+    [ "hal_timer_stop", "hal_8c.html#a24be8ca1c0912025c86497e9521e7682", null ],
+    [ "hal_uart_init", "hal_8c.html#a04de98a22522468aaaacd4140626d6e3", null ],
+    [ "hal_uart_read", "hal_8c.html#a4a993f68f9c9bdf8baef6d370c452b95", null ],
+    [ "hal_uart_write", "hal_8c.html#a1bbe3dd10657732bf282f8cddb3bd941", null ]
+];

@@ -1,0 +1,99 @@
+
+.. _file_include_hal_config.h:
+
+File hal_config.h
+=================
+
+|exhale_lsh| :ref:`Parent directory <dir_include>` (``include``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+Definition (``include/hal_config.h``)
+-------------------------------------
+
+
+.. toctree::
+   :maxdepth: 1
+
+   program_listing_file_include_hal_config.h.rst
+
+
+
+
+
+Includes
+--------
+
+
+- ``board_pins.h`` (:ref:`file_include_board_pins.h`)
+
+
+
+Included By
+-----------
+
+
+- :ref:`file_src_hal.c`
+
+- :ref:`file_src_pickplaz_app.c`
+
+
+
+
+Defines
+-------
+
+
+- :ref:`exhale_define_hal__config_8h_1a6772eedc6294f42ad0ca9fd25500fcfe`
+
+- :ref:`exhale_define_hal__config_8h_1a8c041d95334a3ef9fd798c060c3f4855`
+
+- :ref:`exhale_define_hal__config_8h_1aeab73aaf4687e38e0808b5346ec63c3a`
+
+- :ref:`exhale_define_hal__config_8h_1a3d629db19cbcd0bd5789efa874c953b1`
+
+- :ref:`exhale_define_hal__config_8h_1afef286c1fc0ce93ed2980666ecf97bcc`
+
+- :ref:`exhale_define_hal__config_8h_1a6e1f7b4217fd5fdea827253f8273e4fa`
+
+- :ref:`exhale_define_hal__config_8h_1ae1b7cdc9dae42fb05594add2ea123956`
+
+- :ref:`exhale_define_hal__config_8h_1a59ad33660114e40ba4bb01c938358432`
+
+- :ref:`exhale_define_hal__config_8h_1a342ea9d4a54ce82d80cf304e6f2adca8`
+
+- :ref:`exhale_define_hal__config_8h_1ac3247be628764f7f6184112ec78006be`
+
+- :ref:`exhale_define_hal__config_8h_1a6991bae128c65ea7c2175fe77d8e0889`
+
+- :ref:`exhale_define_hal__config_8h_1a8c313ad2c42d9fd13f2e50d104ea8c3a`
+
+- :ref:`exhale_define_hal__config_8h_1ace82fffd80c62256817f6a8f06ab0f07`
+
+- :ref:`exhale_define_hal__config_8h_1a84c96adff23b5e3086f6db00ffd0af5b`
+
+- :ref:`exhale_define_hal__config_8h_1ab75455812944a504ef3f78d169887fdd`
+
+- :ref:`exhale_define_hal__config_8h_1a126f9a2c0b005e42851b29767c506c3f`
+
+- :ref:`exhale_define_hal__config_8h_1a541081843acf650329c2190692f1ddbf`
+
+- :ref:`exhale_define_hal__config_8h_1a104c7032aa0f72556775ecbc7ea8f571`
+
+- :ref:`exhale_define_hal__config_8h_1a6d8a033cc71ed6d10d28e416ca9b4fc5`
+
+- :ref:`exhale_define_hal__config_8h_1a1c329bff2d2b1e2fbfb68d516ccd62de`
+
+- :ref:`exhale_define_hal__config_8h_1ab55703854ebffcb5ea025f4a7b2094c8`
+
+- :ref:`exhale_define_hal__config_8h_1a084d0442ffbba92d507925eeb6d53aec`
+
+- :ref:`exhale_define_hal__config_8h_1a883a8afee606b1957e0164362231fbeb`
+
+- :ref:`exhale_define_hal__config_8h_1a57f076e114e143850f68670406b30059`
+
