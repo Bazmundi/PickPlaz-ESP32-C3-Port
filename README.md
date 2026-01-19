@@ -3,6 +3,10 @@
 This root contains the original STM32 firmware alongside the ESP32-C3 port
 workspace and local QEMU assets used for emulation-based porting tests.
 
+# This is a PCBWay sponsored project
+<img width="262" height="192" alt="PCBWAY" src="https://github.com/user-attachments/assets/07538e30-3bec-4b2b-8a49-50e9ba6a9420" />
+
+
 ## Structure (top level)
 
 - `application/`, `Core/`, `Drivers/`, `include/`, `src/` - STM32 firmware
