@@ -14,6 +14,9 @@ from generated output.
 Doxygen-generated API docs remain in `docs/doxygen/html/` and can be browsed
 via `docs/doxygen/html/index.html`.
 
+For the published site, use the API entry point:
+`/doxygen-internal/`
+
 ```{toctree}
 :maxdepth: 2
 :caption: Contents
