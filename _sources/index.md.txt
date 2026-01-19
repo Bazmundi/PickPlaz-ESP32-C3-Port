@@ -11,11 +11,8 @@ from generated output.
 - `tooling/` for QEMU/PICSimLab integration notes
 - `workflows.md` for developer workflows
 
-Doxygen-generated API docs remain in `docs/doxygen/html/` and can be browsed
-via `docs/doxygen/html/index.html`.
-
-For the published site, use the API entry point:
-`/doxygen-internal/`
+API reference pages are generated from Doxygen XML via Breathe/Exhale and
+appear under the `API Reference` section.
 
 ```{toctree}
 :maxdepth: 2

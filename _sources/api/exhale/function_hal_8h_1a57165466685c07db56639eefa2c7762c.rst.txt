@@ -1,7 +1,7 @@
 .. _exhale_function_hal_8h_1a57165466685c07db56639eefa2c7762c:
 
-Function hal_delay_ms
-=====================
+Function hal_delay_ms(uint32_t)
+===============================
 
 - Defined in :ref:`file_include_hal.h`
 

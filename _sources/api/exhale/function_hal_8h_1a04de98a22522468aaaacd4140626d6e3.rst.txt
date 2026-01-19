@@ -1,7 +1,7 @@
 .. _exhale_function_hal_8h_1a04de98a22522468aaaacd4140626d6e3:
 
-Function hal_uart_init
-======================
+Function hal_uart_init(int, uint32_t)
+=====================================
 
 - Defined in :ref:`file_include_hal.h`
 

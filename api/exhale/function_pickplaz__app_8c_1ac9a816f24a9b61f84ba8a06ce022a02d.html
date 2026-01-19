@@ -18,7 +18,9 @@
     <script src="../../_static/collapsible-lists/js/apply-collapsible-lists.js?v=660e4f45"></script>
     
     <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" /> 
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Function app_tick" href="function_pickplaz__app_8c_1a89ec102a4528fd88c009fe2f0cd12fce.html" />
+    <link rel="prev" title="Function app_set_led_duty" href="function_pickplaz__app_8c_1a1bb2a8ab977e18ee2bdf0a3c77ea126d.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
@@ -26,7 +28,15 @@
         <li class="right" style="margin-right: 10px">
           <a href="../../genindex.html" title="General Index"
              accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="function_pickplaz__app_8c_1a89ec102a4528fd88c009fe2f0cd12fce.html" title="Function app_tick"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="function_pickplaz__app_8c_1a1bb2a8ab977e18ee2bdf0a3c77ea126d.html" title="Function app_set_led_duty"
+             accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="library_root.html" accesskey="U">API Reference</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Function app_set_motor</a></li> 
       </ul>
     </div>  
@@ -39,14 +49,33 @@
   <section id="function-app-set-motor">
 <span id="exhale-function-pickplaz-app-8c-1ac9a816f24a9b61f84ba8a06ce022a02d"></span><h1>Function app_set_motor<a class="headerlink" href="#function-app-set-motor" title="Link to this heading">¶</a></h1>
 <ul class="simple">
-<li><p>Defined in <a class="reference internal" href="../exhale-internal/file_src_pickplaz_app.c.html#file-src-pickplaz-app-c"><span class="std std-ref">File pickplaz_app.c</span></a></p></li>
+<li><p>Defined in <a class="reference internal" href="file_src_pickplaz_app.c.html#file-src-pickplaz-app-c"><span class="std std-ref">File pickplaz_app.c</span></a></p></li>
 </ul>
 <section id="function-documentation">
 <h2>Function Documentation<a class="headerlink" href="#function-documentation" title="Link to this heading">¶</a></h2>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>doxygenfunction: Cannot find function “app_set_motor” in doxygen xml output for project “pickplaz” from directory: /home/asterion/3D/pick-plaz/pickplazfeederstm_ESP32Port/ESP32Port/pickplazESP32Port/docs/doxygen-internal/xml</p>
-</div>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv413app_set_motor8uint32_tb">
+<span id="_CPPv313app_set_motor8uint32_tb"></span><span id="_CPPv213app_set_motor8uint32_tb"></span><span id="app_set_motor__uint32_t.b"></span><span class="target" id="pickplaz__app_8c_1ac9a816f24a9b61f84ba8a06ce022a02d"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">app_set_motor</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">pwm</span></span>, <span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">forward</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv413app_set_motor8uint32_tb" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Drives the motor H-bridge outputs with scaled PWM. </p>
+<p>Applies the STM32-style duty value (0..2048) to the ESP32 LEDC channels. Forward drives IN2, backward drives IN1, matching the STM32 polarity model.</p>
+<p>Preconditions:<ul class="simple">
+<li><p>Motor PWM channels are initialized via hal_pwm_init().</p></li>
+</ul>
+</p>
+<p>Side effects:<ul class="simple">
+<li><p>Updates LEDC duty on the motor output channels.</p></li>
+</ul>
+</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pwm</strong> – Duty value in STM32 units (0..2048). </p></li>
+<li><p><strong>forward</strong> – True for forward direction, false for reverse. </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 </section>
 
@@ -61,11 +90,24 @@
     <h3><a href="../../index.html">Table of Contents</a></h3>
     <ul>
 <li><a class="reference internal" href="#">Function app_set_motor</a><ul>
-<li><a class="reference internal" href="#function-documentation">Function Documentation</a></li>
+<li><a class="reference internal" href="#function-documentation">Function Documentation</a><ul>
+<li><a class="reference internal" href="#_CPPv413app_set_motor8uint32_tb"><code class="docutils literal notranslate"><span class="pre">app_set_motor()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
 
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="function_pickplaz__app_8c_1a1bb2a8ab977e18ee2bdf0a3c77ea126d.html"
+                          title="previous chapter">Function app_set_led_duty</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="function_pickplaz__app_8c_1a89ec102a4528fd88c009fe2f0cd12fce.html"
+                          title="next chapter">Function app_tick</a></p>
   </div>
 <search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
@@ -87,7 +129,15 @@
         <li class="right" style="margin-right: 10px">
           <a href="../../genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="function_pickplaz__app_8c_1a89ec102a4528fd88c009fe2f0cd12fce.html" title="Function app_tick"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="function_pickplaz__app_8c_1a1bb2a8ab977e18ee2bdf0a3c77ea126d.html" title="Function app_set_led_duty"
+             >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="library_root.html" >API Reference</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Function app_set_motor</a></li> 
       </ul>
     </div>

@@ -18,7 +18,9 @@
     <script src="../../_static/collapsible-lists/js/apply-collapsible-lists.js?v=660e4f45"></script>
     
     <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" /> 
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Function hal_uart_init(int, uint32_t)" href="function_hal_8h_1a04de98a22522468aaaacd4140626d6e3.html" />
+    <link rel="prev" title="Function hal_timer_stop(int)" href="function_hal_8h_1a24be8ca1c0912025c86497e9521e7682.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
@@ -26,7 +28,15 @@
         <li class="right" style="margin-right: 10px">
           <a href="../../genindex.html" title="General Index"
              accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="function_hal_8h_1a04de98a22522468aaaacd4140626d6e3.html" title="Function hal_uart_init(int, uint32_t)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="function_hal_8h_1a24be8ca1c0912025c86497e9521e7682.html" title="Function hal_timer_stop(int)"
+             accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="library_root.html" accesskey="U">API Reference</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Function hal_timer_stop(int)</a></li> 
       </ul>
     </div>  
@@ -39,37 +49,20 @@
   <section id="function-hal-timer-stop-int">
 <span id="exhale-function-hal-8c-1a24be8ca1c0912025c86497e9521e7682"></span><h1>Function hal_timer_stop(int)<a class="headerlink" href="#function-hal-timer-stop-int" title="Link to this heading">¶</a></h1>
 <ul class="simple">
-<li><p>Defined in <a class="reference internal" href="../exhale-internal/file_src_hal.c.html#file-src-hal-c"><span class="std std-ref">File hal.c</span></a></p></li>
+<li><p>Defined in <a class="reference internal" href="file_src_hal.c.html#file-src-hal-c"><span class="std std-ref">File hal.c</span></a></p></li>
 </ul>
 <section id="function-documentation">
 <h2>Function Documentation<a class="headerlink" href="#function-documentation" title="Link to this heading">¶</a></h2>
-<dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv414hal_timer_stopi">
-<span id="_CPPv314hal_timer_stopi"></span><span id="_CPPv214hal_timer_stopi"></span><span id="hal_timer_stop__i"></span><span class="target" id="hal_8h_1a24be8ca1c0912025c86497e9521e7682"></span><a class="reference internal" href="../exhale-internal/enum_hal_8h_1ac2231a7f3681886d9b35e08c23759e27.html#_CPPv412hal_status_t" title="hal_status_t"><span class="n"><span class="pre">hal_status_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">hal_timer_stop</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">timer_id</span></span><span class="sig-paren">)</span><br /></dt>
-<dd><p>Stops a periodic HAL timer. </p>
-<p>Cancels and deletes the timer slot if it is active.</p>
-<p>Preconditions:<ul class="simple">
-<li><p>timer_id must be in range [0, HAL_TIMER_MAX).</p></li>
-</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>doxygenfunction: Unable to resolve function “hal_timer_stop” with arguments (int) in doxygen xml output for project “pickplaz” from directory: /home/asterion/3D/pick-plaz/pickplazfeederstm_ESP32Port/ESP32Port/pickplazESP32Port/docs/doxygen/xml.
+Potential matches:
 </p>
-<p>Postconditions:<ul class="simple">
-<li><p>The timer slot is inactive.</p></li>
-</ul>
-</p>
-<p>Side effects:<ul class="simple">
-<li><p>Deletes the underlying ESP timer if present.</p></li>
-</ul>
-</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>timer_id</strong> – Timer slot identifier. </p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>HAL_OK on success, HAL_ERR_INVALID on invalid timer_id. </p>
-</dd>
-</dl>
-</dd></dl>
-
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="n">hal_status_t</span> <span class="n">hal_timer_stop</span><span class="p">(</span><span class="nb">int</span> <span class="n">timer_id</span><span class="p">)</span>
+<span class="o">-</span> <span class="n">hal_status_t</span> <span class="n">hal_timer_stop</span><span class="p">(</span><span class="nb">int</span> <span class="n">timer_id</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
 </section>
 </section>
 
@@ -84,14 +77,21 @@
     <h3><a href="../../index.html">Table of Contents</a></h3>
     <ul>
 <li><a class="reference internal" href="#">Function hal_timer_stop(int)</a><ul>
-<li><a class="reference internal" href="#function-documentation">Function Documentation</a><ul>
-<li><a class="reference internal" href="#_CPPv414hal_timer_stopi"><code class="docutils literal notranslate"><span class="pre">hal_timer_stop()</span></code></a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#function-documentation">Function Documentation</a></li>
 </ul>
 </li>
 </ul>
 
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="function_hal_8h_1a24be8ca1c0912025c86497e9521e7682.html"
+                          title="previous chapter">Function hal_timer_stop(int)</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="function_hal_8h_1a04de98a22522468aaaacd4140626d6e3.html"
+                          title="next chapter">Function hal_uart_init(int, uint32_t)</a></p>
   </div>
 <search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
@@ -113,7 +113,15 @@
         <li class="right" style="margin-right: 10px">
           <a href="../../genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="function_hal_8h_1a04de98a22522468aaaacd4140626d6e3.html" title="Function hal_uart_init(int, uint32_t)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="function_hal_8h_1a24be8ca1c0912025c86497e9521e7682.html" title="Function hal_timer_stop(int)"
+             >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="library_root.html" >API Reference</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Function hal_timer_stop(int)</a></li> 
       </ul>
     </div>

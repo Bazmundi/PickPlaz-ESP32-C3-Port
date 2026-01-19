@@ -1,7 +1,7 @@
 .. _exhale_function_pickplaz__app_8h_1a6fa0ebb603db0c7a2e39a24a8aa17246:
 
-Function pickplaz_app_init
-==========================
+Function pickplaz_app_init(void)
+================================
 
 - Defined in :ref:`file_include_pickplaz_app.h`
 

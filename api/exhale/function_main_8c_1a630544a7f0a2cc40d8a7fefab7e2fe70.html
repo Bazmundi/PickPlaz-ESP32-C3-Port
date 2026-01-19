@@ -18,7 +18,9 @@
     <script src="../../_static/collapsible-lists/js/apply-collapsible-lists.js?v=660e4f45"></script>
     
     <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" /> 
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Function app_pin_valid" href="function_pickplaz__app_8c_1a5855b84f755058f744ebcf3aeb9b3e37.html" />
+    <link rel="prev" title="Function app_gpio_is_active" href="function_pickplaz__app_8c_1a1aecce630d0bd995ca455ad9405d996f.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
@@ -26,7 +28,15 @@
         <li class="right" style="margin-right: 10px">
           <a href="../../genindex.html" title="General Index"
              accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="function_pickplaz__app_8c_1a5855b84f755058f744ebcf3aeb9b3e37.html" title="Function app_pin_valid"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="function_pickplaz__app_8c_1a1aecce630d0bd995ca455ad9405d996f.html" title="Function app_gpio_is_active"
+             accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="library_root.html" accesskey="U">API Reference</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Function app_main</a></li> 
       </ul>
     </div>  
@@ -39,14 +49,59 @@
   <section id="function-app-main">
 <span id="exhale-function-main-8c-1a630544a7f0a2cc40d8a7fefab7e2fe70"></span><h1>Function app_main<a class="headerlink" href="#function-app-main" title="Link to this heading">¶</a></h1>
 <ul class="simple">
-<li><p>Defined in <a class="reference internal" href="../exhale-internal/file_src_main.c.html#file-src-main-c"><span class="std std-ref">File main.c</span></a></p></li>
+<li><p>Defined in <a class="reference internal" href="file_src_main.c.html#file-src-main-c"><span class="std std-ref">File main.c</span></a></p></li>
 </ul>
 <section id="function-documentation">
 <h2>Function Documentation<a class="headerlink" href="#function-documentation" title="Link to this heading">¶</a></h2>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>doxygenfunction: Cannot find function “app_main” in doxygen xml output for project “pickplaz” from directory: /home/asterion/3D/pick-plaz/pickplazfeederstm_ESP32Port/ESP32Port/pickplazESP32Port/docs/doxygen-internal/xml</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv48app_mainv">
+<span id="_CPPv38app_mainv"></span><span id="_CPPv28app_mainv"></span><span id="app_main__void"></span><span class="target" id="main_8c_1a630544a7f0a2cc40d8a7fefab7e2fe70"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">app_main</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv48app_mainv" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Starts the PickPlaz firmware and application loop. </p>
+<p>Logs boot metadata, initializes HAL services, runs any enabled self-test, and starts the PickPlaz application state machine.</p>
+<p>Preconditions:<ul class="simple">
+<li><p>ESP-IDF runtime is initialized.</p></li>
+</ul>
+</p>
+<p>Postconditions:<ul class="simple">
+<li><p>HAL services are initialized.</p></li>
+<li><p>The application tick is running.</p></li>
+</ul>
+</p>
+<p>Side effects:<ul class="simple">
+<li><p>Writes boot and status logs to the console.</p></li>
+<li><p>Configures GPIO/PWM/ADC resources through the HAL.</p></li>
+</ul>
+</p>
+<p>Error handling:<ul class="simple">
+<li><p>Errors are reported via logs in lower layers; this function does not return error codes.</p></li>
+</ul>
+</p>
+<p><dl class="simple">
+<dt><strong>Inputs/Outputs</strong></dt><dd><p><table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Item  </p></th>
+<th class="head"><p>Description  </p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Inputs  </p></td>
+<td><p>Build flags, board pin mappings, device peripherals  </p></td>
+</tr>
+<tr class="row-odd"><td><p>Outputs  </p></td>
+<td><p>Log messages and initialized runtime services  </p></td>
+</tr>
+</tbody>
+</table>
+</p>
+</dd>
+</dl>
+</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The self-test runs only when HAL_SELFTEST is defined.</p>
 </div>
+</dd></dl>
+
 </section>
 </section>
 
@@ -61,11 +116,24 @@
     <h3><a href="../../index.html">Table of Contents</a></h3>
     <ul>
 <li><a class="reference internal" href="#">Function app_main</a><ul>
-<li><a class="reference internal" href="#function-documentation">Function Documentation</a></li>
+<li><a class="reference internal" href="#function-documentation">Function Documentation</a><ul>
+<li><a class="reference internal" href="#_CPPv48app_mainv"><code class="docutils literal notranslate"><span class="pre">app_main()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
 
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="function_pickplaz__app_8c_1a1aecce630d0bd995ca455ad9405d996f.html"
+                          title="previous chapter">Function app_gpio_is_active</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="function_pickplaz__app_8c_1a5855b84f755058f744ebcf3aeb9b3e37.html"
+                          title="next chapter">Function app_pin_valid</a></p>
   </div>
 <search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
@@ -87,7 +155,15 @@
         <li class="right" style="margin-right: 10px">
           <a href="../../genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="function_pickplaz__app_8c_1a5855b84f755058f744ebcf3aeb9b3e37.html" title="Function app_pin_valid"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="function_pickplaz__app_8c_1a1aecce630d0bd995ca455ad9405d996f.html" title="Function app_gpio_is_active"
+             >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="library_root.html" >API Reference</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Function app_main</a></li> 
       </ul>
     </div>

@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Function hal_pwm_set_duty &#8212; PickPlaz ESP32-C3 Port 0.0.1 documentation</title>
+    <title>Function hal_pwm_set_duty(int, uint32_t) &#8212; PickPlaz ESP32-C3 Port 0.0.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/classic.css?v=2bf1fcf8" />
     <link rel="stylesheet" type="text/css" href="../../_static/collapsible-lists/css/tree_view.css?v=a885cde7" />
@@ -19,8 +19,8 @@
     
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Function hal_selftest_run" href="function_hal_8h_1a0fd5066915239ef7bf934a789344d484.html" />
-    <link rel="prev" title="Function hal_pwm_init" href="function_hal_8h_1a4c49acebd21873268743c97e3819e251.html" /> 
+    <link rel="next" title="Function hal_pwm_set_duty(int, uint32_t)" href="function_hal_8c_1a92f001aca66be66a6d4fe1d269ea54a7.html" />
+    <link rel="prev" title="Function hal_pwm_select_timer" href="function_hal_8c_1a563449b223b376f87e4fbead08e6a228.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
@@ -29,15 +29,15 @@
           <a href="../../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="function_hal_8h_1a0fd5066915239ef7bf934a789344d484.html" title="Function hal_selftest_run"
+          <a href="function_hal_8c_1a92f001aca66be66a6d4fe1d269ea54a7.html" title="Function hal_pwm_set_duty(int, uint32_t)"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="function_hal_8h_1a4c49acebd21873268743c97e3819e251.html" title="Function hal_pwm_init"
+          <a href="function_hal_8c_1a563449b223b376f87e4fbead08e6a228.html" title="Function hal_pwm_select_timer"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="library_root.html" accesskey="U">API Reference</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">Function hal_pwm_set_duty</a></li> 
+        <li class="nav-item nav-item-this"><a href="">Function hal_pwm_set_duty(int, uint32_t)</a></li> 
       </ul>
     </div>  
 
@@ -46,39 +46,23 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <section id="function-hal-pwm-set-duty">
-<span id="exhale-function-hal-8h-1a92f001aca66be66a6d4fe1d269ea54a7"></span><h1>Function hal_pwm_set_duty<a class="headerlink" href="#function-hal-pwm-set-duty" title="Link to this heading">¶</a></h1>
+  <section id="function-hal-pwm-set-duty-int-uint32-t">
+<span id="exhale-function-hal-8h-1a92f001aca66be66a6d4fe1d269ea54a7"></span><h1>Function hal_pwm_set_duty(int, uint32_t)<a class="headerlink" href="#function-hal-pwm-set-duty-int-uint32-t" title="Link to this heading">¶</a></h1>
 <ul class="simple">
-<li><p>Defined in <a class="reference internal" href="../exhale-internal/file_include_hal.h.html#file-include-hal-h"><span class="std std-ref">File hal.h</span></a></p></li>
+<li><p>Defined in <a class="reference internal" href="file_include_hal.h.html#file-include-hal-h"><span class="std std-ref">File hal.h</span></a></p></li>
 </ul>
 <section id="function-documentation">
 <h2>Function Documentation<a class="headerlink" href="#function-documentation" title="Link to this heading">¶</a></h2>
-<dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv416hal_pwm_set_dutyi8uint32_t">
-<span id="_CPPv316hal_pwm_set_dutyi8uint32_t"></span><span id="_CPPv216hal_pwm_set_dutyi8uint32_t"></span><span id="hal_pwm_set_duty__i.uint32_t"></span><span class="target" id="hal_8h_1a92f001aca66be66a6d4fe1d269ea54a7"></span><a class="reference internal" href="../exhale-internal/enum_hal_8h_1ac2231a7f3681886d9b35e08c23759e27.html#_CPPv412hal_status_t" title="hal_status_t"><span class="n"><span class="pre">hal_status_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">hal_pwm_set_duty</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">channel</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">duty</span></span><span class="sig-paren">)</span><br /></dt>
-<dd><p>Updates the PWM duty for a configured channel. </p>
-<p>Clamps duty to the configured maximum for the channel before updating.</p>
-<p>Preconditions:<ul class="simple">
-<li><p>channel must be configured via hal_pwm_init().</p></li>
-</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>doxygenfunction: Unable to resolve function “hal_pwm_set_duty” with arguments (int, uint32_t) in doxygen xml output for project “pickplaz” from directory: /home/asterion/3D/pick-plaz/pickplazfeederstm_ESP32Port/ESP32Port/pickplazESP32Port/docs/doxygen/xml.
+Potential matches:
 </p>
-<p>Side effects:<ul class="simple">
-<li><p>Updates LEDC duty and commits it to hardware.</p></li>
-</ul>
-</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>channel</strong> – LEDC channel index. </p></li>
-<li><p><strong>duty</strong> – Duty value in channel resolution units. </p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>HAL_OK on success, HAL_ERR_INVALID on invalid params or failure, HAL_ERR_UNSUPPORTED if the channel is not configured. </p>
-</dd>
-</dl>
-</dd></dl>
-
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="n">hal_status_t</span> <span class="n">hal_pwm_set_duty</span><span class="p">(</span><span class="nb">int</span> <span class="n">channel</span><span class="p">,</span> <span class="n">uint32_t</span> <span class="n">duty</span><span class="p">)</span>
+<span class="o">-</span> <span class="n">hal_status_t</span> <span class="n">hal_pwm_set_duty</span><span class="p">(</span><span class="nb">int</span> <span class="n">channel</span><span class="p">,</span> <span class="n">uint32_t</span> <span class="n">duty</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
 </section>
 </section>
 
@@ -92,11 +76,8 @@
   <div>
     <h3><a href="../../index.html">Table of Contents</a></h3>
     <ul>
-<li><a class="reference internal" href="#">Function hal_pwm_set_duty</a><ul>
-<li><a class="reference internal" href="#function-documentation">Function Documentation</a><ul>
-<li><a class="reference internal" href="#_CPPv416hal_pwm_set_dutyi8uint32_t"><code class="docutils literal notranslate"><span class="pre">hal_pwm_set_duty()</span></code></a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#">Function hal_pwm_set_duty(int, uint32_t)</a><ul>
+<li><a class="reference internal" href="#function-documentation">Function Documentation</a></li>
 </ul>
 </li>
 </ul>
@@ -104,13 +85,13 @@
   </div>
   <div>
     <h4>Previous topic</h4>
-    <p class="topless"><a href="function_hal_8h_1a4c49acebd21873268743c97e3819e251.html"
-                          title="previous chapter">Function hal_pwm_init</a></p>
+    <p class="topless"><a href="function_hal_8c_1a563449b223b376f87e4fbead08e6a228.html"
+                          title="previous chapter">Function hal_pwm_select_timer</a></p>
   </div>
   <div>
     <h4>Next topic</h4>
-    <p class="topless"><a href="function_hal_8h_1a0fd5066915239ef7bf934a789344d484.html"
-                          title="next chapter">Function hal_selftest_run</a></p>
+    <p class="topless"><a href="function_hal_8c_1a92f001aca66be66a6d4fe1d269ea54a7.html"
+                          title="next chapter">Function hal_pwm_set_duty(int, uint32_t)</a></p>
   </div>
 <search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
@@ -133,15 +114,15 @@
           <a href="../../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="function_hal_8h_1a0fd5066915239ef7bf934a789344d484.html" title="Function hal_selftest_run"
+          <a href="function_hal_8c_1a92f001aca66be66a6d4fe1d269ea54a7.html" title="Function hal_pwm_set_duty(int, uint32_t)"
              >next</a> |</li>
         <li class="right" >
-          <a href="function_hal_8h_1a4c49acebd21873268743c97e3819e251.html" title="Function hal_pwm_init"
+          <a href="function_hal_8c_1a563449b223b376f87e4fbead08e6a228.html" title="Function hal_pwm_select_timer"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="library_root.html" >API Reference</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">Function hal_pwm_set_duty</a></li> 
+        <li class="nav-item nav-item-this"><a href="">Function hal_pwm_set_duty(int, uint32_t)</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

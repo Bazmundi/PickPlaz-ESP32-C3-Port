@@ -18,7 +18,9 @@
     <script src="../../_static/collapsible-lists/js/apply-collapsible-lists.js?v=660e4f45"></script>
     
     <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" /> 
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Function app_gpio_is_active" href="function_pickplaz__app_8c_1a1aecce630d0bd995ca455ad9405d996f.html" />
+    <link rel="prev" title="Function app_configure_inputs" href="function_pickplaz__app_8c_1acfdcdad1fb7e0ff5c734a9f0d4fe995f.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
@@ -26,7 +28,15 @@
         <li class="right" style="margin-right: 10px">
           <a href="../../genindex.html" title="General Index"
              accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="function_pickplaz__app_8c_1a1aecce630d0bd995ca455ad9405d996f.html" title="Function app_gpio_is_active"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="function_pickplaz__app_8c_1acfdcdad1fb7e0ff5c734a9f0d4fe995f.html" title="Function app_configure_inputs"
+             accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="library_root.html" accesskey="U">API Reference</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Function app_configure_pwm_outputs</a></li> 
       </ul>
     </div>  
@@ -39,14 +49,21 @@
   <section id="function-app-configure-pwm-outputs">
 <span id="exhale-function-pickplaz-app-8c-1ae8a27307d299092f67077a8822a02a35"></span><h1>Function app_configure_pwm_outputs<a class="headerlink" href="#function-app-configure-pwm-outputs" title="Link to this heading">¶</a></h1>
 <ul class="simple">
-<li><p>Defined in <a class="reference internal" href="../exhale-internal/file_src_pickplaz_app.c.html#file-src-pickplaz-app-c"><span class="std std-ref">File pickplaz_app.c</span></a></p></li>
+<li><p>Defined in <a class="reference internal" href="file_src_pickplaz_app.c.html#file-src-pickplaz-app-c"><span class="std std-ref">File pickplaz_app.c</span></a></p></li>
 </ul>
 <section id="function-documentation">
 <h2>Function Documentation<a class="headerlink" href="#function-documentation" title="Link to this heading">¶</a></h2>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>doxygenfunction: Cannot find function “app_configure_pwm_outputs” in doxygen xml output for project “pickplaz” from directory: /home/asterion/3D/pick-plaz/pickplazfeederstm_ESP32Port/ESP32Port/pickplazESP32Port/docs/doxygen-internal/xml</p>
-</div>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv425app_configure_pwm_outputsv">
+<span id="_CPPv325app_configure_pwm_outputsv"></span><span id="_CPPv225app_configure_pwm_outputsv"></span><span id="app_configure_pwm_outputs__void"></span><span class="target" id="pickplaz__app_8c_1ae8a27307d299092f67077a8822a02a35"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">app_configure_pwm_outputs</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv425app_configure_pwm_outputsv" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Configures PWM outputs for LEDs and motor channels. </p>
+<p>Initializes LEDC channels only for pins that are enabled in the current board pinmap.</p>
+<p>Side effects:<ul class="simple">
+<li><p>Allocates LEDC timers/channels via the HAL. </p></li>
+</ul>
+</p>
+</dd></dl>
+
 </section>
 </section>
 
@@ -61,11 +78,24 @@
     <h3><a href="../../index.html">Table of Contents</a></h3>
     <ul>
 <li><a class="reference internal" href="#">Function app_configure_pwm_outputs</a><ul>
-<li><a class="reference internal" href="#function-documentation">Function Documentation</a></li>
+<li><a class="reference internal" href="#function-documentation">Function Documentation</a><ul>
+<li><a class="reference internal" href="#_CPPv425app_configure_pwm_outputsv"><code class="docutils literal notranslate"><span class="pre">app_configure_pwm_outputs()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
 
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="function_pickplaz__app_8c_1acfdcdad1fb7e0ff5c734a9f0d4fe995f.html"
+                          title="previous chapter">Function app_configure_inputs</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="function_pickplaz__app_8c_1a1aecce630d0bd995ca455ad9405d996f.html"
+                          title="next chapter">Function app_gpio_is_active</a></p>
   </div>
 <search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
@@ -87,7 +117,15 @@
         <li class="right" style="margin-right: 10px">
           <a href="../../genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="function_pickplaz__app_8c_1a1aecce630d0bd995ca455ad9405d996f.html" title="Function app_gpio_is_active"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="function_pickplaz__app_8c_1acfdcdad1fb7e0ff5c734a9f0d4fe995f.html" title="Function app_configure_inputs"
+             >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="library_root.html" >API Reference</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Function app_configure_pwm_outputs</a></li> 
       </ul>
     </div>

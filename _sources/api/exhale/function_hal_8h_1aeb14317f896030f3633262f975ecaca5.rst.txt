@@ -1,7 +1,7 @@
 .. _exhale_function_hal_8h_1aeb14317f896030f3633262f975ecaca5:
 
-Function hal_i2c_write
-======================
+Function hal_i2c_write(int, uint8_t, const uint8_t \*, size_t)
+==============================================================
 
 - Defined in :ref:`file_include_hal.h`
 

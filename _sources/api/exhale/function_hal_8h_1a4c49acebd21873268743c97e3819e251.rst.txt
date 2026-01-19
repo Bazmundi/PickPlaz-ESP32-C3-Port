@@ -1,7 +1,7 @@
 .. _exhale_function_hal_8h_1a4c49acebd21873268743c97e3819e251:
 
-Function hal_pwm_init
-=====================
+Function hal_pwm_init(int, int, uint32_t, uint32_t)
+===================================================
 
 - Defined in :ref:`file_include_hal.h`
 

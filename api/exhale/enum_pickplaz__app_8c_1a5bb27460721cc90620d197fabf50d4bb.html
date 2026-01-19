@@ -18,7 +18,9 @@
     <script src="../../_static/collapsible-lists/js/apply-collapsible-lists.js?v=660e4f45"></script>
     
     <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" /> 
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Enum button_event_t" href="enum_pickplaz__app_8c_1aba6fb58d4ff9355f14b08a276b38058a.html" />
+    <link rel="prev" title="Enum app_pwm_channels" href="enum_pickplaz__app_8c_1a716d9a867ff82580102db46fcee05080.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
@@ -26,7 +28,15 @@
         <li class="right" style="margin-right: 10px">
           <a href="../../genindex.html" title="General Index"
              accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="enum_pickplaz__app_8c_1aba6fb58d4ff9355f14b08a276b38058a.html" title="Enum button_event_t"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="enum_pickplaz__app_8c_1a716d9a867ff82580102db46fcee05080.html" title="Enum app_pwm_channels"
+             accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="library_root.html" accesskey="U">API Reference</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Enum app_state_t</a></li> 
       </ul>
     </div>  
@@ -39,14 +49,66 @@
   <section id="enum-app-state-t">
 <span id="exhale-enum-pickplaz-app-8c-1a5bb27460721cc90620d197fabf50d4bb"></span><h1>Enum app_state_t<a class="headerlink" href="#enum-app-state-t" title="Link to this heading">¶</a></h1>
 <ul class="simple">
-<li><p>Defined in <a class="reference internal" href="../exhale-internal/file_src_pickplaz_app.c.html#file-src-pickplaz-app-c"><span class="std std-ref">File pickplaz_app.c</span></a></p></li>
+<li><p>Defined in <a class="reference internal" href="file_src_pickplaz_app.c.html#file-src-pickplaz-app-c"><span class="std std-ref">File pickplaz_app.c</span></a></p></li>
 </ul>
 <section id="enum-documentation">
 <h2>Enum Documentation<a class="headerlink" href="#enum-documentation" title="Link to this heading">¶</a></h2>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>doxygenenum: Cannot find enum “app_state_t” in doxygen xml output for project “pickplaz” from directory: /home/asterion/3D/pick-plaz/pickplazfeederstm_ESP32Port/ESP32Port/pickplazESP32Port/docs/doxygen-internal/xml</p>
-</div>
+<dl class="cpp enum">
+<dt class="sig sig-object cpp" id="_CPPv411app_state_t">
+<span id="_CPPv311app_state_t"></span><span id="_CPPv211app_state_t"></span><span class="target" id="pickplaz__app_8c_1a5bb27460721cc90620d197fabf50d4bb"></span><span class="k"><span class="pre">enum</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">app_state_t</span></span></span><a class="headerlink" href="#_CPPv411app_state_t" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Represents the main application state machine. </p>
+<p>States mirror the STM32 firmware behavior for indexed moves and continuous motion while a button is held. </p>
+<p><em>Values:</em></p>
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N11app_state_t8APP_initE">
+<span id="_CPPv3N11app_state_t8APP_initE"></span><span id="_CPPv2N11app_state_t8APP_initE"></span><span class="target" id="pickplaz__app_8c_1a5bb27460721cc90620d197fabf50d4bba89f2c7400311db2cf75a00c243d9b419"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">APP_init</span></span></span><a class="headerlink" href="#_CPPv4N11app_state_t8APP_initE" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Initial state after reset. </p>
+</dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N11app_state_t8APP_idleE">
+<span id="_CPPv3N11app_state_t8APP_idleE"></span><span id="_CPPv2N11app_state_t8APP_idleE"></span><span class="target" id="pickplaz__app_8c_1a5bb27460721cc90620d197fabf50d4bba72f7e777dbd0e57f07ad628430e0c804"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">APP_idle</span></span></span><a class="headerlink" href="#_CPPv4N11app_state_t8APP_idleE" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Idle state waiting for button or feed events. </p>
+</dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N11app_state_t22APP_increment_forward1E">
+<span id="_CPPv3N11app_state_t22APP_increment_forward1E"></span><span id="_CPPv2N11app_state_t22APP_increment_forward1E"></span><span class="target" id="pickplaz__app_8c_1a5bb27460721cc90620d197fabf50d4bba700408a7da9ef7fd6b22d17316a9fce0"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">APP_increment_forward1</span></span></span><a class="headerlink" href="#_CPPv4N11app_state_t22APP_increment_forward1E" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Forward step: move until the opto leaves index or timeout. </p>
+</dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N11app_state_t23APP_increment_backward1E">
+<span id="_CPPv3N11app_state_t23APP_increment_backward1E"></span><span id="_CPPv2N11app_state_t23APP_increment_backward1E"></span><span class="target" id="pickplaz__app_8c_1a5bb27460721cc90620d197fabf50d4bba8b9c9ac60adcf084196ec6248077aa35"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">APP_increment_backward1</span></span></span><a class="headerlink" href="#_CPPv4N11app_state_t23APP_increment_backward1E" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Reverse step: move until the opto leaves index or timeout. </p>
+</dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N11app_state_t22APP_increment_forward2E">
+<span id="_CPPv3N11app_state_t22APP_increment_forward2E"></span><span id="_CPPv2N11app_state_t22APP_increment_forward2E"></span><span class="target" id="pickplaz__app_8c_1a5bb27460721cc90620d197fabf50d4bba5e04ae1186c5c2f11300853eca03633d"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">APP_increment_forward2</span></span></span><a class="headerlink" href="#_CPPv4N11app_state_t22APP_increment_forward2E" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Forward step: continue until opto returns to index or timeout. </p>
+</dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N11app_state_t23APP_increment_backward2E">
+<span id="_CPPv3N11app_state_t23APP_increment_backward2E"></span><span id="_CPPv2N11app_state_t23APP_increment_backward2E"></span><span class="target" id="pickplaz__app_8c_1a5bb27460721cc90620d197fabf50d4bbab58e230e439d0db890d7d2d465bc9b99"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">APP_increment_backward2</span></span></span><a class="headerlink" href="#_CPPv4N11app_state_t23APP_increment_backward2E" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Reverse step: continue until opto returns to index or timeout. </p>
+</dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N11app_state_t16APP_free_forwardE">
+<span id="_CPPv3N11app_state_t16APP_free_forwardE"></span><span id="_CPPv2N11app_state_t16APP_free_forwardE"></span><span class="target" id="pickplaz__app_8c_1a5bb27460721cc90620d197fabf50d4bbac552fcbeea0d9ba3809e93740539c29b"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">APP_free_forward</span></span></span><a class="headerlink" href="#_CPPv4N11app_state_t16APP_free_forwardE" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Continuous forward motion while the forward request is held. </p>
+</dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N11app_state_t17APP_free_backwardE">
+<span id="_CPPv3N11app_state_t17APP_free_backwardE"></span><span id="_CPPv2N11app_state_t17APP_free_backwardE"></span><span class="target" id="pickplaz__app_8c_1a5bb27460721cc90620d197fabf50d4bbac8093d14a39f8d80f33ef8d0ed4d753a"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">APP_free_backward</span></span></span><a class="headerlink" href="#_CPPv4N11app_state_t17APP_free_backwardE" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Continuous reverse motion while the reverse request is held. </p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 </section>
 
@@ -61,11 +123,34 @@
     <h3><a href="../../index.html">Table of Contents</a></h3>
     <ul>
 <li><a class="reference internal" href="#">Enum app_state_t</a><ul>
-<li><a class="reference internal" href="#enum-documentation">Enum Documentation</a></li>
+<li><a class="reference internal" href="#enum-documentation">Enum Documentation</a><ul>
+<li><a class="reference internal" href="#_CPPv411app_state_t"><code class="docutils literal notranslate"><span class="pre">app_state_t</span></code></a><ul>
+<li><a class="reference internal" href="#_CPPv4N11app_state_t8APP_initE"><code class="docutils literal notranslate"><span class="pre">APP_init</span></code></a></li>
+<li><a class="reference internal" href="#_CPPv4N11app_state_t8APP_idleE"><code class="docutils literal notranslate"><span class="pre">APP_idle</span></code></a></li>
+<li><a class="reference internal" href="#_CPPv4N11app_state_t22APP_increment_forward1E"><code class="docutils literal notranslate"><span class="pre">APP_increment_forward1</span></code></a></li>
+<li><a class="reference internal" href="#_CPPv4N11app_state_t23APP_increment_backward1E"><code class="docutils literal notranslate"><span class="pre">APP_increment_backward1</span></code></a></li>
+<li><a class="reference internal" href="#_CPPv4N11app_state_t22APP_increment_forward2E"><code class="docutils literal notranslate"><span class="pre">APP_increment_forward2</span></code></a></li>
+<li><a class="reference internal" href="#_CPPv4N11app_state_t23APP_increment_backward2E"><code class="docutils literal notranslate"><span class="pre">APP_increment_backward2</span></code></a></li>
+<li><a class="reference internal" href="#_CPPv4N11app_state_t16APP_free_forwardE"><code class="docutils literal notranslate"><span class="pre">APP_free_forward</span></code></a></li>
+<li><a class="reference internal" href="#_CPPv4N11app_state_t17APP_free_backwardE"><code class="docutils literal notranslate"><span class="pre">APP_free_backward</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
 
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="enum_pickplaz__app_8c_1a716d9a867ff82580102db46fcee05080.html"
+                          title="previous chapter">Enum app_pwm_channels</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="enum_pickplaz__app_8c_1aba6fb58d4ff9355f14b08a276b38058a.html"
+                          title="next chapter">Enum button_event_t</a></p>
   </div>
 <search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
@@ -87,7 +172,15 @@
         <li class="right" style="margin-right: 10px">
           <a href="../../genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="enum_pickplaz__app_8c_1aba6fb58d4ff9355f14b08a276b38058a.html" title="Enum button_event_t"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="enum_pickplaz__app_8c_1a716d9a867ff82580102db46fcee05080.html" title="Enum app_pwm_channels"
+             >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="library_root.html" >API Reference</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Enum app_state_t</a></li> 
       </ul>
     </div>

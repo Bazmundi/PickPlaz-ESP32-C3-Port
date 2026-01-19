@@ -40,6 +40,8 @@ Included By
 
 - :ref:`file_include_hal_config.h`
 
+- :ref:`file_src_pickplaz_app.c`
+
 
 
 

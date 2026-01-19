@@ -1,7 +1,7 @@
 .. _exhale_function_hal_8h_1a24be8ca1c0912025c86497e9521e7682:
 
-Function hal_timer_stop
-=======================
+Function hal_timer_stop(int)
+============================
 
 - Defined in :ref:`file_include_hal.h`
 

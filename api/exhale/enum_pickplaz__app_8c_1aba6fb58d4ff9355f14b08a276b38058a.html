@@ -18,7 +18,9 @@
     <script src="../../_static/collapsible-lists/js/apply-collapsible-lists.js?v=660e4f45"></script>
     
     <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" /> 
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Enum feed_fsm_t" href="enum_pickplaz__app_8c_1a8aec75bc0407dbc08d59573c338a3ca7.html" />
+    <link rel="prev" title="Enum app_state_t" href="enum_pickplaz__app_8c_1a5bb27460721cc90620d197fabf50d4bb.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
@@ -26,7 +28,15 @@
         <li class="right" style="margin-right: 10px">
           <a href="../../genindex.html" title="General Index"
              accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="enum_pickplaz__app_8c_1a8aec75bc0407dbc08d59573c338a3ca7.html" title="Enum feed_fsm_t"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="enum_pickplaz__app_8c_1a5bb27460721cc90620d197fabf50d4bb.html" title="Enum app_state_t"
+             accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="library_root.html" accesskey="U">API Reference</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Enum button_event_t</a></li> 
       </ul>
     </div>  
@@ -39,14 +49,41 @@
   <section id="enum-button-event-t">
 <span id="exhale-enum-pickplaz-app-8c-1aba6fb58d4ff9355f14b08a276b38058a"></span><h1>Enum button_event_t<a class="headerlink" href="#enum-button-event-t" title="Link to this heading">¶</a></h1>
 <ul class="simple">
-<li><p>Defined in <a class="reference internal" href="../exhale-internal/file_src_pickplaz_app.c.html#file-src-pickplaz-app-c"><span class="std std-ref">File pickplaz_app.c</span></a></p></li>
+<li><p>Defined in <a class="reference internal" href="file_src_pickplaz_app.c.html#file-src-pickplaz-app-c"><span class="std std-ref">File pickplaz_app.c</span></a></p></li>
 </ul>
 <section id="enum-documentation">
 <h2>Enum Documentation<a class="headerlink" href="#enum-documentation" title="Link to this heading">¶</a></h2>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>doxygenenum: Cannot find enum “button_event_t” in doxygen xml output for project “pickplaz” from directory: /home/asterion/3D/pick-plaz/pickplazfeederstm_ESP32Port/ESP32Port/pickplazESP32Port/docs/doxygen-internal/xml</p>
-</div>
+<dl class="cpp enum">
+<dt class="sig sig-object cpp" id="_CPPv414button_event_t">
+<span id="_CPPv314button_event_t"></span><span id="_CPPv214button_event_t"></span><span class="target" id="pickplaz__app_8c_1aba6fb58d4ff9355f14b08a276b38058a"></span><span class="k"><span class="pre">enum</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">button_event_t</span></span></span><a class="headerlink" href="#_CPPv414button_event_t" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Represents the debounced button event for a single tick. </p>
+<p><em>Values:</em></p>
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N14button_event_t11BUTTON_noneE">
+<span id="_CPPv3N14button_event_t11BUTTON_noneE"></span><span id="_CPPv2N14button_event_t11BUTTON_noneE"></span><span class="target" id="pickplaz__app_8c_1aba6fb58d4ff9355f14b08a276b38058aa2c4a4db477e99579c5bb177671400afe"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">BUTTON_none</span></span></span><a class="headerlink" href="#_CPPv4N14button_event_t11BUTTON_noneE" title="Link to this definition">¶</a><br /></dt>
+<dd><p>No event this tick. </p>
+</dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N14button_event_t12BUTTON_shortE">
+<span id="_CPPv3N14button_event_t12BUTTON_shortE"></span><span id="_CPPv2N14button_event_t12BUTTON_shortE"></span><span class="target" id="pickplaz__app_8c_1aba6fb58d4ff9355f14b08a276b38058aa2455f7e4f25b4b43b085c7677e3bcc20"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">BUTTON_short</span></span></span><a class="headerlink" href="#_CPPv4N14button_event_t12BUTTON_shortE" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Short press released after debounce timing. </p>
+</dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N14button_event_t11BUTTON_longE">
+<span id="_CPPv3N14button_event_t11BUTTON_longE"></span><span id="_CPPv2N14button_event_t11BUTTON_longE"></span><span class="target" id="pickplaz__app_8c_1aba6fb58d4ff9355f14b08a276b38058aab79574f7bbf94170f6ad19b028259c3d"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">BUTTON_long</span></span></span><a class="headerlink" href="#_CPPv4N14button_event_t11BUTTON_longE" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Long press released after exceeding the long-press threshold. </p>
+</dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N14button_event_t11BUTTON_holdE">
+<span id="_CPPv3N14button_event_t11BUTTON_holdE"></span><span id="_CPPv2N14button_event_t11BUTTON_holdE"></span><span class="target" id="pickplaz__app_8c_1aba6fb58d4ff9355f14b08a276b38058aa73650ce8e1427e3cf47ffcccc47a6b31"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">BUTTON_hold</span></span></span><a class="headerlink" href="#_CPPv4N14button_event_t11BUTTON_holdE" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Button remains held; emitted while pressed. </p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 </section>
 
@@ -61,11 +98,30 @@
     <h3><a href="../../index.html">Table of Contents</a></h3>
     <ul>
 <li><a class="reference internal" href="#">Enum button_event_t</a><ul>
-<li><a class="reference internal" href="#enum-documentation">Enum Documentation</a></li>
+<li><a class="reference internal" href="#enum-documentation">Enum Documentation</a><ul>
+<li><a class="reference internal" href="#_CPPv414button_event_t"><code class="docutils literal notranslate"><span class="pre">button_event_t</span></code></a><ul>
+<li><a class="reference internal" href="#_CPPv4N14button_event_t11BUTTON_noneE"><code class="docutils literal notranslate"><span class="pre">BUTTON_none</span></code></a></li>
+<li><a class="reference internal" href="#_CPPv4N14button_event_t12BUTTON_shortE"><code class="docutils literal notranslate"><span class="pre">BUTTON_short</span></code></a></li>
+<li><a class="reference internal" href="#_CPPv4N14button_event_t11BUTTON_longE"><code class="docutils literal notranslate"><span class="pre">BUTTON_long</span></code></a></li>
+<li><a class="reference internal" href="#_CPPv4N14button_event_t11BUTTON_holdE"><code class="docutils literal notranslate"><span class="pre">BUTTON_hold</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
 
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="enum_pickplaz__app_8c_1a5bb27460721cc90620d197fabf50d4bb.html"
+                          title="previous chapter">Enum app_state_t</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="enum_pickplaz__app_8c_1a8aec75bc0407dbc08d59573c338a3ca7.html"
+                          title="next chapter">Enum feed_fsm_t</a></p>
   </div>
 <search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
@@ -87,7 +143,15 @@
         <li class="right" style="margin-right: 10px">
           <a href="../../genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="enum_pickplaz__app_8c_1a8aec75bc0407dbc08d59573c338a3ca7.html" title="Enum feed_fsm_t"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="enum_pickplaz__app_8c_1a5bb27460721cc90620d197fabf50d4bb.html" title="Enum app_state_t"
+             >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="library_root.html" >API Reference</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Enum button_event_t</a></li> 
       </ul>
     </div>

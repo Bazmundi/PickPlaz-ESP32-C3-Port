@@ -1,7 +1,7 @@
 .. _exhale_function_hal_8h_1a23978cfc488ed31c3ce490e8964bff2d:
 
-Function hal_tick_stop
-======================
+Function hal_tick_stop(void)
+============================
 
 - Defined in :ref:`file_include_hal.h`
 

@@ -1,7 +1,7 @@
 .. _exhale_function_hal_8h_1ae089162c529176b1b41ed31b0c443106:
 
-Function hal_tick_start
-=======================
+Function hal_tick_start(uint32_t, hal_timer_callback_t, void \*)
+================================================================
 
 - Defined in :ref:`file_include_hal.h`
 

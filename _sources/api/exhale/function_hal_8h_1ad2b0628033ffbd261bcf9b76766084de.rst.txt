@@ -1,7 +1,7 @@
 .. _exhale_function_hal_8h_1ad2b0628033ffbd261bcf9b76766084de:
 
-Function hal_adc_init
-=====================
+Function hal_adc_init(void)
+===========================
 
 - Defined in :ref:`file_include_hal.h`
 

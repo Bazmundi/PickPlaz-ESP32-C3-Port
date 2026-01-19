@@ -18,7 +18,9 @@
     <script src="../../_static/collapsible-lists/js/apply-collapsible-lists.js?v=660e4f45"></script>
     
     <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" /> 
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Function run_motor_fsm" href="function_pickplaz__app_8c_1a464ded86dc13a77e6a36445613542e81.html" />
+    <link rel="prev" title="Function run_app_fsm" href="function_pickplaz__app_8c_1a68e301886a96c2ad8d73246861e15c21.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
@@ -26,7 +28,15 @@
         <li class="right" style="margin-right: 10px">
           <a href="../../genindex.html" title="General Index"
              accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="function_pickplaz__app_8c_1a464ded86dc13a77e6a36445613542e81.html" title="Function run_motor_fsm"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="function_pickplaz__app_8c_1a68e301886a96c2ad8d73246861e15c21.html" title="Function run_app_fsm"
+             accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="library_root.html" accesskey="U">API Reference</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Function run_feed_fsm</a></li> 
       </ul>
     </div>  
@@ -39,14 +49,29 @@
   <section id="function-run-feed-fsm">
 <span id="exhale-function-pickplaz-app-8c-1a60c7da526fc7524c8703fb9fe0e103e9"></span><h1>Function run_feed_fsm<a class="headerlink" href="#function-run-feed-fsm" title="Link to this heading">¶</a></h1>
 <ul class="simple">
-<li><p>Defined in <a class="reference internal" href="../exhale-internal/file_src_pickplaz_app.c.html#file-src-pickplaz-app-c"><span class="std std-ref">File pickplaz_app.c</span></a></p></li>
+<li><p>Defined in <a class="reference internal" href="file_src_pickplaz_app.c.html#file-src-pickplaz-app-c"><span class="std std-ref">File pickplaz_app.c</span></a></p></li>
 </ul>
 <section id="function-documentation">
 <h2>Function Documentation<a class="headerlink" href="#function-documentation" title="Link to this heading">¶</a></h2>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>doxygenfunction: Cannot find function “run_feed_fsm” in doxygen xml output for project “pickplaz” from directory: /home/asterion/3D/pick-plaz/pickplazfeederstm_ESP32Port/ESP32Port/pickplazESP32Port/docs/doxygen-internal/xml</p>
-</div>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv412run_feed_fsmv">
+<span id="_CPPv312run_feed_fsmv"></span><span id="_CPPv212run_feed_fsmv"></span><span id="run_feed_fsm__void"></span><span class="target" id="pickplaz__app_8c_1a60c7da526fc7524c8703fb9fe0e103e9"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">run_feed_fsm</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv412run_feed_fsmv" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Updates the feed pulse FSM. </p>
+<p>Detects short/long feed pulses on HAL_FEED_PIN using the 1 kHz tick and updates feed_signal_state accordingly. If the feed pin is not configured, the FSM remains idle.</p>
+<p>Preconditions:<ul class="simple">
+<li><p>HAL_FEED_PIN is configured as input when enabled.</p></li>
+</ul>
+</p>
+<p>Postconditions:<ul class="simple">
+<li><p>feed_signal_state reflects the most recent pulse classification.</p></li>
+</ul>
+</p>
+<p>Side effects:<ul class="simple">
+<li><p>Reads GPIO through the HAL. </p></li>
+</ul>
+</p>
+</dd></dl>
+
 </section>
 </section>
 
@@ -61,11 +86,24 @@
     <h3><a href="../../index.html">Table of Contents</a></h3>
     <ul>
 <li><a class="reference internal" href="#">Function run_feed_fsm</a><ul>
-<li><a class="reference internal" href="#function-documentation">Function Documentation</a></li>
+<li><a class="reference internal" href="#function-documentation">Function Documentation</a><ul>
+<li><a class="reference internal" href="#_CPPv412run_feed_fsmv"><code class="docutils literal notranslate"><span class="pre">run_feed_fsm()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
 
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="function_pickplaz__app_8c_1a68e301886a96c2ad8d73246861e15c21.html"
+                          title="previous chapter">Function run_app_fsm</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="function_pickplaz__app_8c_1a464ded86dc13a77e6a36445613542e81.html"
+                          title="next chapter">Function run_motor_fsm</a></p>
   </div>
 <search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
@@ -87,7 +125,15 @@
         <li class="right" style="margin-right: 10px">
           <a href="../../genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="function_pickplaz__app_8c_1a464ded86dc13a77e6a36445613542e81.html" title="Function run_motor_fsm"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="function_pickplaz__app_8c_1a68e301886a96c2ad8d73246861e15c21.html" title="Function run_app_fsm"
+             >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="library_root.html" >API Reference</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Function run_feed_fsm</a></li> 
       </ul>
     </div>

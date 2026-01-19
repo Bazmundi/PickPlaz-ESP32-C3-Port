@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Function pickplaz_app_init &#8212; PickPlaz ESP32-C3 Port 0.0.1 documentation</title>
+    <title>Function pickplaz_app_init(void) &#8212; PickPlaz ESP32-C3 Port 0.0.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/classic.css?v=2bf1fcf8" />
     <link rel="stylesheet" type="text/css" href="../../_static/collapsible-lists/css/tree_view.css?v=a885cde7" />
@@ -19,8 +19,8 @@
     
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Function pickplaz_app_start" href="function_pickplaz__app_8h_1acec691e2e6ae375695325f24c7ac949c.html" />
-    <link rel="prev" title="Function hal_uart_write" href="function_hal_8h_1a1bbe3dd10657732bf282f8cddb3bd941.html" /> 
+    <link rel="next" title="Function pickplaz_app_init(void)" href="function_pickplaz__app_8c_1a6fa0ebb603db0c7a2e39a24a8aa17246.html" />
+    <link rel="prev" title="Function hal_uart_write(int, const uint8_t *, size_t)" href="function_hal_8c_1a1bbe3dd10657732bf282f8cddb3bd941.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
@@ -29,15 +29,15 @@
           <a href="../../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="function_pickplaz__app_8h_1acec691e2e6ae375695325f24c7ac949c.html" title="Function pickplaz_app_start"
+          <a href="function_pickplaz__app_8c_1a6fa0ebb603db0c7a2e39a24a8aa17246.html" title="Function pickplaz_app_init(void)"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="function_hal_8h_1a1bbe3dd10657732bf282f8cddb3bd941.html" title="Function hal_uart_write"
+          <a href="function_hal_8c_1a1bbe3dd10657732bf282f8cddb3bd941.html" title="Function hal_uart_write(int, const uint8_t *, size_t)"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="library_root.html" accesskey="U">API Reference</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">Function pickplaz_app_init</a></li> 
+        <li class="nav-item nav-item-this"><a href="">Function pickplaz_app_init(void)</a></li> 
       </ul>
     </div>  
 
@@ -46,43 +46,23 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <section id="function-pickplaz-app-init">
-<span id="exhale-function-pickplaz-app-8h-1a6fa0ebb603db0c7a2e39a24a8aa17246"></span><h1>Function pickplaz_app_init<a class="headerlink" href="#function-pickplaz-app-init" title="Link to this heading">¶</a></h1>
+  <section id="function-pickplaz-app-init-void">
+<span id="exhale-function-pickplaz-app-8h-1a6fa0ebb603db0c7a2e39a24a8aa17246"></span><h1>Function pickplaz_app_init(void)<a class="headerlink" href="#function-pickplaz-app-init-void" title="Link to this heading">¶</a></h1>
 <ul class="simple">
-<li><p>Defined in <a class="reference internal" href="../exhale-internal/file_include_pickplaz_app.h.html#file-include-pickplaz-app-h"><span class="std std-ref">File pickplaz_app.h</span></a></p></li>
+<li><p>Defined in <a class="reference internal" href="file_include_pickplaz_app.h.html#file-include-pickplaz-app-h"><span class="std std-ref">File pickplaz_app.h</span></a></p></li>
 </ul>
 <section id="function-documentation">
 <h2>Function Documentation<a class="headerlink" href="#function-documentation" title="Link to this heading">¶</a></h2>
-<dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv417pickplaz_app_initv">
-<span id="_CPPv317pickplaz_app_initv"></span><span id="_CPPv217pickplaz_app_initv"></span><span id="pickplaz_app_init__void"></span><span class="target" id="pickplaz__app_8h_1a6fa0ebb603db0c7a2e39a24a8aa17246"></span><a class="reference internal" href="../exhale-internal/enum_hal_8h_1ac2231a7f3681886d9b35e08c23759e27.html#_CPPv412hal_status_t" title="hal_status_t"><span class="n"><span class="pre">hal_status_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">pickplaz_app_init</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><br /></dt>
-<dd><p>Initializes PickPlaz application state and IO. </p>
-<p>Configures PWM outputs, input GPIOs, and optional ADC usage, then resets all application state machines and counters.</p>
-<p>Preconditions:<ul class="simple">
-<li><p>hal_init() has been called.</p></li>
-</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>doxygenfunction: Unable to resolve function “pickplaz_app_init” with arguments (void) in doxygen xml output for project “pickplaz” from directory: /home/asterion/3D/pick-plaz/pickplazfeederstm_ESP32Port/ESP32Port/pickplazESP32Port/docs/doxygen/xml.
+Potential matches:
 </p>
-<p>Postconditions:<ul class="simple">
-<li><p>Application state machines are reset to APP_init/MOTOR_init.</p></li>
-<li><p>GPIO/PWM resources are configured for enabled pins.</p></li>
-</ul>
-</p>
-<p>Side effects:<ul class="simple">
-<li><p>Configures PWM, GPIO, and ADC resources through the HAL.</p></li>
-<li><p>Logs initialization status.</p></li>
-</ul>
-</p>
-<p>Error handling:<ul class="simple">
-<li><p>Returns HAL_OK; initialization failures are reported via HAL logs.</p></li>
-</ul>
-</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>HAL_OK on completion. </p>
-</dd>
-</dl>
-</dd></dl>
-
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="n">hal_status_t</span> <span class="n">pickplaz_app_init</span><span class="p">(</span><span class="n">void</span><span class="p">)</span>
+<span class="o">-</span> <span class="n">hal_status_t</span> <span class="n">pickplaz_app_init</span><span class="p">(</span><span class="n">void</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
 </section>
 </section>
 
@@ -96,11 +76,8 @@
   <div>
     <h3><a href="../../index.html">Table of Contents</a></h3>
     <ul>
-<li><a class="reference internal" href="#">Function pickplaz_app_init</a><ul>
-<li><a class="reference internal" href="#function-documentation">Function Documentation</a><ul>
-<li><a class="reference internal" href="#_CPPv417pickplaz_app_initv"><code class="docutils literal notranslate"><span class="pre">pickplaz_app_init()</span></code></a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#">Function pickplaz_app_init(void)</a><ul>
+<li><a class="reference internal" href="#function-documentation">Function Documentation</a></li>
 </ul>
 </li>
 </ul>
@@ -108,13 +85,13 @@
   </div>
   <div>
     <h4>Previous topic</h4>
-    <p class="topless"><a href="function_hal_8h_1a1bbe3dd10657732bf282f8cddb3bd941.html"
-                          title="previous chapter">Function hal_uart_write</a></p>
+    <p class="topless"><a href="function_hal_8c_1a1bbe3dd10657732bf282f8cddb3bd941.html"
+                          title="previous chapter">Function hal_uart_write(int, const uint8_t *, size_t)</a></p>
   </div>
   <div>
     <h4>Next topic</h4>
-    <p class="topless"><a href="function_pickplaz__app_8h_1acec691e2e6ae375695325f24c7ac949c.html"
-                          title="next chapter">Function pickplaz_app_start</a></p>
+    <p class="topless"><a href="function_pickplaz__app_8c_1a6fa0ebb603db0c7a2e39a24a8aa17246.html"
+                          title="next chapter">Function pickplaz_app_init(void)</a></p>
   </div>
 <search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
@@ -137,15 +114,15 @@
           <a href="../../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="function_pickplaz__app_8h_1acec691e2e6ae375695325f24c7ac949c.html" title="Function pickplaz_app_start"
+          <a href="function_pickplaz__app_8c_1a6fa0ebb603db0c7a2e39a24a8aa17246.html" title="Function pickplaz_app_init(void)"
              >next</a> |</li>
         <li class="right" >
-          <a href="function_hal_8h_1a1bbe3dd10657732bf282f8cddb3bd941.html" title="Function hal_uart_write"
+          <a href="function_hal_8c_1a1bbe3dd10657732bf282f8cddb3bd941.html" title="Function hal_uart_write(int, const uint8_t *, size_t)"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="library_root.html" >API Reference</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">Function pickplaz_app_init</a></li> 
+        <li class="nav-item nav-item-this"><a href="">Function pickplaz_app_init(void)</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

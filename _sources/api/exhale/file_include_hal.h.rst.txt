@@ -44,6 +44,12 @@ Included By
 
 - :ref:`file_include_pickplaz_app.h`
 
+- :ref:`file_src_hal.c`
+
+- :ref:`file_src_main.c`
+
+- :ref:`file_src_pickplaz_app.c`
+
 
 
 

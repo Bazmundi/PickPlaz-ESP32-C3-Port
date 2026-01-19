@@ -1,7 +1,7 @@
 .. _exhale_function_hal_8h_1a81481505356e62563e80581dd9cf6c82:
 
-Function hal_i2c_init
-=====================
+Function hal_i2c_init(int, uint32_t)
+====================================
 
 - Defined in :ref:`file_include_hal.h`
 

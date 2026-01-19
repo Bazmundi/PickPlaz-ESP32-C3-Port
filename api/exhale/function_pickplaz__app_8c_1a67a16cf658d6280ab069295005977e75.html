@@ -18,7 +18,9 @@
     <script src="../../_static/collapsible-lists/js/apply-collapsible-lists.js?v=660e4f45"></script>
     
     <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" /> 
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Function eval_led_pwm" href="function_pickplaz__app_8c_1aa8bee7aa8b20782d67b980812ddbb07d.html" />
+    <link rel="prev" title="Function app_update_opto" href="function_pickplaz__app_8c_1a0ff722d6741c5db86e38eedb797cb4f9.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
@@ -26,7 +28,15 @@
         <li class="right" style="margin-right: 10px">
           <a href="../../genindex.html" title="General Index"
              accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="function_pickplaz__app_8c_1aa8bee7aa8b20782d67b980812ddbb07d.html" title="Function eval_led_pwm"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="function_pickplaz__app_8c_1a0ff722d6741c5db86e38eedb797cb4f9.html" title="Function app_update_opto"
+             accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="library_root.html" accesskey="U">API Reference</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Function eval_led_feed</a></li> 
       </ul>
     </div>  
@@ -39,14 +49,21 @@
   <section id="function-eval-led-feed">
 <span id="exhale-function-pickplaz-app-8c-1a67a16cf658d6280ab069295005977e75"></span><h1>Function eval_led_feed<a class="headerlink" href="#function-eval-led-feed" title="Link to this heading">¶</a></h1>
 <ul class="simple">
-<li><p>Defined in <a class="reference internal" href="../exhale-internal/file_src_pickplaz_app.c.html#file-src-pickplaz-app-c"><span class="std std-ref">File pickplaz_app.c</span></a></p></li>
+<li><p>Defined in <a class="reference internal" href="file_src_pickplaz_app.c.html#file-src-pickplaz-app-c"><span class="std std-ref">File pickplaz_app.c</span></a></p></li>
 </ul>
 <section id="function-documentation">
 <h2>Function Documentation<a class="headerlink" href="#function-documentation" title="Link to this heading">¶</a></h2>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>doxygenfunction: Cannot find function “eval_led_feed” in doxygen xml output for project “pickplaz” from directory: /home/asterion/3D/pick-plaz/pickplazfeederstm_ESP32Port/ESP32Port/pickplazESP32Port/docs/doxygen-internal/xml</p>
-</div>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv413eval_led_feedv">
+<span id="_CPPv313eval_led_feedv"></span><span id="_CPPv213eval_led_feedv"></span><span id="eval_led_feed__void"></span><span class="target" id="pickplaz__app_8c_1a67a16cf658d6280ab069295005977e75"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">eval_led_feed</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv413eval_led_feedv" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Drives the feed indicator LED. </p>
+<p>Emits a 500 ms pulse when a feed event is detected. Uses LED4 when available; otherwise falls back to LED3 to preserve visibility.</p>
+<p>Side effects:<ul class="simple">
+<li><p>Updates LED4 GPIO or LED3 PWM output. </p></li>
+</ul>
+</p>
+</dd></dl>
+
 </section>
 </section>
 
@@ -61,11 +78,24 @@
     <h3><a href="../../index.html">Table of Contents</a></h3>
     <ul>
 <li><a class="reference internal" href="#">Function eval_led_feed</a><ul>
-<li><a class="reference internal" href="#function-documentation">Function Documentation</a></li>
+<li><a class="reference internal" href="#function-documentation">Function Documentation</a><ul>
+<li><a class="reference internal" href="#_CPPv413eval_led_feedv"><code class="docutils literal notranslate"><span class="pre">eval_led_feed()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
 
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="function_pickplaz__app_8c_1a0ff722d6741c5db86e38eedb797cb4f9.html"
+                          title="previous chapter">Function app_update_opto</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="function_pickplaz__app_8c_1aa8bee7aa8b20782d67b980812ddbb07d.html"
+                          title="next chapter">Function eval_led_pwm</a></p>
   </div>
 <search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
@@ -87,7 +117,15 @@
         <li class="right" style="margin-right: 10px">
           <a href="../../genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="function_pickplaz__app_8c_1aa8bee7aa8b20782d67b980812ddbb07d.html" title="Function eval_led_pwm"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="function_pickplaz__app_8c_1a0ff722d6741c5db86e38eedb797cb4f9.html" title="Function app_update_opto"
+             >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../index.html">PickPlaz ESP32-C3 Port 0.0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="library_root.html" >API Reference</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Function eval_led_feed</a></li> 
       </ul>
     </div>
