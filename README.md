@@ -15,7 +15,6 @@ workspace and local QEMU assets used for emulation-based porting tests.
 - `qemu/` - QEMU source tree used to emulate ESP32-C3 during porting tests.
 - `qemu-install/` - Local QEMU install prefix (binaries/libs for the emulator).
 
-## Pointers
+## Documentation
 
-- ESP32 port overview: `ESP32Port/pickplazESP32Port/README.md`
-- QEMU usage details: `ESP32Port/pickplazESP32Port/docs/source/tooling/qemu_setup.md`
+- Git Hub Pages: [https://bazmundi.github.io/PickPlaz-ESP32-C3-Port/](https://bazmundi.github.io/PickPlaz-ESP32-C3-Port/)
