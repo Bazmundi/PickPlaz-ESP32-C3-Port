@@ -1,7 +1,16 @@
 API Reference
 =============
 
-.. toctree::
-   :maxdepth: 2
+.. only:: internal
 
-   |exhale_dir|/library_root
+   .. toctree::
+      :maxdepth: 2
+
+      exhale-internal/library_root
+
+.. only:: not internal
+
+   .. toctree::
+      :maxdepth: 2
+
+      exhale/library_root
